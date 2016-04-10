@@ -18,6 +18,13 @@ symbian:TARGET.UID3 = 0xE39F1FBD
 symbian {
     VERSION = 0.1.0
     TARGET.EPOCHEAPSIZE = 0x00001000 0x1FFFFFFF
+
+    TARGET.CAPABILITY += WriteDeviceData \  # Use for LMGFetch (fetch files from gallery)
+                         ReadUserData \     # Use for LMGFetch (fetch files from gallery)
+                         NetworkServices    # Links in QML
+    # Use for LMGFetch (fetch files from gallery)
+    LIBS += -lmgfetch -lbafl
+
     vendorinfo = \
         "%{\"Vitalii Shunkov\"}" \
         ":\"Vitalii Shunkov\""
