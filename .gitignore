@@ -1,0 +1,14 @@
+*.cache
+*.inf
+Makefile
+*.desktop
+*.loc
+*.user
+*.rss
+*.pkg
+*.mmp
+*.sis
+RotateIt64.png
+RotateIt80.png
+qrc_resources.cpp
+moc*

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/RotateIt/images/toolbar-background.svg</file>
+    </qresource>
+</RCC>
