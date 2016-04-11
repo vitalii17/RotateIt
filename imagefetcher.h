@@ -28,6 +28,8 @@ public:
 
 signals:
 
+    void fetchedChanged();
+
 public slots:
 
     void setFetched(const bool arg);
@@ -35,6 +37,7 @@ public slots:
 private:
 
     bool m_fetched;
+    QString m_path;
 };
 
 #endif // IMAGEFETCHER_H

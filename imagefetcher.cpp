@@ -1,6 +1,6 @@
 #include "imagefetcher.h"
 
-#include <QDebug>
+#include <QFileDialog>
 
 #ifdef Q_OS_SYMBIAN
 #include <MGFetch.h>
@@ -18,6 +18,8 @@ QString ImageFetcher::fetchImage(FetchMethod method)
 {
     QString strRes;
 
+    setFetched(false);
+
     switch(method)
     {
     case Gallery:
@@ -29,11 +31,20 @@ QString ImageFetcher::fetchImage(FetchMethod method)
         {
             HBufC* result = fileArray->MdcaPoint(0).Alloc();
             strRes = QString((QChar*)result->Des().Ptr(), result->Length());
+            m_path = strRes;
             setFetched(true);
         }
         else
         {
-            setFetched(false);
+            if(!m_path.isEmpty())
+            {
+                setFetched(true);
+            }
+            else
+            {
+                strRes = "";
+                setFetched(false);
+            }
         }
         CleanupStack::PopAndDestroy();
     #endif
@@ -42,13 +53,28 @@ QString ImageFetcher::fetchImage(FetchMethod method)
 
     case FileManager:
     {
-        // ToDo: write FileMan fatch code
-        setFetched(false);
+        strRes = QFileDialog::getOpenFileName(0, tr("Select File"), "", "Images (*.png *.jpg");
+        if(!strRes.isEmpty())
+        {
+            setFetched(true);
+        }
+        else
+        {
+            if(!m_path.isEmpty())
+            {
+                setFetched(true);
+            }
+            else
+            {
+                setFetched(false);
+            }
+        }
     }
         break;
 
     default:
         setFetched(false);
+        break;
     }
 
     return strRes;
@@ -62,6 +88,7 @@ bool ImageFetcher::fetched() const
 void ImageFetcher::setFetched(bool arg)
 {
     m_fetched = arg;
+    emit fetchedChanged();
 }
 
 

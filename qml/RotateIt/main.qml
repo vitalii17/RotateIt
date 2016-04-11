@@ -1,21 +1,47 @@
 import QtQuick 1.1
 import com.nokia.symbian 1.1
+import imagefetcher 1.0
 
 PageStackWindow {
     id: window
     showStatusBar: false
     showToolBar: false
 
+    property string currentImage
+    onCurrentImageChanged: console.log(currentImage)
+
     Page {
         id: startPage
-        orientationLock: PageOrientation.LockLandscape
+        orientationLock: PageOrientation.Automatic
 
         Button {
             id: openButton
             text: qsTr("Open Image")
             anchors.centerIn: parent
             anchors.bottomMargin: mainToolBar.height
-            onClicked: console.log("Clicked")
+            onClicked: openMethodMenu.open()
+        }
+
+        ContextMenu {
+            id: openMethodMenu
+            MenuLayout {
+                MenuItem {
+                    text: qsTr("From Gallery")
+                    onClicked: currentImage = imageFetcher.fetchImage(ImageFetcher.Gallery)
+                }
+                MenuItem {
+                    text: qsTr("File Manager")
+                    onClicked: currentImage = imageFetcher.fetchImage(ImageFetcher.FileManager)
+                }
+            }
+        }
+
+        ImageFetcher {
+            id: imageFetcher
+            onFetchedChanged: {
+                startPage.orientationLock = fetched ? PageOrientation.LockLandscape :
+                                                      PageOrientation.LockPortrait
+            }
         }
 
         tools: ToolBarLayout {
