@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import com.nokia.symbian 1.1
 import imagefetcher 1.0
+import imageview 1.0
 
 PageStackWindow {
     id: window
@@ -9,7 +10,7 @@ PageStackWindow {
 
     property string currentImagePath
     onCurrentImagePathChanged: {
-        if(pageStack.currentPage != mainPage) {
+        if(pageStack.currentPage !== mainPage) {
             pageStack.push(mainPage)
         }
     }
@@ -23,7 +24,7 @@ PageStackWindow {
             onFetchedChanged: {
                 startPage.orientationLock = imageFetcher.fetched ?
                             PageOrientation.LockLandscape :
-                            PageOrientation.LockPortrait
+                            PageOrientation.Automatic
             }
         }
 
@@ -43,7 +44,6 @@ PageStackWindow {
             }
             ToolButton {
                 iconSource: "toolbar-menu"
-                anchors.right: parent.right
                 onClicked: startPageMenu.open()
             }
         }
@@ -67,11 +67,26 @@ PageStackWindow {
         id: mainPage
         orientationLock: PageOrientation.LockLandscape
 
+        Connections {
+            target: imageFetcher
+            onFetchedChanged: {
+                mainPage.orientationLock = imageFetcher.fetched ?
+                            PageOrientation.LockLandscape :
+                            PageOrientation.Automatic
+            }
+        }
+
+        ImageView {
+            id: imageView
+            anchors.fill: parent
+            //onSourceDataChanged: console.log("123")
+        }
+
         Rectangle {
             id: horizontCorsor
             color: "white"
             height: 2
-            opacity: 0.5
+            opacity: 0.4
             width: parent.width
             y: parent.height / 2
         }
@@ -97,11 +112,10 @@ PageStackWindow {
             id: mainToolBarLayout
             ToolButton {
                 iconSource: "toolbar-back"
-                onClicked: pageStack.pop(mainPage)
+                onClicked: Qt.quit()
             }
             ToolButton {
                 iconSource: "toolbar-menu"
-                //anchors.right: parent.right
                 onClicked: mainPageMenu.open()
             }
         }

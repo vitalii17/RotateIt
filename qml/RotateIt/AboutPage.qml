@@ -15,7 +15,6 @@ Page {
         }
         ToolButton {
             iconSource: "toolbar-menu"
-            anchors.right: parent.right
             onClicked: aboutPageMenu.open()
         }
     }
