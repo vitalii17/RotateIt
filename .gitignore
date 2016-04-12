@@ -2,6 +2,7 @@
 *.inf
 Makefile
 *.desktop
+*.autosave
 *.loc
 *.user
 *.rss

@@ -57,6 +57,7 @@ QString ImageFetcher::fetchImage(FetchMethod method)
         if(!strRes.isEmpty())
         {
             setFetched(true);
+            m_path = strRes;
         }
         else
         {
@@ -75,6 +76,11 @@ QString ImageFetcher::fetchImage(FetchMethod method)
     default:
         setFetched(false);
         break;
+    }
+
+    if(!m_path.isEmpty())
+    {
+        setFetched(true);
     }
 
     return strRes;

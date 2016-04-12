@@ -7,12 +7,25 @@ PageStackWindow {
     showStatusBar: false
     showToolBar: false
 
-    property string currentImage
-    onCurrentImageChanged: console.log(currentImage)
+    property string currentImagePath
+    onCurrentImagePathChanged: {
+        if(pageStack.currentPage != mainPage) {
+            pageStack.push(mainPage)
+        }
+    }
 
     Page {
         id: startPage
         orientationLock: PageOrientation.Automatic
+
+        Connections {
+            target: imageFetcher
+            onFetchedChanged: {
+                startPage.orientationLock = imageFetcher.fetched ?
+                            PageOrientation.LockLandscape :
+                            PageOrientation.LockPortrait
+            }
+        }
 
         Button {
             id: openButton
@@ -22,33 +35,30 @@ PageStackWindow {
             onClicked: openMethodMenu.open()
         }
 
-        ContextMenu {
-            id: openMethodMenu
-            MenuLayout {
-                MenuItem {
-                    text: qsTr("From Gallery")
-                    onClicked: currentImage = imageFetcher.fetchImage(ImageFetcher.Gallery)
-                }
-                MenuItem {
-                    text: qsTr("File Manager")
-                    onClicked: currentImage = imageFetcher.fetchImage(ImageFetcher.FileManager)
-                }
-            }
-        }
-
-        ImageFetcher {
-            id: imageFetcher
-            onFetchedChanged: {
-                startPage.orientationLock = fetched ? PageOrientation.LockLandscape :
-                                                      PageOrientation.LockPortrait
-            }
-        }
-
         tools: ToolBarLayout {
             id: startPageToolBarLayout
             ToolButton {
                 iconSource: "toolbar-back"
                 onClicked: Qt.quit()
+            }
+            ToolButton {
+                iconSource: "toolbar-menu"
+                anchors.right: parent.right
+                onClicked: startPageMenu.open()
+            }
+        }
+
+        Menu {
+            id: startPageMenu
+            MenuLayout {
+                MenuItem {
+                    text: qsTr("About")
+                    onClicked: pageStack.push(aboutPage)
+                }
+                MenuItem {
+                    text: qsTr("Exit")
+                    onClicked: Qt.quit()
+                }
             }
         }
     }
@@ -87,17 +97,38 @@ PageStackWindow {
             id: mainToolBarLayout
             ToolButton {
                 iconSource: "toolbar-back"
-                onClicked: Qt.quit()
+                onClicked: pageStack.pop(mainPage)
+            }
+            ToolButton {
+                iconSource: "toolbar-menu"
+                //anchors.right: parent.right
+                onClicked: mainPageMenu.open()
             }
         }
 
-        ToolBarLayout {
-            id: rotationToolBarLayout
-            ToolButton {
-                iconSource: "toolbar-menu"
-                onClicked: {}
+        Menu {
+            id: mainPageMenu
+            MenuLayout {
+                MenuItem {
+                    text: qsTr("Open")
+                    platformSubItemIndicator: true
+                    onClicked: openMethodMenu.open()
+                }
+                MenuItem {
+                    text: qsTr("Save")
+                    onClicked: {}
+                }
+                MenuItem {
+                    text: qsTr("About")
+                    onClicked: pageStack.push(aboutPage)
+                }
             }
         }
+    }
+
+    AboutPage {
+        id: aboutPage
+        onBack: pageStack.pop()
     }
 
     PageStack {
@@ -122,5 +153,28 @@ PageStackWindow {
         anchors.bottom: parent.bottom
         height: mainToolBar.height
         onPressed: mainToolBar.shown = true
+    }
+
+    ImageFetcher {
+        id: imageFetcher
+        onFetchedChanged: {
+            if(fetched) {
+                //                pageStack.push(mainPage)
+            }
+        }
+    }
+
+    ContextMenu {
+        id: openMethodMenu
+        MenuLayout {
+            MenuItem {
+                text: qsTr("From Gallery")
+                onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
+            }
+            MenuItem {
+                text: qsTr("File Manager")
+                onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.FileManager)
+            }
+        }
     }
 }
