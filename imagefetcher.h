@@ -25,14 +25,13 @@ public:
     Q_INVOKABLE QString fetchImage(FetchMethod method);
 
     bool fetched() const;
+    void setFetched(const bool arg);
 
 signals:
 
     void fetchedChanged();
 
 public slots:
-
-    void setFetched(const bool arg);
 
 private:
 

@@ -2,6 +2,7 @@ import QtQuick 1.1
 import com.nokia.symbian 1.1
 import imagefetcher 1.0
 import imageview 1.0
+import engine 1.0
 
 PageStackWindow {
     id: window
@@ -67,6 +68,9 @@ PageStackWindow {
         id: mainPage
         orientationLock: PageOrientation.LockLandscape
 
+        property int previewWidth: imageView.width
+        property int previewHeight: imageView.height
+
         Connections {
             target: imageFetcher
             onFetchedChanged: {
@@ -75,11 +79,18 @@ PageStackWindow {
                             PageOrientation.Automatic
             }
         }
+        Connections {
+            target: window
+            onCurrentImagePathChanged: slider.reset()
+        }
 
         ImageView {
             id: imageView
             anchors.fill: parent
-            //onSourceDataChanged: console.log("123")
+            Connections {
+                target: engine
+                onPreviewImageChanged: imageView.sourceImage = engine.previewImage
+            }
         }
 
         Rectangle {
@@ -105,7 +116,10 @@ PageStackWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             y: (parent.height / 3) * 2
+            amplitude: 10
+            onYChanged: reset()
             onPressed: mainToolBar.shown = false
+            onValueChanged: engine.rotate(value)
         }
 
         tools: ToolBarLayout {
@@ -171,11 +185,13 @@ PageStackWindow {
 
     ImageFetcher {
         id: imageFetcher
-        onFetchedChanged: {
-            if(fetched) {
-                //                pageStack.push(mainPage)
-            }
-        }
+    }
+
+    Engine {
+        id: engine
+        previewWidth: mainPage.previewWidth * 1.25
+        previewHeight: mainPage.previewHeight * 1.25
+        imagePath: window.currentImagePath
     }
 
     ContextMenu {

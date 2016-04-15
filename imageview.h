@@ -4,6 +4,7 @@
 #include <QDeclarativeItem>
 #include <QLabel>
 #include <QImage>
+#include <QThread>
 
 class ImageView : public QDeclarativeItem
 {

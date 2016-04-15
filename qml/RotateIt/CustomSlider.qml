@@ -12,6 +12,10 @@ Item {
     property real value: privateFunctions.round((((slider.x + slider.width / 2 - containerItem.width / 2) /
                           containerItem.width / 2) * 4) * amplitude, stepSize)
 
+    function reset() {
+        slider.x = containerItem.width / 2 - slider.width / 2
+    }
+
     QtObject {
         id: privateFunctions
         function round(value, stepSize) {
