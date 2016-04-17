@@ -33,7 +33,6 @@ PageStackWindow {
             id: openButton
             text: qsTr("Open Image")
             anchors.centerIn: parent
-            anchors.bottomMargin: mainToolBar.height
             onClicked: openMethodMenu.open()
         }
 

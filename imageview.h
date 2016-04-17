@@ -4,7 +4,8 @@
 #include <QDeclarativeItem>
 #include <QLabel>
 #include <QImage>
-#include <QThread>
+#include <QPainter>
+#include <QPaintEvent>
 
 class ImageView : public QDeclarativeItem
 {
@@ -15,6 +16,7 @@ class ImageView : public QDeclarativeItem
 public:
 
     explicit ImageView(QDeclarativeItem *parent = 0);
+    ~ImageView();
 
     QImage sourceImage() const;
 
@@ -36,3 +38,6 @@ private:
 };
 
 #endif // IMAGEVIEW_H
+
+
+

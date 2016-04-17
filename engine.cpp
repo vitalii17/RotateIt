@@ -39,8 +39,6 @@ void Engine::rotate(qreal angle)
         painter.drawImage(0, 0, m_inputPreviewImage);
         painter.end();
 
-        qDebug() << "width = " << m_inputPreviewImage.width() << ";  height" << m_inputPreviewImage.height();
-
         emit previewImageChanged();
     }
 }
@@ -67,9 +65,23 @@ void Engine::setImagePath(QString arg)
 
     if(!m_imagePath.isEmpty())
     {
-        setPreviewImage(QImage(imagePath()).scaled(previewWidth(),
-                                                   previewHeight(),
-                                                   Qt::KeepAspectRatio).convertToFormat(QImage::Format_ARGB32_Premultiplied));
+        //setPreviewImage(QImage(imagePath()).scaled(previewWidth(),
+          //                                         previewHeight(),
+            //                                       Qt::KeepAspectRatio).convertToFormat(QImage::Format_ARGB32_Premultiplied));
+
+        QThread *thread = new QThread();
+        Resizer *resizer = new Resizer();
+        resizer->moveToThread(thread);
+        resizer->setInputImage(imagePath());
+
+        connect(thread, SIGNAL(started()), resizer, SLOT(process()));
+        connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setPreviewImage(QImage)));
+        connect(resizer, SIGNAL(finished()), thread, SLOT(quit()));
+        connect(resizer, SIGNAL(finished()), resizer, SLOT(deleteLater()));
+        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        thread->start();
+        thread->setPriority(QThread::LowPriority);
+
         m_inputPreviewImage = previewImage();
     }
 
@@ -115,6 +127,18 @@ void Engine::setRotation(qreal arg)
 Resizer::Resizer(QObject *parent) : QObject(parent)
 {
 
+}
+
+void Resizer::process()
+{
+    m_outputImage = QImage(m_path).scaled(640, 360, Qt::KeepAspectRatio);
+    emit finished();
+    emit finished(m_outputImage);
+}
+
+void Resizer::setInputImage(QString path)
+{
+    m_path = path;
 }
 
 

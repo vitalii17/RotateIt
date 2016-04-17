@@ -6,6 +6,8 @@ DEPLOYMENTFOLDERS = folder_01
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
+#QT += opengl
+
 symbian:TARGET.UID3 = 0xE39F1FBD
 
 # Smart Installer package's UID

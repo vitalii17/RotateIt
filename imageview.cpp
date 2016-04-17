@@ -16,6 +16,11 @@ ImageView::ImageView(QDeclarativeItem *parent) :
     connect(this, SIGNAL(heightChanged()), this, SLOT(heightUpdated()));
 }
 
+ImageView::~ImageView()
+{
+    delete label;
+}
+
 QImage ImageView::sourceImage() const
 {
     return m_sourceImage;
@@ -24,9 +29,11 @@ QImage ImageView::sourceImage() const
 void ImageView::setSourceImage(const QImage arg)
 {
     m_sourceImage = arg;
-    label->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
-                                                              Qt::KeepAspectRatio,
-                                                              Qt::SmoothTransformation));
+
+    //label->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
+      //                                                        Qt::KeepAspectRatio,
+        //                                                      Qt::SmoothTransformation));
+    label->setPixmap(QPixmap::fromImage(arg));
     emit sourceImageChanged();
 }
 

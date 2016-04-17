@@ -46,9 +46,11 @@ signals:
     
 public slots:
 
-private:
+private slots:
 
     void setPreviewImage(QImage arg);
+
+private:
     
     QImage m_previewImage;
     QImage m_inputPreviewImage;
@@ -58,7 +60,7 @@ private:
     qreal m_rotation;
 };
 
-class Resizer : QObject
+class Resizer : public QObject
 {
     Q_OBJECT
 
@@ -66,6 +68,21 @@ public:
 
     explicit Resizer(QObject *parent = 0);
 
+public slots:
+
+    void process();
+    void setInputImage(QString path);
+
+signals:
+
+    void finished();
+    void finished(QImage outputImage);
+
+private:
+
+    QImage m_inputImage;
+    QImage m_outputImage;
+    QString m_path;
 };
 
 #endif // ENGINE_H
