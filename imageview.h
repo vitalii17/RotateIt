@@ -24,7 +24,7 @@ signals:
     void sourceImageChanged();
     
 public slots:
-    void setSourceImage(const QImage arg);
+    void setSourceImage(const QImage &arg);
 
 private slots:
 
@@ -33,7 +33,7 @@ private slots:
 
 private:
 
-    QLabel *label;
+    QLabel *m_label;
     QImage m_sourceImage;
 };
 

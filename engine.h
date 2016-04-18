@@ -60,18 +60,27 @@ private:
     qreal m_rotation;
 };
 
-class Resizer : public QObject
+class Resize : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(int width READ width WRITE setWidth)
+    Q_PROPERTY(int height READ height WRITE setHeight)
+
 public:
 
-    explicit Resizer(QObject *parent = 0);
+    explicit Resize(QObject *parent = 0);
+
+    int width() const;
+    int height() const;
 
 public slots:
 
     void process();
-    void setInputImage(QString path);
+    void setInputImagePath(QString path);
+
+    void setWidth(int arg);
+    void setHeight(int arg);
 
 signals:
 
@@ -83,6 +92,8 @@ private:
     QImage m_inputImage;
     QImage m_outputImage;
     QString m_path;
+    int m_width;
+    int m_height;
 };
 
 #endif // ENGINE_H

@@ -1,5 +1,3 @@
-#include "imagefetcher.h"
-
 #include <QFileDialog>
 
 #ifdef Q_OS_SYMBIAN
@@ -8,6 +6,8 @@
 #include <eikmenub.h>
 #include <aknappui.h>
 #endif
+
+#include "imagefetcher.h"
 
 ImageFetcher::ImageFetcher(QObject *parent) :
     QObject(parent)

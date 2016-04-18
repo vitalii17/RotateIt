@@ -1,8 +1,8 @@
-#include "engine.h"
-
 #include <QDebug>
 #include <QPainter>
 #include <qmath.h>
+
+#include "engine.h"
 
 Engine::Engine(QObject *parent) :
     QObject(parent)
@@ -12,7 +12,7 @@ Engine::Engine(QObject *parent) :
 
 void Engine::rotate(qreal angle)
 {
-    if(!m_imagePath.isEmpty())
+    if(!m_previewImage.isNull())
     {
         qreal angle_rad = qAbs((M_PI / 180) * angle);
         qreal cos_angle = qCos(angle_rad);
@@ -70,9 +70,11 @@ void Engine::setImagePath(QString arg)
             //                                       Qt::KeepAspectRatio).convertToFormat(QImage::Format_ARGB32_Premultiplied));
 
         QThread *thread = new QThread();
-        Resizer *resizer = new Resizer();
+        Resize *resizer = new Resize();
         resizer->moveToThread(thread);
-        resizer->setInputImage(imagePath());
+        resizer->setInputImagePath(imagePath());
+        resizer->setWidth(previewWidth());
+        resizer->setHeight(previewHeight());
 
         connect(thread, SIGNAL(started()), resizer, SLOT(process()));
         connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setPreviewImage(QImage)));
@@ -124,21 +126,41 @@ void Engine::setRotation(qreal arg)
 
 // Resizer
 
-Resizer::Resizer(QObject *parent) : QObject(parent)
+Resize::Resize(QObject *parent) : QObject(parent)
 {
 
 }
 
-void Resizer::process()
+int Resize::width() const
 {
-    m_outputImage = QImage(m_path).scaled(640, 360, Qt::KeepAspectRatio);
+    return m_width;
+}
+
+int Resize::height() const
+{
+    return m_height;
+}
+
+void Resize::process()
+{
+    m_outputImage = QImage(m_path).scaled(width(), height(), Qt::KeepAspectRatio);
     emit finished();
     emit finished(m_outputImage);
 }
 
-void Resizer::setInputImage(QString path)
+void Resize::setInputImagePath(QString path)
 {
     m_path = path;
+}
+
+void Resize::setWidth(int arg)
+{
+    m_width = arg;
+}
+
+void Resize::setHeight(int arg)
+{
+    m_height = arg;
 }
 
 
