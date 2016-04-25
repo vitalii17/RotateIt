@@ -118,7 +118,7 @@ PageStackWindow {
             amplitude: 10
             onYChanged: reset()
             onPressed: mainToolBar.shown = false
-            onValueChanged: engine.rotate(value)
+            onValueChanged: engine.rotation = value
         }
 
         tools: ToolBarLayout {
@@ -188,9 +188,12 @@ PageStackWindow {
 
     Engine {
         id: engine
-        previewWidth: mainPage.previewWidth * 1.25
-        previewHeight: mainPage.previewHeight * 1.25
+        previewWidth: mainPage.previewWidth * 1.0
+        previewHeight: mainPage.previewHeight * 1.0
         imagePath: window.currentImagePath
+        onStateChanged: {
+
+        }
     }
 
     ContextMenu {
