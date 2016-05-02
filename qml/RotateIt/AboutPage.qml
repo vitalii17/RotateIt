@@ -5,9 +5,6 @@ Page {
     id: root
     orientationLock: PageOrientation.Automatic
 
-    Component.onCompleted: console.log("AboutPage: completed")
-    Component.onDestruction: console.log("AboutPage: destruction")
-
     signal back
 
     tools: ToolBarLayout {
