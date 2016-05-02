@@ -2,8 +2,11 @@ import QtQuick 1.1
 import com.nokia.symbian 1.1
 
 Page {
-    id: aboutPage
+    id: root
     orientationLock: PageOrientation.Automatic
+
+    Component.onCompleted: console.log("AboutPage: completed")
+    Component.onDestruction: console.log("AboutPage: destruction")
 
     signal back
 
@@ -11,7 +14,10 @@ Page {
         id: startPageToolBarLayout
         ToolButton {
             iconSource: "toolbar-back"
-            onClicked: back()
+            onClicked: {
+                back()
+                root.destroy()
+            }
         }
         ToolButton {
             iconSource: "toolbar-menu"

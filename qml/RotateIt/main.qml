@@ -53,7 +53,11 @@ PageStackWindow {
             MenuLayout {
                 MenuItem {
                     text: qsTr("About")
-                    onClicked: pageStack.push(aboutPage)
+                    onClicked: {
+                        var aboutPageObject = object.create("AboutPage.qml")
+                        pageStack.push(aboutPageObject)
+                        aboutPageObject.back.connect(pageStack.pop)
+                    }
                 }
                 MenuItem {
                     text: qsTr("Exit")
@@ -147,15 +151,14 @@ PageStackWindow {
                 }
                 MenuItem {
                     text: qsTr("About")
-                    onClicked: pageStack.push(aboutPage)
+                    onClicked: {
+                        var aboutPageObject = object.create("AboutPage.qml")
+                        pageStack.push(aboutPageObject)
+                        aboutPageObject.back.connect(pageStack.pop)
+                    }
                 }
             }
         }
-    }
-
-    AboutPage {
-        id: aboutPage
-        onBack: pageStack.pop()
     }
 
     PageStack {
@@ -207,6 +210,13 @@ PageStackWindow {
                 text: qsTr("File Manager")
                 onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.FileManager)
             }
+        }
+    }
+
+    QtObject {
+        id: object
+        function create(obj) {
+            return Qt.createComponent(obj).createObject(window)
         }
     }
 }
