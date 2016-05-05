@@ -24,7 +24,7 @@ signals:
     void sourceImageChanged();
     
 public slots:
-    void setSourceImage(const QImage &arg);
+    void setSourceImage(const QImage &sourceImage);
 
 private slots:
 
@@ -33,8 +33,10 @@ private slots:
 
 private:
 
-    QLabel *m_label;
+    QLabel *m_pLabel;
     QImage m_sourceImage;
+
+    QGraphicsProxyWidget *m_pProxyWidget;
 };
 
 #endif // IMAGEVIEW_H

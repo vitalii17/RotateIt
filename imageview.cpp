@@ -5,11 +5,11 @@
 ImageView::ImageView(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
-    m_label = new QLabel;
-    m_label->setAlignment(Qt::AlignCenter);
+    m_pLabel = new QLabel;
+    m_pLabel->setAlignment(Qt::AlignCenter);
 
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(this);
-    proxy->setWidget(m_label);
+    m_pProxyWidget = new QGraphicsProxyWidget(this);
+    m_pProxyWidget->setWidget(m_pLabel);
 
     connect(this, SIGNAL(widthChanged()), this, SLOT(widthUpdated()));
     connect(this, SIGNAL(heightChanged()), this, SLOT(heightUpdated()));
@@ -17,7 +17,8 @@ ImageView::ImageView(QDeclarativeItem *parent) :
 
 ImageView::~ImageView()
 {
-    delete m_label;
+    delete m_pLabel;
+    delete m_pProxyWidget;
 }
 
 QImage ImageView::sourceImage() const
@@ -29,21 +30,20 @@ void ImageView::setSourceImage(const QImage &sourceImage)
 {
     m_sourceImage = sourceImage;
 
-    m_label->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
-                                                                Qt::KeepAspectRatio,
-                                                                Qt::SmoothTransformation));
+    m_pLabel->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
+                                                                 Qt::KeepAspectRatio/*,
+                                                                Qt::SmoothTransformation*/));
 
-    //    m_label->setPixmap(QPixmap::fromImage(sourceImage));
-
+    //m_pLabel->setPixmap(QPixmap::fromImage(sourceImage));
     emit sourceImageChanged();
 }
 
 void ImageView::widthUpdated()
 {
-    m_label->resize(width(), height());
+    m_pLabel->resize(width(), height());
 }
 
 void ImageView::heightUpdated()
 {
-    m_label->resize(width(), height());
+    m_pLabel->resize(width(), height());
 }
