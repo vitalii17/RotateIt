@@ -60,7 +60,7 @@ void Engine::rotate(qreal angle)
         QPainter painter(&m_previewImage);
 
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+//        painter.setRenderHint(QPainter::SmoothPixmapTransform);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
         painter.translate(m_previewImage.width() / 2, m_previewImage.height() / 2);
         painter.rotate(angle);
@@ -68,7 +68,6 @@ void Engine::rotate(qreal angle)
         painter.translate(QPoint(cut_width / 2 - m_inputPreviewImage.width() / 2,
                                  cut_height / 2 - m_inputPreviewImage.height() / 2));
         painter.drawImage(0, 0, m_inputPreviewImage);
-        painter.end();
 
         emit previewImageChanged();
     }
@@ -220,9 +219,14 @@ void Resize::setHeight(int arg)
 
 // Rotate
 
-Rotate::Rotate(QObject *parent) : QObject(parent), m_angle(3.1)
+Rotate::Rotate(QObject *parent) : QObject(parent), m_angle(0)
 {
 
+}
+
+QImage Rotate::rotate(QImage &image, qreal angle)
+{
+    return image;
 }
 
 qreal Rotate::angle() const

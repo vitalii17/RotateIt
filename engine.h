@@ -122,6 +122,8 @@ public:
 
     explicit Rotate(QObject *parent = 0);
 
+    static QImage rotate(QImage &image, qreal angle);
+
     qreal angle() const;
     void setAngle(qreal value);
 
@@ -142,6 +144,5 @@ private:
     QImage m_inputImage;
     QString m_path;
 };
-
 
 #endif // ENGINE_H
