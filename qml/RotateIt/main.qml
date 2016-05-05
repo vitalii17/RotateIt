@@ -92,7 +92,14 @@ PageStackWindow {
             anchors.fill: parent
             Connections {
                 target: engine
-                onPreviewImageChanged: imageView.sourceImage = engine.previewImage
+//                onPreviewImageChanged: imageView.sourceImage = engine.previewImage
+                onPreviewImageChanged: {
+                    var startTime = new Date().getTime()
+                    imageView.sourceImage = engine.previewImage
+                    gc()
+                    var stopTime = new Date().getTime()
+                    console.log(stopTime - startTime)
+                }
             }
         }
 
@@ -176,6 +183,14 @@ PageStackWindow {
         tools: pageStack.currentPage.tools
         background: "qrc:///qml/RotateIt/images/toolbar-background.svg"
     }
+
+//    TopBar {
+//        id: topBar
+//        anchors.left: parent.left
+//        anchors.right: parent.right
+//        anchors.top: parent.top
+//        background: "qrc:///qml/RotateIt/images/topbar-background.svg"
+//    }
 
     MouseArea {
         anchors.left: parent.left
