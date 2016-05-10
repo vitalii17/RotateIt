@@ -18,7 +18,6 @@ ImageView::ImageView(QDeclarativeItem *parent) :
 ImageView::~ImageView()
 {
     delete m_pLabel;
-    delete m_pProxyWidget;
 }
 
 QImage ImageView::sourceImage() const
