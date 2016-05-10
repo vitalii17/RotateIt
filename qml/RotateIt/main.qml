@@ -33,7 +33,22 @@ PageStackWindow {
             id: openButton
             text: qsTr("Open Image")
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: -height / 1.5
+            Component.onCompleted: width = Math.max(openButton.width, aboutButton.width)
             onClicked: openMethodMenu.open()
+        }
+
+        Button {
+            id: aboutButton
+            text: qsTr("About")
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: height / 1.5
+            Component.onCompleted: width = Math.max(openButton.width, aboutButton.width)
+            onClicked: {
+                var aboutPageObject = object.create("AboutPage.qml")
+                pageStack.push(aboutPageObject)
+                aboutPageObject.back.connect(pageStack.pop)
+            }
         }
 
         tools: ToolBarLayout {
@@ -51,14 +66,14 @@ PageStackWindow {
         Menu {
             id: startPageMenu
             MenuLayout {
-                MenuItem {
-                    text: qsTr("About")
-                    onClicked: {
-                        var aboutPageObject = object.create("AboutPage.qml")
-                        pageStack.push(aboutPageObject)
-                        aboutPageObject.back.connect(pageStack.pop)
-                    }
-                }
+//                MenuItem {
+//                    text: qsTr("About")
+//                    onClicked: {
+//                        var aboutPageObject = object.create("AboutPage.qml")
+//                        pageStack.push(aboutPageObject)
+//                        aboutPageObject.back.connect(pageStack.pop)
+//                    }
+//                }
                 MenuItem {
                     text: qsTr("Exit")
                     onClicked: Qt.quit()
