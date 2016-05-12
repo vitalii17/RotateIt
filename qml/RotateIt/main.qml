@@ -109,11 +109,11 @@ PageStackWindow {
                 target: engine
 //                onPreviewImageChanged: imageView.sourceImage = engine.previewImage
                 onPreviewImageChanged: {
-                    var startTime = new Date().getTime()
+//                    var startTime = new Date().getTime()
                     imageView.sourceImage = engine.previewImage
                     gc()
-                    var stopTime = new Date().getTime()
-                    console.log(stopTime - startTime)
+//                    var stopTime = new Date().getTime()
+//                    console.log(stopTime - startTime)
                 }
             }
         }
@@ -152,6 +152,14 @@ PageStackWindow {
             ToolButton {
                 iconSource: "toolbar-back"
                 onClicked: Qt.quit()
+            }
+            ToolButton {
+                iconSource: "qrc:///qml/RotateIt/images/open.png"
+                onClicked: openMethodMenu.open()
+            }
+            ToolButton {
+                iconSource: "qrc:///qml/RotateIt/images/save.svg"
+                onClicked: console.log("clicked 'save'")
             }
             ToolButton {
                 iconSource: "toolbar-menu"
