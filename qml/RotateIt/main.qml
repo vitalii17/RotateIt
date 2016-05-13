@@ -167,6 +167,40 @@ PageStackWindow {
             }
         }
 
+        TopBar {
+            id: mainTopBar
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            background: "qrc:///qml/RotateIt/images/topbar-background.svg"
+            //visible: false
+            Connections {
+                target: engine
+                onStateChanged: {
+                    switch(engine.state) {
+                    case Engine.Opening:
+                        mainTopBar.text = qsTr("Opening")
+                        mainTopBar.visible = true
+                        break
+                    case Engine.Passive:
+                        mainTopBar.visible = false
+                        break
+                    case Engine.FinalRendering:
+                        mainTopBar.text = qsTr("Rendering")
+                        mainTopBar.visible = true
+                        break
+                    case Engine.Saving:
+                        mainTopBar.text = qsTr("Saving")
+                        mainTopBar.visible = true
+                        break
+                    default:
+                        mainTopBar.visible = false
+                        break
+                    }
+                }
+            }
+        }
+
         Menu {
             id: mainPageMenu
             MenuLayout {
@@ -206,14 +240,6 @@ PageStackWindow {
         tools: pageStack.currentPage.tools
         background: "qrc:///qml/RotateIt/images/toolbar-background.svg"
     }
-
-//    TopBar {
-//        id: topBar
-//        anchors.left: parent.left
-//        anchors.right: parent.right
-//        anchors.top: parent.top
-//        background: "qrc:///qml/RotateIt/images/topbar-background.svg"
-//    }
 
     MouseArea {
         anchors.left: parent.left
