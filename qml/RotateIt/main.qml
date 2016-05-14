@@ -172,8 +172,7 @@ PageStackWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            background: "qrc:///qml/RotateIt/images/topbar-background.svg"
-            //visible: false
+//            visible: false
             Connections {
                 target: engine
                 onStateChanged: {

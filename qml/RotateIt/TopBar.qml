@@ -6,34 +6,35 @@ Item {
 
     width: 100
     height: (screen.width < screen.height)
-            ? privateStyle.toolBarHeightPortrait
-            : privateStyle.toolBarHeightLandscape
+            ? ((privateStyle.toolBarHeightPortrait / 4) * 3)
+            : ((privateStyle.toolBarHeightLandscape / 4) * 3)
 
     property string text: "text"
-    property string background
+    property string backgroundColor: "grey"
 
-    Image {
-        id: backgroundImage
+    Rectangle {
+        id: background
         anchors.fill: root
-        source: root.background
-    }
-
-    ProgressBar {
-        id: progressBar
-        indeterminate: true
-        anchors.left: root.left
-        anchors.leftMargin: platformStyle.paddingMedium
-        anchors.verticalCenter: root.verticalCenter
-        width: root.width - textString.width - 3 * platformStyle.paddingMedium
+        color: backgroundColor
+        opacity: 0.3
     }
 
     Text {
         id: textString
         text: root.text
-        color: "grey"
-        font.pixelSize: 20
-        anchors.right: root.right
+        color: "white"
+        font.pixelSize: root.height / 3 * 2
+        anchors.left: root.left
+        anchors.leftMargin: platformStyle.paddingMedium
         anchors.verticalCenter: root.verticalCenter
+    }
+
+    ProgressBar {
+        id: progressBar
+        indeterminate: true
+        anchors.right: root.right
         anchors.rightMargin: platformStyle.paddingMedium
+        anchors.verticalCenter: root.verticalCenter
+        width: root.width - textString.width - 3 * platformStyle.paddingMedium
     }
 }
