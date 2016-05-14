@@ -18,7 +18,7 @@ PageStackWindow {
 
     StartPage {
         id: startPage
-        onOpen: openMethodMenu.open()
+        onOpen: openMenu.open()
         onAbout: {
             var aboutPageObject = object.create("AboutPage.qml")
             pageStack.push(aboutPageObject)
@@ -101,7 +101,7 @@ PageStackWindow {
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/open.png"
-                onClicked: openMethodMenu.open()
+                onClicked: openMenu.open()
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
@@ -152,7 +152,7 @@ PageStackWindow {
                 MenuItem {
                     text: qsTr("Open")
                     platformSubItemIndicator: true
-                    onClicked: openMethodMenu.open()
+                    onClicked: openMenu.open()
                 }
                 MenuItem {
                     text: qsTr("Save")
@@ -209,7 +209,7 @@ PageStackWindow {
     }
 
     ContextMenu {
-        id: openMethodMenu
+        id: openMenu
         MenuLayout {
             MenuItem {
                 text: qsTr("From Gallery")
