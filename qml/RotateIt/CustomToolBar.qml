@@ -46,7 +46,7 @@ Item {
 
     property Item tools: null
 
-    property string background: privateStyle.imagePath("qtg_fr_toolbar", root.platformInverted)
+    //property string background: privateStyle.imagePath("qtg_fr_toolbar", root.platformInverted)
     property bool shown: true
 
     state: shown ? "shown" : "hidden"
@@ -116,12 +116,21 @@ Item {
         ? privateStyle.toolBarHeightPortrait
         : privateStyle.toolBarHeightLandscape
 
-    BorderImage {
+//    BorderImage {
+//        id: backgroundImage
+//        anchors.fill: parent
+//        //source: privateStyle.imagePath("qtg_fr_toolbar", root.platformInverted)
+//        source: root.background
+//        border { left: 20; top: 20; right: 20; bottom: 20 }
+//        visible: false
+//    }
+
+    Rectangle {
         id: background
         anchors.fill: parent
-        //source: privateStyle.imagePath("qtg_fr_toolbar", root.platformInverted)
-        source: root.background
-        border { left: 20; top: 20; right: 20; bottom: 20 }
+        color: "grey"
+        opacity: 0.4
+        visible: true
     }
 
     //Prevents mouse events from propagating to elements below the ToolBar

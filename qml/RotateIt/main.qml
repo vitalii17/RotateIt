@@ -237,7 +237,7 @@ PageStackWindow {
         anchors.bottom: parent.bottom
         z: 1
         tools: pageStack.currentPage.tools
-        background: "qrc:///qml/RotateIt/images/toolbar-background.svg"
+        //background: "qrc:///qml/RotateIt/images/toolbar-background.svg"
     }
 
     MouseArea {
