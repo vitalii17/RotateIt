@@ -20,14 +20,14 @@ PageStackWindow {
         id: startPage
         orientationLock: PageOrientation.Automatic
 
-        Connections {
-            target: imageFetcher
-            onFetchedChanged: {
-                startPage.orientationLock = imageFetcher.fetched ?
-                            PageOrientation.LockLandscape :
-                            PageOrientation.Automatic
-            }
-        }
+//        Connections {
+//            target: imageFetcher
+//            onFetchedChanged: {
+//                startPage.orientationLock = imageFetcher.fetched ?
+//                            PageOrientation.LockLandscape :
+//                            PageOrientation.Automatic
+//            }
+//        }
 
         Button {
             id: openButton
