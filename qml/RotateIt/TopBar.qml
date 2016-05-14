@@ -16,7 +16,7 @@ Item {
         id: background
         anchors.fill: root
         color: backgroundColor
-        opacity: 0.3
+        opacity: 0.4
     }
 
     Text {
