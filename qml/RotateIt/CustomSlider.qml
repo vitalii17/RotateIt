@@ -17,7 +17,7 @@ Item {
     }
 
     function blink() {
-        boarderAnimation.start()
+        borderAnimation.start()
     }
 
     QtObject {
@@ -50,7 +50,7 @@ Item {
             }
 
             SequentialAnimation {
-                id: boarderAnimation
+                id: borderAnimation
                 running: false
                 loops: 1
                 PropertyAnimation {
