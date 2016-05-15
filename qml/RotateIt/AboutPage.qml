@@ -15,12 +15,12 @@ Page {
         anchors.rightMargin: platformStyle.paddingMedium
         anchors.bottomMargin: platformStyle.paddingSmall
         contentWidth: width
-        //contentHeight: text.height + 4 * aboutPageToolBarLayout.height
         contentHeight: column.height + 4 * aboutPageToolBarLayout.height
 
         Column {
             id: column
             width: parent.width
+            spacing: 10
 
             Text {
                 id: text
@@ -28,6 +28,7 @@ Page {
                 textFormat: Text.RichText
                 wrapMode: Text.WordWrap
                 color: "white"
+                onLinkActivated: Qt.openUrlExternally(link)
 
                 text: qsTr("<h2><p align = \"center\">Rotate It</p></h2>\
     <p>Fix your photos directly on your smartphone. Correct the \
@@ -54,11 +55,8 @@ Page {
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, \
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE \
     SOFTWARE.</p>")
-
-                onLinkActivated: {
-                    Qt.openUrlExternally(link);
-                }
             }
+            // Here next item
         }
     }
 
