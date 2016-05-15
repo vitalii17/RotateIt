@@ -51,7 +51,6 @@ Item {
 
             SequentialAnimation {
                 id: borderAnimation
-                running: false
                 PropertyAnimation {
                     target: slider
                     property: "border.color"
