@@ -71,6 +71,21 @@ PageStackWindow {
             opacity: 0.4
             width: parent.width
             y: parent.height / 2
+            function blink() { borderAnimation.start() }
+
+            SequentialAnimation {
+                id: borderAnimation
+                PropertyAnimation {
+                    target: horizontCorsor
+                    properties: "color"
+                    to: "blue"
+                }
+                PropertyAnimation {
+                    target: horizontCorsor
+                    property: "color"
+                    to: "white"
+                }
+            }
         }
 
         MouseArea {
@@ -80,6 +95,7 @@ PageStackWindow {
             drag.minimumY: 0
             drag.maximumY: parent.height - horizontCorsor.height
             onClicked: mainToolBar.shown = false
+            onPressed: horizontCorsor.blink()
         }
 
         CustomSlider {
