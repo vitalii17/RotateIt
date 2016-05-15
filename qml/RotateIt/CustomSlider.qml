@@ -16,6 +16,10 @@ Item {
         slider.x = containerItem.width / 2 - slider.width / 2
     }
 
+    function blink() {
+        boarderAnimation.start()
+    }
+
     QtObject {
         id: privateFunctions
         function round(value, stepSize) {
@@ -44,6 +48,23 @@ Item {
                 font.pixelSize: 35
                 anchors.centerIn: parent
             }
+
+            SequentialAnimation {
+                id: boarderAnimation
+                running: false
+                loops: 1
+                PropertyAnimation {
+                    target: slider
+                    property: "border.color"
+                    to: "blue"
+                }
+                PropertyAnimation {
+                    target: slider
+                    property: "border.color"
+                    to: target.color
+                }
+                onRunningChanged: slider.border.width = running ? 3 : 0
+            }
         }
 
         MouseArea {
@@ -56,7 +77,10 @@ Item {
             drag.axis: Drag.XAxis
             drag.minimumX: 0 - drag.target.width / 2
             drag.maximumX: parent.width - drag.target.width / 2
-            onPressed: root.pressed()
+            onPressed: {
+                root.pressed()
+                blink()
+            }
         }
     }
 }
