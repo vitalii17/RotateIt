@@ -41,6 +41,7 @@ Item {
             width: 75
             height: root.height
             x: containerItem.width / 2 - width / 2
+            border.color: color
             border.width: 3
 
             Text {
@@ -62,7 +63,6 @@ Item {
                     property: "border.color"
                     to: target.color
                 }
-                //onRunningChanged: slider.border.width = running ? 3 : 0
             }
         }
 
