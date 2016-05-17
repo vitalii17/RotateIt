@@ -34,7 +34,7 @@ Page {
     <p>Fix your photos directly on your smartphone. Correct the \
     \"littered horizon\" has never been so easy!</p>\
     <p>Developer: <a href=\"http://m.vk.com/vitalis17\">Vitalii Shunkov</a> \
-    (mail: Shunkov@gmail.com)</p>\
+    (mail: Shynkov@bigmir.net)</p>\
     <p>Special thanks: <a href=\"http://m.vk.com/symbian_zone\">\"Symbian Zone\"</a> and \
     <a href=\"http://forum.dailymobile.net\">\"dailymobile.net\"</a></p>\
     <h3><p align = \"center\">License</p></h3>\
