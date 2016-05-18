@@ -139,19 +139,11 @@ PageStackWindow {
                 target: engine
                 onStateChanged: {
                     switch(engine.state) {
-                    case Engine.Opening:
-                        mainTopBar.text = qsTr("Opening")
-                        mainTopBar.visible = true
-                        break
                     case Engine.Passive:
                         mainTopBar.visible = false
                         break
-                    case Engine.FinalRendering:
-                        mainTopBar.text = qsTr("Rendering")
-                        mainTopBar.visible = true
-                        break
-                    case Engine.Saving:
-                        mainTopBar.text = qsTr("Saving")
+                    case Engine.Processing:
+                        mainTopBar.text = qsTr("Processing")
                         mainTopBar.visible = true
                         break
                     default:

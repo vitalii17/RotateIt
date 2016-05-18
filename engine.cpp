@@ -100,7 +100,7 @@ void Engine::setImagePath(QString arg)
 
     if(!m_imagePath.isEmpty())
     {
-        setState(Engine::Opening);
+        setState(Engine::Processing);
         QThread *thread = new QThread();
         Resize *resizer = new Resize();
         resizer->moveToThread(thread);

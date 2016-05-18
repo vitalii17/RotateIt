@@ -22,7 +22,7 @@ public:
 
     enum EngineState
     {
-        Passive, Processing, Opening, Saving, FinalRendering
+        Passive, Processing
     };
 
     explicit Engine(QObject *parent = 0);
