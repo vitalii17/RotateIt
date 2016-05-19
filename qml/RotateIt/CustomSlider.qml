@@ -69,7 +69,9 @@ Item {
         MouseArea {
             id: mouseArea
             anchors.left: containerItem.left
+            anchors.leftMargin: -slider.width / 2
             anchors.right: containerItem.right
+            anchors.rightMargin: -slider.width / 2
             anchors.verticalCenter: slider.verticalCenter
             height: slider.height
             drag.target: slider
