@@ -157,13 +157,22 @@ PageStackWindow {
         Menu {
             id: mainPageMenu
             MenuLayout {
+//                MenuItem {
+//                    text: qsTr("Open")
+//                    platformSubItemIndicator: true
+//                    onClicked: openMenu.open()
+//                }
+//                MenuItem {
+//                    text: qsTr("Save")
+//                    onClicked: {}
+//                }
                 MenuItem {
-                    text: qsTr("Open")
+                    text: qsTr("File")
                     platformSubItemIndicator: true
-                    onClicked: openMenu.open()
+                    onClicked: fileMenu.open()
                 }
                 MenuItem {
-                    text: qsTr("Save")
+                    text: qsTr("Settings")
                     onClicked: {}
                 }
                 MenuItem {
@@ -173,6 +182,20 @@ PageStackWindow {
                         pageStack.push(aboutPageObject)
                         aboutPageObject.back.connect(pageStack.pop)
                     }
+                }
+            }
+        }
+        ContextMenu {
+            id: fileMenu
+            MenuLayout {
+                MenuItem {
+                    text: qsTr("Open")
+                    platformSubItemIndicator: true
+                    onClicked: openMenu.open()
+                }
+                MenuItem {
+                    text: qsTr("Save")
+                    onClicked: {}
                 }
             }
         }
