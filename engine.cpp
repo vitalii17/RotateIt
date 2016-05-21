@@ -51,6 +51,15 @@ void Engine::rotate(qreal angle)
                     (m_inputPreviewImage.height() * cos_angle -
                      m_inputPreviewImage.width() * sin_angle) / cos_2angle);
 
+        if(cut_width <= 1)
+        {
+            cut_width = 1;
+        }
+        if(cut_height <= 1)
+        {
+            cut_height = 1;
+        }
+
         QRect cutRect(m_inputPreviewImage.width() / 2 - cut_width / 2,
                       m_inputPreviewImage.height() / 2 - cut_height / 2,
                       cut_width, cut_height);
