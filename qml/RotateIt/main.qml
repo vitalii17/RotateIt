@@ -53,7 +53,6 @@ PageStackWindow {
             anchors.fill: parent
             Connections {
                 target: engine
-//                onPreviewImageChanged: imageView.sourceImage = engine.previewImage
                 onPreviewImageChanged: {
 //                    var startTime = new Date().getTime()
                     imageView.sourceImage = engine.previewImage
@@ -157,15 +156,6 @@ PageStackWindow {
         Menu {
             id: mainPageMenu
             MenuLayout {
-//                MenuItem {
-//                    text: qsTr("Open")
-//                    platformSubItemIndicator: true
-//                    onClicked: openMenu.open()
-//                }
-//                MenuItem {
-//                    text: qsTr("Save")
-//                    onClicked: {}
-//                }
                 MenuItem {
                     text: qsTr("File")
                     platformSubItemIndicator: true

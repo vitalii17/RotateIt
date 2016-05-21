@@ -42,14 +42,6 @@ Page {
     Menu {
         id: startPageMenu
         MenuLayout {
-//                MenuItem {
-//                    text: qsTr("About")
-//                    onClicked: {
-//                        var aboutPageObject = object.create("AboutPage.qml")
-//                        pageStack.push(aboutPageObject)
-//                        aboutPageObject.back.connect(pageStack.pop)
-//                    }
-//                }
             MenuItem {
                 text: qsTr("Exit")
                 onClicked: Qt.quit()
