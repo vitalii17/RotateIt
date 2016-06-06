@@ -60,10 +60,6 @@ Page {
         }
     }
 
-    ScrollDecorator {
-        flickableItem: flickArea
-    }
-
     Rectangle {
         id: toolBarSubstrate
         anchors.left: root.left
