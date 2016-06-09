@@ -11,6 +11,47 @@ Item {
 
     property string text: "text"
     property string backgroundColor: "grey"
+    property bool shown: true
+
+    state: shown ? "shown" : "hidden"
+
+    states: [
+        State {
+            name: "shown"
+            PropertyChanges {
+                target: root
+                anchors.topMargin: 0
+            }
+        },
+        State {
+            name: "hidden"
+            PropertyChanges {
+                target: root
+                anchors.topMargin: -root.height
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "shown"
+            to: "hidden"
+            PropertyAnimation {
+                target: root
+                property: "anchors.topMargin"
+                easing.type: Easing.InQuad
+            }
+        },
+        Transition {
+            from: "hidden"
+            to: "shown"
+            PropertyAnimation {
+                target: root
+                property: "anchors.topMargin"
+                easing.type: Easing.OutQuad
+            }
+        }
+    ]
 
     Rectangle {
         id: background
@@ -32,6 +73,7 @@ Item {
     ProgressBar {
         id: progressBar
         indeterminate: true
+        visible: root.shown
         anchors.right: root.right
         anchors.rightMargin: platformStyle.paddingMedium
         anchors.verticalCenter: root.verticalCenter

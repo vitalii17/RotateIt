@@ -35,9 +35,6 @@ PageStackWindow {
         property int previewWidth: (width > height) ? width : height
         property int previewHeight: (height > width) ? width : height
 
-        onPreviewWidthChanged: console.log("PagePrevWidth = ", previewWidth)
-        onPreviewHeightChanged: console.log("PagePrevHeight = ", previewHeight)
-
         Connections {
             target: imageFetcher
             onFetchedChanged: {
@@ -136,21 +133,22 @@ PageStackWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-//            visible: false
+
             Connections {
                 target: engine
                 onStateChanged: {
-                    switch(engine.state) {
-                    case Engine.Passive:
-                        mainTopBar.visible = false
-                        break
-                    case Engine.Processing:
+                    if(engine.state === Engine.Processing) {
                         mainTopBar.text = qsTr("Processing")
-                        mainTopBar.visible = true
-                        break
-                    default:
-                        mainTopBar.visible = false
-                        break
+                        mainTopBar.shown = true
+                        console.log("Engine.Processing")
+                    }
+                    else if(engine.state === Engine.Passive) {
+                        mainTopBar.shown = false
+                        console.log("Engine.Passive")
+                    }
+                    else {
+                        mainTopBar.shown = false
+                        console.log("default")
                     }
                 }
             }
