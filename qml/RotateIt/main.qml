@@ -64,7 +64,7 @@ PageStackWindow {
         }
 
         Rectangle {
-            id: horizontCorsor
+            id: horizontCursor
             color: "white"
             height: 2
             opacity: 0.4
@@ -75,12 +75,12 @@ PageStackWindow {
             SequentialAnimation {
                 id: borderAnimation
                 PropertyAnimation {
-                    target: horizontCorsor
+                    target: horizontCursor
                     properties: "color"
                     to: "blue"
                 }
                 PropertyAnimation {
-                    target: horizontCorsor
+                    target: horizontCursor
                     property: "color"
                     to: "white"
                 }
@@ -89,12 +89,12 @@ PageStackWindow {
 
         MouseArea {
             anchors.fill: parent
-            drag.target: horizontCorsor
+            drag.target: horizontCursor
             drag.axis: Drag.YAxis
             drag.minimumY: 0
-            drag.maximumY: parent.height - horizontCorsor.height
+            drag.maximumY: parent.height - horizontCursor.height
             onClicked: mainToolBar.shown = false
-            onPressed: horizontCorsor.blink()
+            onPressed: horizontCursor.blink()
         }
 
         CustomSlider {
@@ -140,15 +140,12 @@ PageStackWindow {
                     if(engine.state === Engine.Processing) {
                         mainTopBar.text = qsTr("Processing")
                         mainTopBar.shown = true
-                        console.log("Engine.Processing")
                     }
                     else if(engine.state === Engine.Passive) {
                         mainTopBar.shown = false
-                        console.log("Engine.Passive")
                     }
                     else {
                         mainTopBar.shown = false
-                        console.log("default")
                     }
                 }
             }
