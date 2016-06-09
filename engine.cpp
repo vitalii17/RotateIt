@@ -14,68 +14,9 @@ Engine::Engine(QObject *parent) :
 
 void Engine::rotate(qreal angle)
 {
-//    if((state() == Engine::Passive) && (!m_inputPreviewImage.isNull()))
-//    {
-//        setState(Engine::Processing);
-//        QThread *thread = new QThread();
-//        Rotate *rotator = new Rotate();
-//        rotator->setInputImage(m_inputPreviewImage);
-//        rotator->setAngle(angle);
-//        connect(thread, SIGNAL(started()), rotator, SLOT(process()));
-//        connect(rotator, SIGNAL(finished(QImage)), this, SLOT(setPreviewImage(QImage)));
-//        connect(rotator, SIGNAL(finished()), thread, SLOT(quit()));
-//        connect(rotator, SIGNAL(finished()), rotator, SLOT(deleteLater()));
-//        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-//        connect(thread, SIGNAL(finished()), this, SLOT(resetState()));
-//        thread->start();
-//    }
-//    else if(state() == Engine::FinalRendering)
-//    {
-
-//    }
     if(!m_previewImage.isNull())
     {
-        //Source https://rsdn.ru/forum/alg/3797164.all
-        //With my optimizations
-        qreal angle_rad = qAbs((M_PI / 180) * angle);
-        qreal cos_angle = qCos(angle_rad);
-        qreal sin_angle = qSin(angle_rad);
-        qreal cos_2angle = qCos(2 * angle_rad);
-
-        int cut_width = static_cast<int>(
-                    (m_inputPreviewImage.width() * cos_angle -
-                     m_inputPreviewImage.height() * sin_angle) / cos_2angle);
-
-        int cut_height = static_cast<int>(
-                    (m_inputPreviewImage.height() * cos_angle -
-                     m_inputPreviewImage.width() * sin_angle) / cos_2angle);
-
-        if(cut_width <= 1)
-        {
-            cut_width = 1;
-        }
-        if(cut_height <= 1)
-        {
-            cut_height = 1;
-        }
-
-        QRect cutRect(m_inputPreviewImage.width() / 2 - cut_width / 2,
-                      m_inputPreviewImage.height() / 2 - cut_height / 2,
-                      cut_width, cut_height);
-
-        m_previewImage = QImage(cutRect.size(), QImage::Format_ARGB32_Premultiplied);
-
-        QPainter painter(&m_previewImage);
-        painter.setRenderHint(QPainter::Antialiasing);
-//        painter.setRenderHint(QPainter::SmoothPixmapTransform);
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
-        painter.translate(m_previewImage.width() / 2, m_previewImage.height() / 2);
-        painter.rotate(angle);
-        painter.translate(-m_previewImage.width() / 2, -m_previewImage.height() / 2);
-        painter.translate(QPoint(cut_width / 2 - m_inputPreviewImage.width() / 2,
-                                 cut_height / 2 - m_inputPreviewImage.height() / 2));
-        painter.drawImage(0, 0, m_inputPreviewImage);
-
+        m_previewImage = Rotate::rotate(m_inputPreviewImage, angle);
         emit previewImageChanged();
     }
 }
@@ -234,7 +175,51 @@ Rotate::Rotate(QObject *parent) : QObject(parent), m_angle(0)
 
 QImage Rotate::rotate(QImage &image, qreal angle)
 {
-    return image;
+    QImage resultImage;
+    if(!image.isNull())
+    {
+        //Source https://rsdn.ru/forum/alg/3797164.all
+        //With my optimizations
+        qreal angle_rad = qAbs((M_PI / 180) * angle);
+        qreal cos_angle = qCos(angle_rad);
+        qreal sin_angle = qSin(angle_rad);
+        qreal cos_2angle = qCos(2 * angle_rad);
+
+        int cut_width = static_cast<int>(
+                    (image.width() * cos_angle -
+                     image.height() * sin_angle) / cos_2angle);
+
+        int cut_height = static_cast<int>(
+                    (image.height() * cos_angle -
+                     image.width() * sin_angle) / cos_2angle);
+
+        if(cut_width <= 1)
+        {
+            cut_width = 1;
+        }
+        if(cut_height <= 1)
+        {
+            cut_height = 1;
+        }
+
+        QRect cutRect(image.width() / 2 - cut_width / 2,
+                      image.height() / 2 - cut_height / 2,
+                      cut_width, cut_height);
+
+        resultImage = QImage(cutRect.size(), QImage::Format_ARGB32_Premultiplied);
+
+        QPainter painter(&resultImage);
+        painter.setRenderHint(QPainter::Antialiasing);
+        //        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.setRenderHint(QPainter::HighQualityAntialiasing);
+        painter.translate(resultImage.width() / 2, resultImage.height() / 2);
+        painter.rotate(angle);
+        painter.translate(-resultImage.width() / 2, -resultImage.height() / 2);
+        painter.translate(QPoint(cut_width / 2 - image.width() / 2,
+                                 cut_height / 2 - image.height() / 2));
+        painter.drawImage(0, 0, image);
+    }
+    return resultImage;
 }
 
 qreal Rotate::angle() const
