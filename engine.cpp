@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <qmath.h>
 
-#include <QTime>  // For performance measurement
+#include <QElapsedTimer> // For performance measurement
 
 #include "engine.h"
 
@@ -33,7 +33,6 @@ void Engine::rotate(qreal angle)
 //    {
 
 //    }
-
     if(!m_previewImage.isNull())
     {
         //Source https://rsdn.ru/forum/alg/3797164.all
@@ -67,7 +66,6 @@ void Engine::rotate(qreal angle)
         m_previewImage = QImage(cutRect.size(), QImage::Format_ARGB32_Premultiplied);
 
         QPainter painter(&m_previewImage);
-
         painter.setRenderHint(QPainter::Antialiasing);
 //        painter.setRenderHint(QPainter::SmoothPixmapTransform);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -203,9 +201,10 @@ int Resize::height() const
 void Resize::process()
 {
     m_outputImage = QImage(m_path).
-            scaled(width(), height(), Qt::KeepAspectRatioByExpanding).
+            scaled(width(), height(), Qt::KeepAspectRatio).
             convertToFormat(QImage::Format_ARGB32_Premultiplied);
-
+    qDebug() << "width = " << m_outputImage.width() << " height = " <<
+                m_outputImage.height();
     emit finished();
     emit finished(m_outputImage);
 }

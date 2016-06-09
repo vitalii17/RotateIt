@@ -32,8 +32,11 @@ PageStackWindow {
         id: mainPage
         orientationLock: PageOrientation.LockLandscape
 
-        property int previewWidth: imageView.width
-        property int previewHeight: imageView.height
+        property int previewWidth: (width > height) ? width : height
+        property int previewHeight: (height > width) ? width : height
+
+        onPreviewWidthChanged: console.log("PagePrevWidth = ", previewWidth)
+        onPreviewHeightChanged: console.log("PagePrevHeight = ", previewHeight)
 
         Connections {
             target: imageFetcher
