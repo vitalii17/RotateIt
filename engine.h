@@ -16,6 +16,9 @@ class Engine : public QObject
     Q_PROPERTY(int         previewHeight READ previewHeight WRITE setPreviewHeight)
     Q_PROPERTY(qreal       rotation      READ rotation      WRITE setRotation)
     Q_PROPERTY(EngineState state         READ state         WRITE setState RESET resetState)
+    Q_PROPERTY(bool smoothPixmapTransformHint
+               READ smoothPixmapTransformHint
+               WRITE setSmoothPixmapTransformHint)
     Q_ENUMS(EngineState)
 
 public:
@@ -40,6 +43,9 @@ public:
 
     qreal rotation() const;
     void setRotation(qreal arg);
+
+    bool smoothPixmapTransformHint();
+    void setSmoothPixmapTransformHint(bool hint);
 
     EngineState state() const;
 
@@ -72,6 +78,7 @@ private:
     int m_previewWidth;
     int m_previewHeight;
     qreal m_rotation;
+    bool m_smoothPixmapTransformHint;
     EngineState m_state;
 };
 
@@ -122,7 +129,8 @@ public:
 
     explicit Rotate(QObject *parent = 0);
 
-    static QImage rotate(QImage &image, qreal angle);
+    static QImage rotate(QImage &image, qreal angle,
+                         bool smoothPixmapTransformHint = false);
 
     qreal angle() const;
     void setAngle(qreal value);

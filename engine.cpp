@@ -7,7 +7,7 @@
 #include "engine.h"
 
 Engine::Engine(QObject *parent) :
-    QObject(parent)
+    QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false)
 {
 
 }
@@ -16,7 +16,8 @@ void Engine::rotate(qreal angle)
 {
     if(!m_previewImage.isNull())
     {
-        m_previewImage = Rotate::rotate(m_inputPreviewImage, angle);
+        m_previewImage = Rotate::rotate(m_inputPreviewImage, angle,
+                                        smoothPixmapTransformHint());
         emit previewImageChanged();
     }
 }
@@ -104,6 +105,16 @@ void Engine::setRotation(qreal arg)
     rotate(arg);
 }
 
+bool Engine::smoothPixmapTransformHint()
+{
+    return m_smoothPixmapTransformHint;
+}
+
+void Engine::setSmoothPixmapTransformHint(bool hint)
+{
+    m_smoothPixmapTransformHint = hint;
+}
+
 Engine::EngineState Engine::state() const
 {
     return m_state;
@@ -173,7 +184,8 @@ Rotate::Rotate(QObject *parent) : QObject(parent), m_angle(0)
 
 }
 
-QImage Rotate::rotate(QImage &image, qreal angle)
+QImage Rotate::rotate(QImage &image, qreal angle,
+                      bool smoothPixmapTransformHint)
 {
     QImage resultImage;
     if(!image.isNull())
@@ -210,7 +222,8 @@ QImage Rotate::rotate(QImage &image, qreal angle)
 
         QPainter painter(&resultImage);
         painter.setRenderHint(QPainter::Antialiasing);
-        //        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform,
+                              smoothPixmapTransformHint);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
         painter.translate(resultImage.width() / 2, resultImage.height() / 2);
         painter.rotate(angle);
@@ -236,19 +249,7 @@ void Rotate::process()
 {
     if(!m_inputImage.isNull())
     {
-        QImage resultImage(m_inputImage.width(),
-                           m_inputImage.height(),
-                           QImage::Format_ARGB32_Premultiplied);
-        QPainter painter(&resultImage);
-        //painter->setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform);
-        //painter->setRenderHint(QPainter::HighQualityAntialiasing);
-        painter.translate(m_inputImage.width()/2, m_inputImage.height()/2);
-        painter.rotate(m_angle);
-        painter.translate(-m_inputImage.width()/2, -m_inputImage.height()/2);
-        painter.drawImage(0, 0, m_inputImage);
-        painter.end();
-        emit finished(resultImage);
+
     }
     emit finished();
 }
@@ -262,5 +263,4 @@ void Rotate::setInputImage(QImage &image)
 {
     m_inputImage = image;
 }
-
 

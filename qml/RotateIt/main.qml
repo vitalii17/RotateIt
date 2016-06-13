@@ -104,7 +104,15 @@ PageStackWindow {
             y: (parent.height / 3) * 2
             amplitude: 10
             onYChanged: reset()
-            onPressed: mainToolBar.shown = false
+            onPressed: {
+                mainToolBar.shown = false
+                engine.smoothPixmapTransformHint = false
+            }
+            onReleased: {
+                engine.smoothPixmapTransformHint = true
+                engine.rotation = value
+            }
+
             onValueChanged: engine.rotation = value
         }
 

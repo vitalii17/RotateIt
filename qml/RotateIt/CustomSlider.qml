@@ -4,6 +4,7 @@ Item {
     id: root
 
     signal pressed
+    signal released
 
     height: 50
 
@@ -81,6 +82,9 @@ Item {
             onPressed: {
                 root.pressed()
                 blink()
+            }
+            onReleased: {
+                root.released()
             }
         }
     }
