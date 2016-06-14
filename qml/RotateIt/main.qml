@@ -3,6 +3,7 @@ import com.nokia.symbian 1.1
 import imagefetcher 1.0
 import imageview 1.0
 import engine 1.0
+import settings 1.0
 
 PageStackWindow {
     id: window
@@ -106,11 +107,15 @@ PageStackWindow {
             onYChanged: reset()
             onPressed: {
                 mainToolBar.shown = false
-                engine.smoothPixmapTransformHint = false
+                if(settings.spthPreview) {
+                    engine.smoothPixmapTransformHint = false
+                }
             }
             onReleased: {
-                engine.smoothPixmapTransformHint = true
-                engine.rotation = value
+                if(settings.spthPreview) {
+                    engine.smoothPixmapTransformHint = true
+                    engine.rotation = value
+                }
             }
 
             onValueChanged: engine.rotation = value
@@ -233,6 +238,10 @@ PageStackWindow {
         onStateChanged: {
 
         }
+    }
+
+    Settings {
+        id: settings
     }
 
     ContextMenu {

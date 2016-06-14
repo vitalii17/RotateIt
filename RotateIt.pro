@@ -51,7 +51,8 @@ CONFIG += qt-components
 SOURCES += main.cpp \
     imageview.cpp \
     engine.cpp \
-    imagefetcher.cpp
+    imagefetcher.cpp \
+    settings.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -60,7 +61,8 @@ qtcAddDeployment()
 HEADERS += \
     imageview.h \
     engine.h \
-    imagefetcher.h
+    imagefetcher.h \
+    settings.h
 
 RESOURCES += \
     resources.qrc
