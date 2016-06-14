@@ -155,8 +155,6 @@ void Resize::process()
     m_outputImage = QImage(m_path).
             scaled(width(), height(), Qt::KeepAspectRatio).
             convertToFormat(QImage::Format_ARGB32_Premultiplied);
-    qDebug() << "width = " << m_outputImage.width() << " height = " <<
-                m_outputImage.height();
     emit finished();
     emit finished(m_outputImage);
 }
