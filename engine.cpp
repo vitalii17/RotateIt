@@ -4,6 +4,8 @@
 
 #include <QElapsedTimer> // For performance measurement
 
+#include <QTime>
+
 #include "engine.h"
 
 Engine::Engine(QObject *parent) :
@@ -118,6 +120,35 @@ void Engine::setSmoothPixmapTransformHint(bool hint)
 Engine::EngineState Engine::state() const
 {
     return m_state;
+}
+
+void Engine::save(int compression)
+{
+    if(!imagePath().isEmpty())
+    {
+        setState(Engine::Processing);
+
+        QString outputPath = imagePath().
+                insert(imagePath().lastIndexOf("."), "_rotated(" +
+                       QTime::currentTime().toString("mmss") + ")");
+
+        QThread *thread = new QThread();
+        Rotate *rotator = new Rotate();
+        rotator->moveToThread(thread);
+        rotator->setInputImagePath(imagePath());
+        rotator->setAngle(rotation());
+        rotator->setCompression(compression);
+        rotator->setOutputImagePath(outputPath);
+        rotator->setSpth(smoothPixmapTransformHint());
+
+        connect(thread, SIGNAL(started()), rotator, SLOT(process()));
+        connect(rotator, SIGNAL(finished()), thread, SLOT(quit()));
+        connect(rotator, SIGNAL(finished()), rotator, SLOT(deleteLater()));
+        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        connect(thread, SIGNAL(finished()), this, SLOT(resetState()));
+        thread->start();
+        thread->setPriority(QThread::LowPriority);
+    }
 }
 
 void Engine::setState(Engine::EngineState arg)
@@ -243,18 +274,47 @@ void Rotate::setAngle(qreal value)
     m_angle = value;
 }
 
+int Rotate::compression() const
+{
+    return m_compression;
+}
+
+void Rotate::setOutputImagePath(QString &path)
+{
+    m_outputImagePath = path;
+}
+
+void Rotate::setSpth(bool hint)
+{
+    m_spth = hint;
+}
+
+bool Rotate::spth() const
+{
+    return m_spth;
+}
+
+void Rotate::setCompression(int value)
+{
+    m_compression = value;
+}
+
 void Rotate::process()
 {
-    if(!m_inputImage.isNull())
+    if(!m_inputImagePath.isEmpty())
     {
+        QImage image = QImage(m_inputImagePath).
+                convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
+        image = rotate(image, angle(), spth());
+        image.save(m_outputImagePath, 0, 100 - compression());
     }
     emit finished();
 }
 
 void Rotate::setInputImagePath(QString path)
 {
-    m_path = path;
+    m_inputImagePath = path;
 }
 
 void Rotate::setInputImage(QImage &image)

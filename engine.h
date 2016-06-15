@@ -49,6 +49,8 @@ public:
 
     EngineState state() const;
 
+    Q_INVOKABLE void save(int compression = -1);
+
 signals:
 
     void previewImageChanged();
@@ -135,6 +137,14 @@ public:
     qreal angle() const;
     void setAngle(qreal value);
 
+    void setCompression(int value);
+    int compression() const;
+
+    void setOutputImagePath(QString &path);
+
+    void setSpth(bool hint);
+    bool spth() const;
+
 signals:
 
     void finished(QImage outputImage);
@@ -150,7 +160,10 @@ private:
 
     qreal m_angle;
     QImage m_inputImage;
-    QString m_path;
+    QString m_inputImagePath;
+    QString m_outputImagePath;
+    int m_compression;
+    bool m_spth;
 };
 
 #endif // ENGINE_H

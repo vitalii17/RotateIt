@@ -133,7 +133,9 @@ PageStackWindow {
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
-                onClicked: console.log("clicked 'save'")
+                onClicked: {
+                    engine.save(5)
+                }
             }
             ToolButton {
                 iconSource: "toolbar-menu"
