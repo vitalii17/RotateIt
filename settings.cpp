@@ -16,7 +16,6 @@ Settings::~Settings()
 void Settings::update()
 {
     emit spthPreviewChanged(spthPreview());
-    emit spthFinalChanged(spthFinal());
 }
 
 bool Settings::spthPreview() const
@@ -30,15 +29,5 @@ void Settings::setSpthPreview(bool arg)
     emit spthPreviewChanged(arg);
 }
 
-bool Settings::spthFinal() const
-{
-    return m_pSettings->value("SmoothPixmapTransformHintFinal", true).toBool();
-}
-
-void Settings::setSpthFinal(bool arg)
-{
-    m_pSettings->setValue("SmoothPixmapTransformHintFinal", arg);
-    emit spthFinalChanged(arg);
-}
 
 

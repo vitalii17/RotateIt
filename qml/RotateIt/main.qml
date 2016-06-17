@@ -135,7 +135,7 @@ PageStackWindow {
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
                 onClicked: {
-                    engine.smoothPixmapTransformHint = settings.spthFinal
+                    engine.smoothPixmapTransformHint = true
                     engine.save(5)
                 }
             }

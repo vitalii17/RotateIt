@@ -20,16 +20,9 @@ Page {
 
             CheckableListElement {
                 titleText: "Anti-aliasing in preview"
-                subTitleText: "It has not affect the final image"
+                subTitleText: "Disable if you have a low-performance CPU"
                 checked: settings.spthPreview
                 onCheckedChanged: settings.spthPreview = checked
-            }
-
-            CheckableListElement {
-                titleText: "Anti-aliasing in final"
-                subTitleText: "True is recommended! It will be saved in file"
-                checked: settings.spthFinal
-                onCheckedChanged: settings.spthFinal = checked
             }
         }
     }
