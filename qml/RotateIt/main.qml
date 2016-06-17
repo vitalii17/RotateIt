@@ -115,6 +115,7 @@ PageStackWindow {
                 if(settings.spthPreview) {
                     engine.smoothPixmapTransformHint = true
                     engine.rotation = value
+                    engine.smoothPixmapTransformHint = false
                 }
             }
 
@@ -134,6 +135,7 @@ PageStackWindow {
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
                 onClicked: {
+                    engine.smoothPixmapTransformHint = settings.spthFinal
                     engine.save(5)
                 }
             }
@@ -176,7 +178,12 @@ PageStackWindow {
                 }
                 MenuItem {
                     text: qsTr("Settings")
-                    onClicked: {}
+                    onClicked: {
+                        var settingsPageObject = object.create("SettingsPage.qml")
+                        pageStack.push(settingsPageObject)
+                        settingsPageObject.back.connect(pageStack.pop)
+                        settingsPageObject.back.connect(settings.update)
+                    }
                 }
                 MenuItem {
                     text: qsTr("About")

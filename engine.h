@@ -19,6 +19,7 @@ class Engine : public QObject
     Q_PROPERTY(bool smoothPixmapTransformHint
                READ smoothPixmapTransformHint
                WRITE setSmoothPixmapTransformHint)
+
     Q_ENUMS(EngineState)
 
 public:
@@ -60,7 +61,7 @@ signals:
     void rotationChanged();
 
     void stateChanged();
-    
+
 public slots:
 
 private slots:

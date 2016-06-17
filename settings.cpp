@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "settings.h"
 
 Settings::Settings(QObject *parent) :
@@ -13,7 +15,8 @@ Settings::~Settings()
 
 void Settings::update()
 {
-
+    emit spthPreviewChanged(spthPreview());
+    emit spthFinalChanged(spthFinal());
 }
 
 bool Settings::spthPreview() const
@@ -24,7 +27,18 @@ bool Settings::spthPreview() const
 void Settings::setSpthPreview(bool arg)
 {
     m_pSettings->setValue("SmoothPixmapTransformHintPreview", arg);
-    emit spthChanged(arg);
+    emit spthPreviewChanged(arg);
+}
+
+bool Settings::spthFinal() const
+{
+    return m_pSettings->value("SmoothPixmapTransformHintFinal", true).toBool();
+}
+
+void Settings::setSpthFinal(bool arg)
+{
+    m_pSettings->setValue("SmoothPixmapTransformHintFinal", arg);
+    emit spthFinalChanged(arg);
 }
 
 

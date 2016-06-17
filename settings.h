@@ -9,7 +9,9 @@ class Settings : public QObject
     Q_OBJECT
 
     Q_PROPERTY(bool spthPreview READ spthPreview WRITE setSpthPreview
-               NOTIFY spthChanged)
+               NOTIFY spthPreviewChanged)
+    Q_PROPERTY(bool spthFinal READ spthFinal WRITE setSpthFinal
+               NOTIFY spthFinalChanged)
 
 public:
 
@@ -22,9 +24,13 @@ public:
     bool spthPreview() const;
     void setSpthPreview(bool arg);
 
+    bool spthFinal() const;
+    void setSpthFinal(bool arg);
+
 signals:
     
-    void spthChanged(bool arg);
+    void spthPreviewChanged(bool arg);
+    void spthFinalChanged(bool arg);
 
 public slots:
 
