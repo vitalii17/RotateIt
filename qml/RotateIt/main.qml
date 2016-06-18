@@ -25,7 +25,12 @@ PageStackWindow {
             pageStack.push(aboutPageObject)
             aboutPageObject.back.connect(pageStack.pop)
         }
-
+        onSettings: {
+            var settingsPageObject = object.create("SettingsPage.qml")
+            pageStack.push(settingsPageObject)
+            settingsPageObject.back.connect(pageStack.pop)
+            settingsPageObject.back.connect(settings.update)
+        }
         onBack: Qt.quit()
     }
 

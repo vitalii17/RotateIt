@@ -8,6 +8,7 @@ Page {
     signal open
     signal back
     signal about
+    signal settings
 
     Button {
         id: openButton
@@ -42,6 +43,11 @@ Page {
     Menu {
         id: startPageMenu
         MenuLayout {
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: settings()
+            }
+
             MenuItem {
                 text: qsTr("Exit")
                 onClicked: Qt.quit()
