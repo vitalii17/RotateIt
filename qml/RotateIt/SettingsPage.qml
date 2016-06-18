@@ -19,10 +19,26 @@ Page {
             width: parent.width
 
             CheckableListElement {
-                titleText: "Anti-aliasing in preview"
-                subTitleText: "Disable if you have a low-performance CPU"
+                titleText: qsTr("Anti-aliasing in preview")
+                subTitleText: qsTr("Disable to speed up GUI")
                 checked: settings.spthPreview
                 onCheckedChanged: settings.spthPreview = checked
+            }
+
+            NumberListElement {
+                titleText: qsTr("Quality of final JPEG")
+                subTitleText: qsTr("Set 90 or more for better quality")
+                dialogTitleText: qsTr("Quality")
+                minimumValue: 0
+                maximumValue: 100
+                stepSize: 1
+                defaultValue: 95
+                onIsDefaultChanged: settings.isDefaultCompression = isDefault
+                onValueChanged: settings.compression = 100 - value
+                Component.onCompleted: {
+                    isDefault = settings.isDefaultCompression
+                    value = 100 - settings.compression
+                }
             }
         }
     }
