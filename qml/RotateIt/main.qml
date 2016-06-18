@@ -55,11 +55,11 @@ PageStackWindow {
             Connections {
                 target: engine
                 onPreviewImageChanged: {
-//                    var startTime = new Date().getTime()
+                    //                    var startTime = new Date().getTime()
                     imageView.sourceImage = engine.previewImage
                     gc()
-//                    var stopTime = new Date().getTime()
-//                    console.log(stopTime - startTime)
+                    //                    var stopTime = new Date().getTime()
+                    //                    console.log(stopTime - startTime)
                 }
             }
         }
@@ -136,7 +136,7 @@ PageStackWindow {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
-                    engine.save(5)
+                    engine.save(settings.compression)
                 }
             }
             ToolButton {
@@ -205,7 +205,10 @@ PageStackWindow {
                 }
                 MenuItem {
                     text: qsTr("Save")
-                    onClicked: {}
+                    onClicked: {
+                        engine.smoothPixmapTransformHint = true
+                        engine.save(settings.compression)
+                    }
                 }
             }
         }
