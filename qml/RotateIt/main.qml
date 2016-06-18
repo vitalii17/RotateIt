@@ -112,19 +112,28 @@ PageStackWindow {
             onYChanged: reset()
             onPressed: {
                 mainToolBar.shown = false
-                if(settings.spthPreview) {
+                if(!settings.spthPreview) {
                     engine.smoothPixmapTransformHint = false
                 }
             }
             onReleased: {
-                if(settings.spthPreview) {
+                if(!settings.spthPreview) {
                     engine.smoothPixmapTransformHint = true
                     engine.rotation = value
                     engine.smoothPixmapTransformHint = false
                 }
             }
 
-            onValueChanged: engine.rotation = value
+            onValueChanged: {
+                if(settings.spthPreview) {
+                    engine.smoothPixmapTransformHint = true
+                    engine.rotation = value
+                }
+                else {
+                    engine.smoothPixmapTransformHint = false
+                    engine.rotation = value
+                }
+            }
         }
 
         tools: ToolBarLayout {
