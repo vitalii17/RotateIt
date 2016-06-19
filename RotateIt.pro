@@ -25,7 +25,7 @@ symbian {
                          ReadUserData \     # Use for LMGFetch (fetch files from gallery)
                          NetworkServices    # Links in QML
     # Use for LMGFetch (fetch files from gallery)
-    LIBS += -lmgfetch -lbafl
+    LIBS += -lmgfetch -lbafl -lhwrmvibraclient
 
     vendorinfo = \
         "%{\"Vitalii Shunkov\"}" \
@@ -52,7 +52,10 @@ SOURCES += main.cpp \
     imageview.cpp \
     engine.cpp \
     imagefetcher.cpp \
-    settings.cpp
+    settings.cpp \
+    xqvibra_p.cpp \
+    xqvibra.cpp \
+    vibra.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -62,7 +65,10 @@ HEADERS += \
     imageview.h \
     engine.h \
     imagefetcher.h \
-    settings.h
+    settings.h \
+    xqvibra_p.h \
+    xqvibra.h \
+    vibra.h
 
 RESOURCES += \
     resources.qrc

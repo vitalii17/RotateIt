@@ -8,6 +8,7 @@
 #include "imageview.h"
 #include "engine.h"
 #include "settings.h"
+#include "vibra.h"
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
@@ -16,6 +17,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
 
+    Vibra vibra;
+
     qmlRegisterType<ImageFetcher>("imagefetcher", 1, 0, "ImageFetcher");
     qmlRegisterType<ImageView>   ("imageview",    1, 0, "ImageView");
     qmlRegisterType<Engine>      ("engine",       1, 0, "Engine");
@@ -23,6 +26,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QmlApplicationViewer viewer;
     viewer.setMainQmlFile(QLatin1String("qml/RotateIt/main.qml"));
+    viewer.rootContext()->setContextProperty("vibra", &vibra);
     viewer.showExpanded();
 
     return app->exec();
