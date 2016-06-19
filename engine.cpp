@@ -9,7 +9,8 @@
 #include "engine.h"
 
 Engine::Engine(QObject *parent) :
-    QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false)
+    QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false),
+    m_privateOpeningState(false), m_privateSavingState(false)
 {
 
 }
@@ -51,7 +52,7 @@ void Engine::setImagePath(QString arg)
 
     if(!m_imagePath.isEmpty())
     {
-        setState(Engine::Processing);
+        setState(Engine::Processing, Engine::Opening);
         QThread *thread = new QThread();
         Resize *resizer = new Resize();
         resizer->moveToThread(thread);
@@ -65,7 +66,7 @@ void Engine::setImagePath(QString arg)
         connect(resizer, SIGNAL(finished()), thread, SLOT(quit()));
         connect(resizer, SIGNAL(finished()), resizer, SLOT(deleteLater()));
         connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), this, SLOT(resetState()));
+        connect(thread, SIGNAL(finished()), this, SLOT(resetPrivateOpeningState()));
         thread->start();
         thread->setPriority(QThread::LowPriority);
     }
@@ -126,7 +127,7 @@ void Engine::save(int compression)
 {
     if(!imagePath().isEmpty())
     {
-        setState(Engine::Processing);
+        setState(Engine::Processing, Engine::Saving);
 
         QString outputPath = imagePath().
                 insert(imagePath().lastIndexOf("."), "_rotated(" +
@@ -145,22 +146,53 @@ void Engine::save(int compression)
         connect(rotator, SIGNAL(finished()), thread, SLOT(quit()));
         connect(rotator, SIGNAL(finished()), rotator, SLOT(deleteLater()));
         connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), this, SLOT(resetState()));
+        connect(thread, SIGNAL(finished()), this, SLOT(resetPrivateSavingState()));
+        connect(thread , SIGNAL(finished()), this, SIGNAL(savingFinished()));
         thread->start();
         thread->setPriority(QThread::LowPriority);
     }
 }
 
-void Engine::setState(Engine::EngineState arg)
+void Engine::setState(Engine::EngineState arg, Engine::PrivateEngineState privateState)
 {
     m_state = arg;
+
+    switch(privateState)
+    {
+    case Engine::Opening:
+        m_privateOpeningState = true;
+        break;
+
+    case Engine::Saving:
+        m_privateSavingState = true;
+        break;
+
+    default:
+        break;
+    }
+
     emit stateChanged();
 }
 
 void Engine::resetState()
 {
-    m_state = Engine::Passive;
-    emit stateChanged();
+    if((!m_privateOpeningState) && (!m_privateSavingState))
+    {
+        m_state = Engine::Passive;
+        emit stateChanged();
+    }
+}
+
+void Engine::resetPrivateOpeningState()
+{
+    m_privateOpeningState = false;
+    resetState();
+}
+
+void Engine::resetPrivateSavingState()
+{
+    m_privateSavingState = false;
+    resetState();
 }
 
 

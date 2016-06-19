@@ -15,7 +15,7 @@ class Engine : public QObject
     Q_PROPERTY(int         previewWidth  READ previewWidth  WRITE setPreviewWidth)
     Q_PROPERTY(int         previewHeight READ previewHeight WRITE setPreviewHeight)
     Q_PROPERTY(qreal       rotation      READ rotation      WRITE setRotation)
-    Q_PROPERTY(EngineState state         READ state         WRITE setState RESET resetState)
+    Q_PROPERTY(EngineState state         READ state         RESET resetState)
     Q_PROPERTY(bool smoothPixmapTransformHint
                READ smoothPixmapTransformHint
                WRITE setSmoothPixmapTransformHint)
@@ -61,15 +61,26 @@ signals:
     void rotationChanged();
 
     void stateChanged();
+    void savingFinished();
 
 public slots:
+
+private:
+
+    enum PrivateEngineState
+    {
+        Opening, Saving
+    };
 
 private slots:
 
     void setPreviewImage(QImage arg);
     void setInputPreviewImage(QImage arg);
-    void setState(EngineState arg);
+    void setState(EngineState arg, PrivateEngineState privateState);
     void resetState();
+
+    void resetPrivateOpeningState();
+    void resetPrivateSavingState();
 
 private:
 
@@ -83,6 +94,9 @@ private:
     qreal m_rotation;
     bool m_smoothPixmapTransformHint;
     EngineState m_state;
+
+    bool m_privateOpeningState;
+    bool m_privateSavingState;
 };
 
 

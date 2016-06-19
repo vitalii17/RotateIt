@@ -172,9 +172,6 @@ PageStackWindow {
                         mainTopBar.text = qsTr("Processing")
                         mainTopBar.shown = true
                     }
-                    else if(engine.state === Engine.Passive) {
-                        mainTopBar.shown = false
-                    }
                     else {
                         mainTopBar.shown = false
                     }
@@ -261,8 +258,8 @@ PageStackWindow {
         previewWidth: mainPage.previewWidth * 1.0
         previewHeight: mainPage.previewHeight * 1.0
         imagePath: window.currentImagePath
-        onStateChanged: {
-
+        onSavingFinished: {
+            vibra.doubleVibrate(50, 150)
         }
     }
 
