@@ -150,7 +150,7 @@ PageStackWindow {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
-                    engine.save(settings.compression)
+                    engine.save(settings.quality)
                 }
             }
             ToolButton {
@@ -218,7 +218,7 @@ PageStackWindow {
                     text: qsTr("Save")
                     onClicked: {
                         engine.smoothPixmapTransformHint = true
-                        engine.save(settings.compression)
+                        engine.save(settings.quality)
                     }
                 }
             }

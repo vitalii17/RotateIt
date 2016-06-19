@@ -123,7 +123,7 @@ Engine::EngineState Engine::state() const
     return m_state;
 }
 
-void Engine::save(int compression)
+void Engine::save(int quality)
 {
     if(!imagePath().isEmpty())
     {
@@ -138,7 +138,7 @@ void Engine::save(int compression)
         rotator->moveToThread(thread);
         rotator->setInputImagePath(imagePath());
         rotator->setAngle(rotation());
-        rotator->setCompression(compression);
+        rotator->setQuality(quality);
         rotator->setOutputImagePath(outputPath);
         rotator->setSpth(smoothPixmapTransformHint());
 
@@ -306,9 +306,9 @@ void Rotate::setAngle(qreal value)
     m_angle = value;
 }
 
-int Rotate::compression() const
+int Rotate::quality() const
 {
-    return m_compression;
+    return m_quality;
 }
 
 void Rotate::setOutputImagePath(QString &path)
@@ -326,9 +326,9 @@ bool Rotate::spth() const
     return m_spth;
 }
 
-void Rotate::setCompression(int value)
+void Rotate::setQuality(int value)
 {
-    m_compression = value;
+    m_quality = value;
 }
 
 void Rotate::process()
@@ -339,7 +339,7 @@ void Rotate::process()
                 convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
         image = rotate(image, angle(), spth());
-        image.save(m_outputImagePath, 0, 100 - compression());
+        image.save(m_outputImagePath, 0, quality());
     }
     emit finished();
 }

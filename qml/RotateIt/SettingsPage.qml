@@ -32,12 +32,12 @@ Page {
                 minimumValue: 0
                 maximumValue: 100
                 stepSize: 1
-                defaultValue: 95
-                onIsDefaultChanged: settings.isDefaultCompression = isDefault
-                onValueChanged: settings.compression = 100 - value
+                defaultValue: 96
+                onIsDefaultChanged: settings.isDefaultQuality = isDefault
+                onValueChanged: settings.quality = value
                 Component.onCompleted: {
-                    isDefault = settings.isDefaultCompression
-                    value = 100 - settings.compression
+                    isDefault = settings.isDefaultQuality
+                    value = settings.quality
                 }
             }
         }

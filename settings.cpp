@@ -29,26 +29,26 @@ void Settings::setSpthPreview(bool arg)
     emit spthPreviewChanged(arg);
 }
 
-int Settings::compression() const
+int Settings::quality() const
 {
-    return m_pSettings->value("Compression", 5).toInt();
+    return m_pSettings->value("Quality", 96).toInt();
 }
 
-void Settings::setCompression(int arg)
+void Settings::setQuality(int arg)
 {
-    m_pSettings->setValue("Compression", arg);
-    emit compressionChanged(arg);
+    m_pSettings->setValue("Quality", arg);
+    emit qualityChanged(arg);
 }
 
-bool Settings::isDefaultCompression() const
+bool Settings::isDefaultQuality() const
 {
-    return m_pSettings->value("IsDefaultCompression", true).toBool();
+    return m_pSettings->value("IsDefaultQuality", true).toBool();
 }
 
-void Settings::setIsDefaultCompression(bool arg)
+void Settings::setIsDefaultQuality(bool arg)
 {
-    m_pSettings->setValue("IsDefaultCompression", arg);
-    emit isDefaultCompressionChanged(arg);
+    m_pSettings->setValue("IsDefaultQuality", arg);
+    emit isDefaultQualityChanged(arg);
 }
 
 

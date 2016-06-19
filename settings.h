@@ -10,10 +10,10 @@ class Settings : public QObject
 
     Q_PROPERTY(bool spthPreview READ spthPreview WRITE setSpthPreview
                NOTIFY spthPreviewChanged)
-    Q_PROPERTY(int compression READ compression WRITE setCompression
-               NOTIFY compressionChanged)
-    Q_PROPERTY(bool isDefaultCompression READ isDefaultCompression WRITE setIsDefaultCompression
-               NOTIFY isDefaultCompressionChanged)
+    Q_PROPERTY(int quality READ quality WRITE setQuality
+               NOTIFY qualityChanged)
+    Q_PROPERTY(bool isDefaultQuality READ isDefaultQuality WRITE setIsDefaultQuality
+               NOTIFY isDefaultQualityChanged)
 
 public:
 
@@ -26,17 +26,17 @@ public:
     bool spthPreview() const;
     void setSpthPreview(bool arg);
 
-    int compression() const;
-    void setCompression(int arg);
+    int quality() const;
+    void setQuality(int arg);
 
-    bool isDefaultCompression() const;
-    void setIsDefaultCompression(bool arg);
+    bool isDefaultQuality() const;
+    void setIsDefaultQuality(bool arg);
 
 signals:
     
     void spthPreviewChanged(bool arg);
-    void compressionChanged(int arg);
-    void isDefaultCompressionChanged(bool arg);
+    void qualityChanged(int arg);
+    void isDefaultQualityChanged(bool arg);
 
 public slots:
 
