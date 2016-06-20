@@ -5,7 +5,7 @@
 Vibra::Vibra(QObject *parent) :
     QObject(parent), m_pVibra(new XQVibra)
 {
-    m_pVibra->setIntensity(90);
+    m_pVibra->setIntensity(70);
 }
 
 Vibra::~Vibra()
