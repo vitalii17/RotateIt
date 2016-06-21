@@ -41,6 +41,8 @@ PageStackWindow {
         property int previewWidth: (width > height) ? width : height
         property int previewHeight: (height > width) ? width : height
 
+        property bool imageModified: false
+
         Connections {
             target: imageFetcher
             onFetchedChanged: {
@@ -125,6 +127,7 @@ PageStackWindow {
             }
 
             onValueChanged: {
+                //Smooth
                 if(settings.spthPreview) {
                     engine.smoothPixmapTransformHint = true
                     engine.rotation = value
@@ -132,7 +135,11 @@ PageStackWindow {
                 else {
                     engine.smoothPixmapTransformHint = false
                     engine.rotation = value
-                }
+                } //EndSmooth
+
+                //IsModified?
+                mainPage.imageModified = (value.toFixed(1) !== "0.0") ? true : false
+                //EndIsModified
             }
         }
 
@@ -140,7 +147,14 @@ PageStackWindow {
             id: mainToolBarLayout
             ToolButton {
                 iconSource: "toolbar-back"
-                onClicked: Qt.quit()
+                onClicked: {
+                    if(mainPage.imageModified) {
+                        saveDialog.openDialog("quit")
+                    }
+                    else {
+                        Qt.quit()
+                    }
+                }
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/open.png"
@@ -206,6 +220,7 @@ PageStackWindow {
                 }
             }
         }
+
         ContextMenu {
             id: fileMenu
             MenuLayout {
@@ -220,6 +235,34 @@ PageStackWindow {
                         engine.smoothPixmapTransformHint = true
                         engine.save(settings.quality)
                     }
+                }
+            }
+        }
+
+        QueryDialog {
+            id: saveDialog
+            titleText: qsTr("Image does not saved")
+            message: qsTr("Do you want to save the modified image?")
+            acceptButtonText: qsTr("Yes")
+            rejectButtonText: qsTr("No")
+            property string _cause
+
+            function openDialog(cause) {
+                _cause = cause
+                open()
+            }
+
+            onAccepted: {
+                engine.smoothPixmapTransformHint = true
+                engine.save(settings.quality)
+                    if(_cause === "quit") {
+//                        window.quitAfterSaving = true
+                        engine.savingFinished.connect(Qt.quit)
+                    }
+            }
+            onRejected: {
+                if(_cause === "quit") {
+                    Qt.quit()
                 }
             }
         }
