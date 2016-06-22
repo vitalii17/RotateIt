@@ -89,8 +89,11 @@ Page {
         id: aboutPageMenu
         MenuLayout {
             MenuItem {
-                text: qsTr("Exit")
-                onClicked: Qt.quit()
+                text: qsTr("Back")
+                onClicked: {
+                    back()
+                    root.destroy()
+                }
             }
         }
     }

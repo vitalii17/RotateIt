@@ -158,13 +158,21 @@ PageStackWindow {
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/open.png"
-                onClicked: openMenu.open()
+                onClicked: {
+                    if(mainPage.imageModified) {
+                        saveDialog.openDialog("open")
+                    }
+                    else {
+                        openMenu.open()
+                    }
+                }
             }
             ToolButton {
                 iconSource: "qrc:///qml/RotateIt/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
                     engine.save(settings.quality)
+                    mainPage.imageModified = false
                 }
             }
             ToolButton {
@@ -227,13 +235,21 @@ PageStackWindow {
                 MenuItem {
                     text: qsTr("Open")
                     platformSubItemIndicator: true
-                    onClicked: openMenu.open()
+                    onClicked: {
+                        if(mainPage.imageModified) {
+                            saveDialog.openDialog("open")
+                        }
+                        else {
+                            openMenu.open()
+                        }
+                    }
                 }
                 MenuItem {
                     text: qsTr("Save")
                     onClicked: {
                         engine.smoothPixmapTransformHint = true
                         engine.save(settings.quality)
+                        mainPage.imageModified = false
                     }
                 }
             }
@@ -255,14 +271,22 @@ PageStackWindow {
             onAccepted: {
                 engine.smoothPixmapTransformHint = true
                 engine.save(settings.quality)
+                mainPage.imageModified = false
                     if(_cause === "quit") {
-//                        window.quitAfterSaving = true
                         engine.savingFinished.connect(Qt.quit)
+                    }
+                    else if(_cause === "open") {
+                        engine.smoothPixmapTransformHint = true
+                        engine.save(settings.quality)
+                        openMenu.open()
                     }
             }
             onRejected: {
                 if(_cause === "quit") {
                     Qt.quit()
+                }
+                else if(_cause === "open") {
+                    openMenu.open()
                 }
             }
         }
