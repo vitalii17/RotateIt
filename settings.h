@@ -14,6 +14,7 @@ class Settings : public QObject
                NOTIFY qualityChanged)
     Q_PROPERTY(bool isDefaultQuality READ isDefaultQuality WRITE setIsDefaultQuality
                NOTIFY isDefaultQualityChanged)
+    Q_PROPERTY(bool vibraOn READ vibraOn WRITE setVibraOn NOTIFY vibraOnChanged)
 
 public:
 
@@ -32,11 +33,15 @@ public:
     bool isDefaultQuality() const;
     void setIsDefaultQuality(bool arg);
 
+    bool vibraOn() const;
+    void setVibraOn(bool arg);
+
 signals:
     
     void spthPreviewChanged(bool arg);
     void qualityChanged(int arg);
     void isDefaultQualityChanged(bool arg);
+    void vibraOnChanged(bool arg);
 
 public slots:
 

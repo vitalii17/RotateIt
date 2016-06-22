@@ -326,7 +326,9 @@ PageStackWindow {
         previewHeight: mainPage.previewHeight * 1.0
         imagePath: window.currentImagePath
         onSavingFinished: {
-            vibra.doubleVibrate(50, 150)
+            if(settings.vibraOn) {
+                vibra.doubleVibrate(65, 160)
+            }
         }
     }
 

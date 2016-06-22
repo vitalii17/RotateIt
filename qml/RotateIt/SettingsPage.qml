@@ -25,6 +25,13 @@ Page {
                 onCheckedChanged: settings.spthPreview = checked
             }
 
+            CheckableListElement {
+                titleText: qsTr("Vibrate after saving")
+                subTitleText: qsTr("It helps wait until the image is saved")
+                checked: settings.vibraOn
+                onCheckedChanged: settings.vibraOn = checked
+            }
+
             NumberListElement {
                 titleText: qsTr("Quality of final JPEG")
                 subTitleText: qsTr("Set 90 or more for better quality")

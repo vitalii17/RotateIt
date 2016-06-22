@@ -51,6 +51,17 @@ void Settings::setIsDefaultQuality(bool arg)
     emit isDefaultQualityChanged(arg);
 }
 
+bool Settings::vibraOn() const
+{
+    return m_pSettings->value("VibraOn", true).toBool();
+}
+
+void Settings::setVibraOn(bool arg)
+{
+    m_pSettings->setValue("VibraOn", arg);
+    emit vibraOnChanged(arg);
+}
+
 
 
 
