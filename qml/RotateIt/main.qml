@@ -157,7 +157,7 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:///qml/RotateIt/images/open.png"
+                iconSource: "qrc:///qml/images/open.png"
                 onClicked: {
                     if(mainPage.imageModified) {
                         saveDialog.openDialog("open")
@@ -168,7 +168,7 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:///qml/RotateIt/images/save.svg"
+                iconSource: "qrc:///qml/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
                     engine.save(settings.quality)
@@ -305,7 +305,7 @@ PageStackWindow {
         anchors.bottom: parent.bottom
         z: 1
         tools: pageStack.currentPage.tools
-        //background: "qrc:///qml/RotateIt/images/toolbar-background.svg"
+        //background: "qrc:///qml/images/toolbar-background.svg"
     }
 
     MouseArea {
