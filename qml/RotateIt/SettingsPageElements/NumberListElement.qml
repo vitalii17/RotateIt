@@ -16,6 +16,8 @@ BaseListElement {
     onValueChanged: slider.value = value
     onIsDefaultChanged: checkBox.checked = isDefault
 
+    onClicked: dialog.open()
+
     TextField {
         text: root.value
         width: UiConstants.listControlsWidth
