@@ -296,6 +296,11 @@ PageStackWindow {
         id: pageStack
         anchors.fill: parent
         Component.onCompleted: push(startPage)
+        onCurrentPageChanged: {
+            if(currentPage !== mainPage) {
+                mainToolBar.shown = true
+            }
+        }
     }
 
     CustomToolBar {
