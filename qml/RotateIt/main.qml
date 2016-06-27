@@ -36,7 +36,6 @@ PageStackWindow {
 
     Page {
         id: mainPage
-        orientationLock: PageOrientation.LockLandscape
 
         property int previewWidth: (width > height) ? width : height
         property int previewHeight: (height > width) ? width : height
@@ -44,7 +43,7 @@ PageStackWindow {
         property bool imageModified: false
 
         Connections {
-            target: imageFetcher
+            target: /*imageFetcher*/ null
             onFetchedChanged: {
                 mainPage.orientationLock = imageFetcher.fetched ?
                             PageOrientation.LockLandscape :
