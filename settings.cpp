@@ -43,8 +43,11 @@ bool Settings::spthPreview() const
 
 void Settings::setSpthPreview(bool arg)
 {
-    m_spthPreview = arg;
-    emit spthPreviewChanged(arg);
+    if(m_spthPreview != arg)
+    {
+        m_spthPreview = arg;
+        emit spthPreviewChanged(arg);
+    }
 }
 
 int Settings::quality() const
@@ -54,8 +57,11 @@ int Settings::quality() const
 
 void Settings::setQuality(int arg)
 {
-    m_quality = arg;
-    emit qualityChanged(arg);
+    if(m_quality != arg)
+    {
+        m_quality = arg;
+        emit qualityChanged(arg);
+    }
 }
 
 bool Settings::isDefaultQuality() const
@@ -65,8 +71,11 @@ bool Settings::isDefaultQuality() const
 
 void Settings::setIsDefaultQuality(bool arg)
 {
-    m_isDefaultQuality = arg;
-    emit isDefaultQualityChanged(arg);
+    if(m_isDefaultQuality != arg)
+    {
+        m_isDefaultQuality = arg;
+        emit isDefaultQualityChanged(arg);
+    }
 }
 
 bool Settings::vibraOn() const
@@ -76,8 +85,11 @@ bool Settings::vibraOn() const
 
 void Settings::setVibraOn(bool arg)
 {
-    m_vibraOn = arg;
-    emit vibraOnChanged(arg);
+    if(m_vibraOn != arg)
+    {
+        m_vibraOn = arg;
+        emit vibraOnChanged(arg);
+    }
 }
 
 
