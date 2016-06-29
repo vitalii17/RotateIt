@@ -17,16 +17,17 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
 
-    Vibra vibra;
+    Vibra    vibra;
+    Settings settings;
 
     qmlRegisterType<ImageFetcher>("imagefetcher", 1, 0, "ImageFetcher");
     qmlRegisterType<ImageView>   ("imageview",    1, 0, "ImageView");
     qmlRegisterType<Engine>      ("engine",       1, 0, "Engine");
-    qmlRegisterType<Settings>    ("settings",     1, 0, "Settings");
 
     QmlApplicationViewer viewer;
-    viewer.setMainQmlFile(QLatin1String("qml/RotateIt/main.qml"));
     viewer.rootContext()->setContextProperty("vibra", &vibra);
+    viewer.rootContext()->setContextProperty("settings", &settings);
+    viewer.setMainQmlFile(QLatin1String("qml/RotateIt/main.qml"));
     viewer.showExpanded();
 
     return app->exec();

@@ -21,8 +21,6 @@ public:
     explicit Settings(QObject *parent = 0);
 
     ~Settings();
-
-    Q_INVOKABLE void update();
     
     bool spthPreview() const;
     void setSpthPreview(bool arg);
@@ -48,6 +46,10 @@ public slots:
 private:
 
 QSettings *m_pSettings;
+bool m_spthPreview;
+int m_quality;
+bool m_isDefaultQuality;
+bool m_vibraOn;
 
 };
 

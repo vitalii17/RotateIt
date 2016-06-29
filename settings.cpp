@@ -5,60 +5,78 @@
 Settings::Settings(QObject *parent) :
     QObject(parent), m_pSettings(new QSettings)
 {
-
+    m_spthPreview      = m_pSettings->value("SmoothPixmapTransformHintPreview", false).toBool();
+    m_quality          = m_pSettings->value("Quality", 96).toInt();
+    m_isDefaultQuality = m_pSettings->value("IsDefaultQuality", true).toBool();
+    m_vibraOn          = m_pSettings->value("VibraOn", true).toBool();
 }
 
 Settings::~Settings()
 {
-    delete m_pSettings;
-}
+    if(m_spthPreview != m_pSettings->value("SmoothPixmapTransformHintPreview").toBool())
+    {
+        m_pSettings->setValue("SmoothPixmapTransformHintPreview", m_spthPreview);
+    }
 
-void Settings::update()
-{
-    emit spthPreviewChanged(spthPreview());
+    if(m_quality != m_pSettings->value("Quality", 96).toInt())
+    {
+        m_pSettings->setValue("Quality", m_quality);
+    }
+
+    if(m_isDefaultQuality != m_pSettings->value("IsDefaultQuality", true).toBool())
+    {
+        m_pSettings->setValue("IsDefaultQuality", m_isDefaultQuality);
+    }
+
+    if(m_vibraOn != m_pSettings->value("VibraOn", true).toBool())
+    {
+        m_pSettings->setValue("VibraOn", m_vibraOn);
+    }
+
+    delete m_pSettings;
 }
 
 bool Settings::spthPreview() const
 {
-    return m_pSettings->value("SmoothPixmapTransformHintPreview", false).toBool();
+    return m_spthPreview;
 }
 
 void Settings::setSpthPreview(bool arg)
 {
-    m_pSettings->setValue("SmoothPixmapTransformHintPreview", arg);
+    m_spthPreview = arg;
     emit spthPreviewChanged(arg);
 }
 
 int Settings::quality() const
 {
-    return m_pSettings->value("Quality", 96).toInt();
+    return m_quality;
 }
 
 void Settings::setQuality(int arg)
 {
-    m_pSettings->setValue("Quality", arg);
+    m_quality = arg;
     emit qualityChanged(arg);
 }
 
 bool Settings::isDefaultQuality() const
 {
-    return m_pSettings->value("IsDefaultQuality", true).toBool();
+    return m_isDefaultQuality;
 }
 
 void Settings::setIsDefaultQuality(bool arg)
 {
-    m_pSettings->setValue("IsDefaultQuality", arg);
+    m_isDefaultQuality = arg;
     emit isDefaultQualityChanged(arg);
 }
 
 bool Settings::vibraOn() const
 {
-    return m_pSettings->value("VibraOn", true).toBool();
+    return m_vibraOn;
 }
 
 void Settings::setVibraOn(bool arg)
 {
-    m_pSettings->setValue("VibraOn", arg);
+    m_vibraOn = arg;
     emit vibraOnChanged(arg);
 }
 

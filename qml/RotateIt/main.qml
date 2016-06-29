@@ -3,7 +3,6 @@ import com.nokia.symbian 1.1
 import imagefetcher 1.0
 import imageview 1.0
 import engine 1.0
-import settings 1.0
 
 PageStackWindow {
     id: window
@@ -29,7 +28,6 @@ PageStackWindow {
             var settingsPageObject = object.create("SettingsPage.qml")
             pageStack.push(settingsPageObject)
             settingsPageObject.back.connect(pageStack.pop)
-            settingsPageObject.back.connect(settings.update)
         }
         onBack: Qt.quit()
     }
@@ -214,7 +212,6 @@ PageStackWindow {
                         var settingsPageObject = object.create("SettingsPage.qml")
                         pageStack.push(settingsPageObject)
                         settingsPageObject.back.connect(pageStack.pop)
-                        settingsPageObject.back.connect(settings.update)
                     }
                 }
                 MenuItem {
@@ -334,10 +331,6 @@ PageStackWindow {
                 vibra.doubleVibrate(65, 160)
             }
         }
-    }
-
-    Settings {
-        id: settings
     }
 
     ContextMenu {

@@ -1,6 +1,5 @@
 import QtQuick 1.1
 import com.nokia.symbian 1.1
-import settings 1.0
 import "SettingsPageElements"
 
 Page {
@@ -74,9 +73,5 @@ Page {
                 root.destroy()
             }
         }
-    }
-
-    Settings {
-        id: settings
     }
 }
