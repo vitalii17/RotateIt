@@ -285,6 +285,7 @@ PageStackWindow {
                     openMenu.open()
                 }
             }
+            onClickedOutside: close()
         }
     }
 
