@@ -41,13 +41,23 @@ PageStackWindow {
         property bool imageModified: false
 
         Connections {
-            target: /*imageFetcher*/ null
+            target: settings.landscapeMode ? imageFetcher : null
             onFetchedChanged: {
                 mainPage.orientationLock = imageFetcher.fetched ?
                             PageOrientation.LockLandscape :
                             PageOrientation.Automatic
             }
         }
+
+        Connections {
+            target: settings
+            onLandscapeModeChanged: {
+                mainPage.orientationLock = settings.landscapeMode ?
+                            PageOrientation.LockLandscape :
+                            PageOrientation.Automatic
+            }
+        }
+
         Connections {
             target: window
             onCurrentImagePathChanged: slider.reset()

@@ -15,6 +15,8 @@ class Settings : public QObject
     Q_PROPERTY(bool isDefaultQuality READ isDefaultQuality WRITE setIsDefaultQuality
                NOTIFY isDefaultQualityChanged)
     Q_PROPERTY(bool vibraOn READ vibraOn WRITE setVibraOn NOTIFY vibraOnChanged)
+    Q_PROPERTY(bool landscapeMode READ landscapeMode WRITE setLandscapeMode
+               NOTIFY landscapeModeChanged)
 
 public:
 
@@ -34,12 +36,16 @@ public:
     bool vibraOn() const;
     void setVibraOn(bool arg);
 
+    bool landscapeMode() const;
+    void setLandscapeMode(bool arg);
+
 signals:
     
     void spthPreviewChanged(bool arg);
     void qualityChanged(int arg);
     void isDefaultQualityChanged(bool arg);
     void vibraOnChanged(bool arg);
+    void landscapeModeChanged(bool arg);
 
 public slots:
 
@@ -50,6 +56,7 @@ bool m_spthPreview;
 int m_quality;
 bool m_isDefaultQuality;
 bool m_vibraOn;
+bool m_landscapeMode;
 
 };
 
