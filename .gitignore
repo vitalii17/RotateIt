@@ -13,3 +13,5 @@ RotateIt64.png
 RotateIt80.png
 qrc_resources.cpp
 moc*
+lupdate.bat
+lrelease.bat
