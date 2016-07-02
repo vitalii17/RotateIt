@@ -2,5 +2,16 @@
     <qresource prefix="/">
         <file>qml/images/open.png</file>
         <file>qml/images/save.svg</file>
+        <file>qml/RotateIt/AboutPage.qml</file>
+        <file>qml/RotateIt/CustomSlider.qml</file>
+        <file>qml/RotateIt/CustomToolBar.qml</file>
+        <file>qml/RotateIt/main.qml</file>
+        <file>qml/RotateIt/SettingsPage.qml</file>
+        <file>qml/RotateIt/StartPage.qml</file>
+        <file>qml/RotateIt/TopBar.qml</file>
+        <file>qml/RotateIt/SettingsPageElements/BaseListElement.qml</file>
+        <file>qml/RotateIt/SettingsPageElements/CheckableListElement.qml</file>
+        <file>qml/RotateIt/SettingsPageElements/NumberListElement.qml</file>
+        <file>qml/RotateIt/SettingsPageElements/UiConstants.js</file>
     </qresource>
 </RCC>

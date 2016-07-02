@@ -1,7 +1,5 @@
 #include <QtGui/QApplication>
-
-//#include <QDeclarativeContext>
-#include <QtDeclarative> // For qmlRegisterType()
+#include <QtDeclarative>
 #include "qmlapplicationviewer.h"
 
 #include "imagefetcher.h"
@@ -12,7 +10,7 @@
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
-    QScopedPointer<QApplication> app(createApplication(argc, argv));
+    QApplication app(argc, argv);
 
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
@@ -24,11 +22,11 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterType<ImageView>   ("imageview",    1, 0, "ImageView");
     qmlRegisterType<Engine>      ("engine",       1, 0, "Engine");
 
-    QmlApplicationViewer viewer;
-    viewer.rootContext()->setContextProperty("vibra", &vibra);
-    viewer.rootContext()->setContextProperty("settings", &settings);
-    viewer.setMainQmlFile(QLatin1String("qml/RotateIt/main.qml"));
-    viewer.showExpanded();
+    QDeclarativeView view;
+    view.rootContext()->setContextProperty("vibra", &vibra);
+    view.rootContext()->setContextProperty("settings", &settings);
+    view.setSource(QUrl("qrc:///qml/RotateIt/main.qml"));
+    view.showFullScreen();
 
-    return app->exec();
+    return app.exec();
 }

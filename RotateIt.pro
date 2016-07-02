@@ -1,7 +1,9 @@
 # Add more folders to ship with the application, here
-folder_01.source = qml/RotateIt
-folder_01.target = qml
-DEPLOYMENTFOLDERS = folder_01
+CONFIG(debug, debug|release) {
+    folder_01.source = qml/RotateIt
+    folder_01.target = qml
+    DEPLOYMENTFOLDERS = folder_01
+}
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
@@ -72,9 +74,3 @@ HEADERS += \
 
 RESOURCES += \
     resources.qrc
-
-OTHER_FILES += \
-    qml/main.qml \
-    qml/CustomToolBar.qml \
-    qml/CustomSlider.qml \
-    qml/AboutPage.qml
