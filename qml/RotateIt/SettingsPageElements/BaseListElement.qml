@@ -15,10 +15,12 @@ ListItem {
         ListItemText {
             role: "Title"
             text: root.titleText
+            width: parent.width
         }
         ListItemText {
             role: "SubTitle"
             text: root.subTitleText
+            width: parent.width
         }
     }
 }
