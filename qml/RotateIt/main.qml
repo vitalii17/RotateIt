@@ -164,7 +164,7 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:///qml/images/open.png"
+                iconSource: "qrc:/gui/qml/images/open.png"
                 onClicked: {
                     if(mainPage.imageModified) {
                         saveDialog.openDialog("open")
@@ -175,11 +175,11 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:///qml/images/up.png"
+                iconSource: "qrc:/gui/qml/images/up.png"
 //                onClicked:
             }
             ToolButton {
-                iconSource: "qrc:///qml/images/save.svg"
+                iconSource: "qrc:/gui/qml/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
                     engine.save(settings.quality)
@@ -321,7 +321,7 @@ PageStackWindow {
         anchors.bottom: parent.bottom
         z: 1
         tools: pageStack.currentPage.tools
-        //background: "qrc:///qml/images/toolbar-background.svg"
+        //background: "qrc:/gui/qml/images/toolbar-background.svg"
     }
 
     MouseArea {

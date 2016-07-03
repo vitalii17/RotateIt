@@ -25,7 +25,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QDeclarativeView view;
     view.rootContext()->setContextProperty("vibra", &vibra);
     view.rootContext()->setContextProperty("settings", &settings);
-    view.setSource(QUrl("qrc:///qml/RotateIt/main.qml"));
+    view.setSource(QUrl("qrc:/gui/qml/RotateIt/main.qml"));
     view.showFullScreen();
 
     return app.exec();
