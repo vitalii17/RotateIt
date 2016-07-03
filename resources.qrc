@@ -13,5 +13,7 @@
         <file>qml/RotateIt/SettingsPageElements/CheckableListElement.qml</file>
         <file>qml/RotateIt/SettingsPageElements/NumberListElement.qml</file>
         <file>qml/RotateIt/SettingsPageElements/UiConstants.js</file>
+        <file>qml/images/up.png</file>
+        <file>qml/images/arrow-up.png</file>
     </qresource>
 </RCC>

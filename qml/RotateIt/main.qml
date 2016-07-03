@@ -175,6 +175,10 @@ PageStackWindow {
                 }
             }
             ToolButton {
+                iconSource: "qrc:///qml/images/up.png"
+//                onClicked:
+            }
+            ToolButton {
                 iconSource: "qrc:///qml/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
