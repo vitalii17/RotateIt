@@ -14,5 +14,10 @@
         <file>qml/images/open.png</file>
         <file>qml/images/save.svg</file>
         <file>qml/images/up.png</file>
+        <file>qml/RotateIt/ToolBoard.qml</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>translations/Russian.qm</file>
+        <file>translations/Ukrainian.qm</file>
     </qresource>
 </RCC>

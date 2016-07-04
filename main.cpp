@@ -1,5 +1,6 @@
 #include <QtGui/QApplication>
 #include <QtDeclarative>
+#include <QLocale>
 #include "qmlapplicationviewer.h"
 
 #include "imagefetcher.h"
@@ -14,6 +15,13 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
+
+    QTranslator translator;
+    if(QLocale::languageToString(QLocale::system().language()) == "Russian")
+    {
+        translator.load(":/translations/Russian.qm");
+        app.installTranslator(&translator);
+    }
 
     Vibra    vibra;
     Settings settings;
