@@ -175,8 +175,23 @@ PageStackWindow {
                 }
             }
             ToolButton {
+                id: upToolButton
                 iconSource: "qrc:/gui/qml/images/up.png"
-//                onClicked:
+                property bool checked: false
+                onClicked: checked = !checked
+                onCheckedChanged: mainToolBoard.shown = checked ? true : false
+                rotation: checked ? 180.0 : 0.0
+                Behavior on rotation {
+                    PropertyAnimation{}
+                }
+                Connections {
+                    target: mainToolBar
+                    onShownChanged: {
+                        if(upToolButton.checked && !mainToolBar.shown) {
+                            upToolButton.checked = false
+                        }
+                    }
+                }
             }
             ToolButton {
                 iconSource: "qrc:/gui/qml/images/save.svg"
@@ -209,6 +224,33 @@ PageStackWindow {
                         mainTopBar.shown = false
                     }
                 }
+            }
+        }
+
+        ToolBoard {
+            id: mainToolBoard
+            offsetY: mainToolBarLayout.height
+            anchors.bottom: parent.bottom
+            z: 1
+            Connections {
+                target: mainToolBar
+                onShownChanged: {
+                    if(mainToolBoard.shown && !mainToolBar.shown) {
+                        mainToolBoard.shown = false
+                    }
+                }
+            }
+            ToolBoardItem {
+                text: qsTr("Rotate -90°")
+                iconSource: "qrc:/gui/qml/images/rotate-left.png"
+            }
+            ToolBoardItem {
+                text: qsTr("Rotate 90°")
+                iconSource: "qrc:/gui/qml/images/rotate-right.png"
+            }
+            ToolBoardItem {
+                text: qsTr("Base angle")
+                iconSource: "qrc:/gui/qml/images/rotate-base.svg"
             }
         }
 

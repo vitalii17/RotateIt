@@ -14,7 +14,12 @@
         <file>qml/images/open.png</file>
         <file>qml/images/save.svg</file>
         <file>qml/images/up.png</file>
+        <file>qml/RotateIt/ToolBoard.js</file>
         <file>qml/RotateIt/ToolBoard.qml</file>
+        <file>qml/RotateIt/ToolBoardItem.qml</file>
+        <file>qml/images/rotate-left.png</file>
+        <file>qml/images/rotate-right.png</file>
+        <file>qml/images/rotate-base.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>
