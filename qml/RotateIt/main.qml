@@ -164,7 +164,7 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:/gui/qml/images/open.png"
+                iconSource: "qrc:/images/images/open.png"
                 onClicked: {
                     if(mainPage.imageModified) {
                         saveDialog.openDialog("open")
@@ -176,7 +176,7 @@ PageStackWindow {
             }
             ToolButton {
                 id: upToolButton
-                iconSource: "qrc:/gui/qml/images/up.png"
+                iconSource: "qrc:/images/images/up.png"
                 property bool checked: false
                 onClicked: checked = !checked
                 onCheckedChanged: mainToolBoard.shown = checked ? true : false
@@ -194,7 +194,7 @@ PageStackWindow {
                 }
             }
             ToolButton {
-                iconSource: "qrc:/gui/qml/images/save.svg"
+                iconSource: "qrc:/images/images/save.svg"
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
                     engine.save(settings.quality)
@@ -242,15 +242,15 @@ PageStackWindow {
             }
             ToolBoardItem {
                 text: qsTr("Rotate -90°")
-                iconSource: "qrc:/gui/qml/images/rotate-left.png"
+                iconSource: "qrc:/images/images/rotate-left.png"
             }
             ToolBoardItem {
                 text: qsTr("Rotate 90°")
-                iconSource: "qrc:/gui/qml/images/rotate-right.png"
+                iconSource: "qrc:/images/images/rotate-right.png"
             }
             ToolBoardItem {
                 text: qsTr("Base angle")
-                iconSource: "qrc:/gui/qml/images/rotate-base.svg"
+                iconSource: "qrc:/images/images/rotate-base.svg"
             }
         }
 
@@ -363,7 +363,7 @@ PageStackWindow {
         anchors.bottom: parent.bottom
         z: 1
         tools: pageStack.currentPage.tools
-        //background: "qrc:/gui/qml/images/toolbar-background.svg"
+        //background: "qrc:/images/images/toolbar-background.svg"
     }
 
     MouseArea {

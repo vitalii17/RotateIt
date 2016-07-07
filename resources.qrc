@@ -11,18 +11,20 @@
         <file>qml/RotateIt/SettingsPageElements/CheckableListElement.qml</file>
         <file>qml/RotateIt/SettingsPageElements/NumberListElement.qml</file>
         <file>qml/RotateIt/SettingsPageElements/UiConstants.js</file>
-        <file>qml/images/open.png</file>
-        <file>qml/images/save.svg</file>
-        <file>qml/images/up.png</file>
         <file>qml/RotateIt/ToolBoard.js</file>
         <file>qml/RotateIt/ToolBoard.qml</file>
         <file>qml/RotateIt/ToolBoardItem.qml</file>
-        <file>qml/images/rotate-left.png</file>
-        <file>qml/images/rotate-right.png</file>
-        <file>qml/images/rotate-base.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>
         <file>translations/Ukrainian.qm</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>images/open.png</file>
+        <file>images/rotate-base.svg</file>
+        <file>images/rotate-left.png</file>
+        <file>images/rotate-right.png</file>
+        <file>images/save.svg</file>
+        <file>images/up.png</file>
     </qresource>
 </RCC>
