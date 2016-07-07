@@ -1,6 +1,6 @@
 # Add more folders to ship with the application, here
 CONFIG(debug, debug|release) {
-    folder_01.source = qml/RotateIt
+    folder_01.source = qml
     folder_01.target = qml
     DEPLOYMENTFOLDERS = folder_01
 }

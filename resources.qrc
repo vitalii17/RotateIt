@@ -1,19 +1,19 @@
 <RCC>
     <qresource prefix="/gui">
-        <file>qml/RotateIt/AboutPage.qml</file>
-        <file>qml/RotateIt/CustomSlider.qml</file>
-        <file>qml/RotateIt/CustomToolBar.qml</file>
-        <file>qml/RotateIt/main.qml</file>
-        <file>qml/RotateIt/SettingsPage.qml</file>
-        <file>qml/RotateIt/StartPage.qml</file>
-        <file>qml/RotateIt/TopBar.qml</file>
-        <file>qml/RotateIt/SettingsPageElements/BaseListElement.qml</file>
-        <file>qml/RotateIt/SettingsPageElements/CheckableListElement.qml</file>
-        <file>qml/RotateIt/SettingsPageElements/NumberListElement.qml</file>
-        <file>qml/RotateIt/SettingsPageElements/UiConstants.js</file>
-        <file>qml/RotateIt/ToolBoard.js</file>
-        <file>qml/RotateIt/ToolBoard.qml</file>
-        <file>qml/RotateIt/ToolBoardItem.qml</file>
+        <file>qml/SettingsPageElements/BaseListElement.qml</file>
+        <file>qml/SettingsPageElements/CheckableListElement.qml</file>
+        <file>qml/SettingsPageElements/NumberListElement.qml</file>
+        <file>qml/SettingsPageElements/UiConstants.js</file>
+        <file>qml/SettingsPage.qml</file>
+        <file>qml/AboutPage.qml</file>
+        <file>qml/CustomSlider.qml</file>
+        <file>qml/CustomToolBar.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/StartPage.qml</file>
+        <file>qml/ToolBoard.js</file>
+        <file>qml/ToolBoard.qml</file>
+        <file>qml/ToolBoardItem.qml</file>
+        <file>qml/TopBar.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>
