@@ -10,11 +10,27 @@ Item {
 
     property real amplitude: 1
     property real stepSize: 0.1
-    property real value: privateFunctions.round((((slider.x + slider.width / 2 - containerItem.width / 2) /
-                          containerItem.width / 2) * 4) * amplitude, stepSize)
+    property real value: privateFunctions.round((((slider.x + slider.width / 2 -
+                                                   containerItem.width / 2) /
+                                                  containerItem.width / 2) * 4) *
+                                                amplitude + offset, stepSize)
+    property real offset: 0
+
+    onOffsetChanged: {
+        if(offset >= 360) {
+            while(offset >= 360) {
+                offset = offset - 360
+            }
+        }
+        if(offset <= -360) {
+            while(offset <= -360) {
+                offset = offset + 360
+            }
+        }
+    }
 
     function reset() {
-        slider.x = containerItem.width / 2 - slider.width / 2
+        slider.x = containerItem.width / 2 - slider.width / 2 + offset
     }
 
     function blink() {
