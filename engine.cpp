@@ -258,13 +258,109 @@ QImage Rotate::rotate(QImage &image, qreal angle,
         qreal sin_angle = qSin(angle_rad);
         qreal cos_2angle = qCos(2 * angle_rad);
 
-        int cut_width = static_cast<int>(
-                    (image.width() * cos_angle -
-                     image.height() * sin_angle) / cos_2angle);
+        int cut_width  = 0;
+        int cut_height = 0;
 
-        int cut_height = static_cast<int>(
-                    (image.height() * cos_angle -
-                     image.width() * sin_angle) / cos_2angle);
+        if((angle >= 90) && (angle < 180))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle - 90));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+        }
+        else if((angle >= -180) && (angle < -90))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle + 90));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+        }
+        else if((angle >= 180) && (angle < 270))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle - 180));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+        }
+        else if((angle >= -270) && (angle < -180))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle + 180));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+        }
+        else if((angle >= 270) && (angle < 360))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle - 270));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+        }
+        else if((angle >= -360) && (angle < -270))
+        {
+            angle_rad = qAbs((M_PI / 180) * (angle + 270));
+            cos_angle = qCos(angle_rad);
+            sin_angle = qSin(angle_rad);
+            cos_2angle = qCos(2 * angle_rad);
+
+            cut_width = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+        }
+        else
+        {
+            cut_width = static_cast<int>(
+                        (image.width() * cos_angle -
+                         image.height() * sin_angle) / cos_2angle);
+
+            cut_height = static_cast<int>(
+                        (image.height() * cos_angle -
+                         image.width() * sin_angle) / cos_2angle);
+        }
 
         if(cut_width <= 1)
         {
