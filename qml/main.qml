@@ -60,7 +60,10 @@ PageStackWindow {
 
         Connections {
             target: window
-            onCurrentImagePathChanged: slider.reset()
+            onCurrentImagePathChanged: {
+                slider.offset = 0
+                slider.reset()
+            }
         }
 
         ImageView {
