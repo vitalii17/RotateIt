@@ -10,9 +10,9 @@ Item {
 
     property int topPadding: 25
     property int bottomPadding: 25
-    property int leftPadding: 30
-    property int rightPadding: 30
-    property int spacing: 30
+    property int leftPadding: 25
+    property int rightPadding: 25
+    property int spacing: 35
 
     anchors.left: parent.left
     anchors.right: parent.right

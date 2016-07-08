@@ -244,12 +244,12 @@ PageStackWindow {
                 }
             }
             ToolBoardItem {
-                text: qsTr("Rotate -90°")
+                text: qsTr("Rotate -90") + "°"
                 iconSource: "qrc:/images/images/rotate-left.png"
                 onClicked: slider.offset = slider.offset - 90.0
             }
             ToolBoardItem {
-                text: qsTr("Rotate 90°")
+                text: qsTr("Rotate 90") + "°"
                 iconSource: "qrc:/images/images/rotate-right.png"
                 onClicked: slider.offset = slider.offset + 90.0
             }
