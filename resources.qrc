@@ -21,7 +21,6 @@
     </qresource>
     <qresource prefix="/images">
         <file>images/open.png</file>
-        <file>images/rotate-base.svg</file>
         <file>images/rotate-left.png</file>
         <file>images/rotate-right.png</file>
         <file>images/save.svg</file>
