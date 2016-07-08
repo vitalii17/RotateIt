@@ -77,6 +77,7 @@ Item {
         anchors.right: root.right
         anchors.rightMargin: platformStyle.paddingMedium
         anchors.verticalCenter: root.verticalCenter
+        rotation: 180
         width: root.width - textString.width - 3 * platformStyle.paddingMedium
     }
 }
