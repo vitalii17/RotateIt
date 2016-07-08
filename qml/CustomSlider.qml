@@ -6,7 +6,7 @@ Item {
     signal pressed
     signal released
 
-    height: 50
+    height: 55
 
     property real amplitude: 1
     property real stepSize: 0.1
@@ -55,7 +55,7 @@ Item {
             id: slider
             color: "grey"
             opacity: 0.5
-            width: 75
+            width: 85
             height: root.height
             x: containerItem.width / 2 - width / 2
             border.color: color
@@ -64,7 +64,7 @@ Item {
             Text {
                 text: root.value
                 color: "white"
-                font.pixelSize: 35
+                font.pixelSize: 31
                 anchors.centerIn: parent
             }
 
