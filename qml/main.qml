@@ -250,10 +250,6 @@ PageStackWindow {
                 iconSource: "qrc:/images/images/rotate-right.png"
                 onClicked: slider.offset = slider.offset + 90.0
             }
-            ToolBoardItem {
-                text: qsTr("Base angle")
-                iconSource: "qrc:/images/images/rotate-base.svg"
-            }
         }
 
         Menu {
