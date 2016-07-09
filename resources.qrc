@@ -26,5 +26,6 @@
         <file>images/save.svg</file>
         <file>images/up.png</file>
         <file>images/refresh.svg</file>
+        <file>images/horizont-line.svg</file>
     </qresource>
 </RCC>

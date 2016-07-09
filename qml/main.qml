@@ -258,6 +258,11 @@ PageStackWindow {
                 iconSource: "qrc:/images/images/refresh.svg"
                 onClicked: { slider.offset = 0; slider.reset()}
             }
+            ToolBoardItem {
+                text: qsTr("Line")
+                iconSource: "qrc:/images/images/horizont-line.svg"
+                onClicked: horizontCursor.visible = !horizontCursor.visible
+            }
         }
 
         Menu {
