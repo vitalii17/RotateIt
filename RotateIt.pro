@@ -10,8 +10,6 @@ QML_IMPORT_PATH =
 
 #QT += opengl
 
-symbian:TARGET.UID3 = 0xE39F1FBD
-
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
 # fail to install if self-signed. By default qmake uses the unprotected
@@ -22,12 +20,25 @@ symbian:TARGET.UID3 = 0xE39F1FBD
 symbian {
     VERSION = 0.1.0
     TARGET.EPOCHEAPSIZE = 0x00001000 0x1FFFFFFF
+    ICON = RotateIt.svg
 
-    TARGET.CAPABILITY += WriteDeviceData \  # Use for LMGFetch (fetch files from gallery)
-                         ReadUserData \     # Use for LMGFetch (fetch files from gallery)
-                         NetworkServices    # Links in QML
-    # Use for LMGFetch (fetch files from gallery)
-    LIBS += -lmgfetch -lbafl -lhwrmvibraclient
+    extended_version {
+        TARGET.UID3 = 0xE39F1FBD
+        TARGET = Rotate_It_Extended
+        TARGET.CAPABILITY += WriteDeviceData \ # Use for LMGFetch (fetch files from gallery)
+
+        # Use for LMGFetch (fetch files from gallery)
+        LIBS += -lmgfetch -lbafl
+        DEFINES += MG_FETCH_ENABLED
+    }
+    else {
+        TARGET = Rotate_It
+        TARGET.UID3 = 0xE39F1FBE
+        DEFINES += MG_FETCH_DISABLED
+    }
+
+    TARGET.CAPABILITY += NetworkServices # Links in QML
+    LIBS += -lhwrmvibraclient
 
     vendorinfo = \
         "%{\"Vitalii Shunkov\"}" \

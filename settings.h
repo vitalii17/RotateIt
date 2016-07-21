@@ -17,6 +17,7 @@ class Settings : public QObject
     Q_PROPERTY(bool vibraOn READ vibraOn WRITE setVibraOn NOTIFY vibraOnChanged)
     Q_PROPERTY(bool landscapeMode READ landscapeMode WRITE setLandscapeMode
                NOTIFY landscapeModeChanged)
+    Q_PROPERTY(bool galleryAvailable READ galleryAvailable)
 
 public:
 
@@ -38,6 +39,8 @@ public:
 
     bool landscapeMode() const;
     void setLandscapeMode(bool arg);
+
+    bool galleryAvailable() const;
 
 signals:
     

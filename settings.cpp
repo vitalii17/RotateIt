@@ -112,6 +112,15 @@ void Settings::setLandscapeMode(bool arg)
     }
 }
 
+bool Settings::galleryAvailable() const
+{
+#ifdef MG_FETCH_ENABLED
+    return true;
+#elif MG_FETCH_DISABLED
+    return false;
+#endif
+}
+
 
 
 

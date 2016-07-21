@@ -406,12 +406,19 @@ PageStackWindow {
         MenuLayout {
             MenuItem {
                 text: qsTr("From Gallery")
+                Component.onCompleted: enabled = (settings.galleryAvailable ? true : false)
                 onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
             }
             MenuItem {
                 text: qsTr("File Manager")
                 onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.FileManager)
             }
+        }
+        QueryDialog {
+            id: openMenuInfoDialog
+            acceptButtonText: qsTr("OK")
+            titleText: qsTr("Not implemented!")
+            message: qsTr("Available only in extended version.")
         }
     }
 

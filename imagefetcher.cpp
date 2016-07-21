@@ -1,11 +1,13 @@
 #include <QFileDialog>
 
 #ifdef Q_OS_SYMBIAN
+#ifdef MG_FETCH_ENABLED
 #include <MGFetch.h>
 #include <eikenv.h>
 #include <eikmenub.h>
 #include <aknappui.h>
-#endif
+#endif // MG_FETCH_ENABLED
+#endif // Q_OS_SYMBIAN
 
 #include "imagefetcher.h"
 
@@ -25,6 +27,7 @@ QString ImageFetcher::fetchImage(FetchMethod method)
     case Gallery:
     {
     #ifdef Q_OS_SYMBIAN
+    #ifdef MG_FETCH_ENABLED
         CDesCArrayFlat* fileArray = new(ELeave)CDesCArrayFlat(3);
         CleanupStack::PushL(fileArray);
         if (MGFetch::RunL(*fileArray, EImageFile, EFalse))
@@ -47,7 +50,8 @@ QString ImageFetcher::fetchImage(FetchMethod method)
             }
         }
         CleanupStack::PopAndDestroy();
-    #endif
+    #endif // MG_FETCH_ENABLED
+    #endif // Q_OS_SYMBIAN
     }
         break;
 
