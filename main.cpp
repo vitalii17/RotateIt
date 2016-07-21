@@ -13,6 +13,15 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+#ifdef Q_OS_SYMBIAN
+    QLabel *splashScreen = new QLabel("Symbian Zone");
+    QFont splashScreenFont("Helvetica");
+    splashScreenFont.setPixelSize(58);
+    splashScreen->setFont(splashScreenFont);
+    splashScreen->setAlignment(Qt::AlignCenter);
+    splashScreen->showFullScreen();
+#endif
+
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
 
@@ -36,6 +45,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     view.rootContext()->setContextProperty("settings", &settings);
     view.setSource(QUrl("qrc:/gui/qml/main.qml"));
     view.showFullScreen();
+
+    delete splashScreen;
 
     return app.exec();
 }
