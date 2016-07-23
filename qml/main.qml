@@ -3,7 +3,7 @@ import com.nokia.symbian 1.1
 import imagefetcher 1.0
 import imageview 1.0
 import engine 1.0
-import "DynamicObjectManagement.js" as DynamicObject
+import "DynamicObject.js" as DynamicObject
 
 PageStackWindow {
     id: window
