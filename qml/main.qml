@@ -3,6 +3,7 @@ import com.nokia.symbian 1.1
 import imagefetcher 1.0
 import imageview 1.0
 import engine 1.0
+import "DynamicObjectManagement.js" as DynamicObject
 
 PageStackWindow {
     id: window
@@ -20,12 +21,12 @@ PageStackWindow {
         id: startPage
         onOpen: openMenu.open()
         onAbout: {
-            var aboutPageObject = object.create("AboutPage.qml")
+            var aboutPageObject = DynamicObject.create(window, "AboutPage.qml")
             pageStack.push(aboutPageObject)
             aboutPageObject.back.connect(pageStack.pop)
         }
         onSettings: {
-            var settingsPageObject = object.create("SettingsPage.qml")
+            var settingsPageObject = DynamicObject.create(window, "SettingsPage.qml")
             pageStack.push(settingsPageObject)
             settingsPageObject.back.connect(pageStack.pop)
         }
@@ -278,7 +279,8 @@ PageStackWindow {
                 MenuItem {
                     text: qsTr("Settings")
                     onClicked: {
-                        var settingsPageObject = object.create("SettingsPage.qml")
+                        var settingsPageObject = DynamicObject.create(
+                                    window, "SettingsPage.qml")
                         pageStack.push(settingsPageObject)
                         settingsPageObject.back.connect(pageStack.pop)
                     }
@@ -286,7 +288,8 @@ PageStackWindow {
                 MenuItem {
                     text: qsTr("About")
                     onClicked: {
-                        var aboutPageObject = object.create("AboutPage.qml")
+                        var aboutPageObject = DynamicObject.create(
+                                    window, "AboutPage.qml")
                         pageStack.push(aboutPageObject)
                         aboutPageObject.back.connect(pageStack.pop)
                     }
@@ -415,13 +418,6 @@ PageStackWindow {
                 text: qsTr("File Manager")
                 onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.FileManager)
             }
-        }
-    }
-
-    QtObject {
-        id: object
-        function create(obj) {
-            return Qt.createComponent(obj).createObject(window)
         }
     }
 }
