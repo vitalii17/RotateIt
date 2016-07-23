@@ -15,6 +15,8 @@ Item {
                                                   containerItem.width / 2) * 4) *
                                                 amplitude + offset, stepSize)
     property real offset: 0
+    property bool arrowsEnabled: true
+    property string arrowsPath: ""
 
     onOffsetChanged: {
         if(offset >= 360) {
@@ -81,6 +83,31 @@ Item {
                     to: target.color
                 }
             }
+        }
+
+        Image {
+            source: root.arrowsEnabled ? root.arrowsPath : ""
+            width: slider.width / 5
+            height: slider.height
+            sourceSize.width: width
+            sourceSize.height: height
+            anchors.right: slider.left
+            anchors.verticalCenter: slider.verticalCenter
+            anchors.rightMargin: 5
+            opacity: slider.opacity
+        }
+
+        Image {
+            source: root.arrowsEnabled ? root.arrowsPath : ""
+            width: slider.width / 5
+            height: slider.height
+            sourceSize.width: width
+            sourceSize.height: height
+            anchors.left: slider.right
+            anchors.verticalCenter: slider.verticalCenter
+            anchors.leftMargin: 5 + 1 // QImage bug (???)
+            rotation: 180
+            opacity: slider.opacity
         }
 
         MouseArea {

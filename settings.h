@@ -18,6 +18,8 @@ class Settings : public QObject
     Q_PROPERTY(bool landscapeMode READ landscapeMode WRITE setLandscapeMode
                NOTIFY landscapeModeChanged)
     Q_PROPERTY(bool galleryAvailable READ galleryAvailable)
+    Q_PROPERTY(bool sliderArrowsEnabled READ sliderArrowsEnabled
+               WRITE setSliderArrowsEnabled NOTIFY sliderArrowsEnabledChanged)
 
 public:
 
@@ -42,6 +44,9 @@ public:
 
     bool galleryAvailable() const;
 
+    bool sliderArrowsEnabled() const;
+    void setSliderArrowsEnabled(bool arg);
+
 signals:
     
     void spthPreviewChanged(bool arg);
@@ -49,6 +54,7 @@ signals:
     void isDefaultQualityChanged(bool arg);
     void vibraOnChanged(bool arg);
     void landscapeModeChanged(bool arg);
+    void sliderArrowsEnabledChanged(bool arg);
 
 public slots:
 
@@ -60,6 +66,7 @@ int m_quality;
 bool m_isDefaultQuality;
 bool m_vibraOn;
 bool m_landscapeMode;
+bool m_sliderArrowsEnabled;
 
 };
 

@@ -53,6 +53,13 @@ Page {
                     value = settings.quality
                 }
             }
+
+            CheckableListElement {
+                titleText: qsTr("Slider arrows")
+                subTitleText: qsTr("Click to disable")
+                checked: settings.sliderArrowsEnabled
+                onCheckedChanged: settings.sliderArrowsEnabled = checked
+            }
         }
     }
 

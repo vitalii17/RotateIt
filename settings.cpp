@@ -5,11 +5,12 @@
 Settings::Settings(QObject *parent) :
     QObject(parent), m_pSettings(new QSettings)
 {
-    m_spthPreview      = m_pSettings->value("SmoothPixmapTransformHintPreview", false).toBool();
-    m_quality          = m_pSettings->value("Quality", 96).toInt();
-    m_isDefaultQuality = m_pSettings->value("IsDefaultQuality", true).toBool();
-    m_vibraOn          = m_pSettings->value("VibraOn", true).toBool();
-    m_landscapeMode    = m_pSettings->value("LandscapeMode", false).toBool();
+    m_spthPreview         = m_pSettings->value("SmoothPixmapTransformHintPreview", false).toBool();
+    m_quality             = m_pSettings->value("Quality", 96).toInt();
+    m_isDefaultQuality    = m_pSettings->value("IsDefaultQuality", true).toBool();
+    m_vibraOn             = m_pSettings->value("VibraOn", true).toBool();
+    m_landscapeMode       = m_pSettings->value("LandscapeMode", false).toBool();
+    m_sliderArrowsEnabled = m_pSettings->value("SliderArrowsEnabled", true).toBool();
 }
 
 Settings::~Settings()
@@ -37,6 +38,11 @@ Settings::~Settings()
     if(m_landscapeMode != m_pSettings->value("LandscapeMode", false).toBool())
     {
         m_pSettings->setValue("LandscapeMode", m_landscapeMode);
+    }
+
+    if(m_sliderArrowsEnabled != m_pSettings->value("SliderArrowsEnabled", true).toBool())
+    {
+        m_pSettings->setValue("SliderArrowsEnabled", m_sliderArrowsEnabled);
     }
 
     delete m_pSettings;
@@ -119,6 +125,20 @@ bool Settings::galleryAvailable() const
 #elif MG_FETCH_DISABLED
     return false;
 #endif
+}
+
+bool Settings::sliderArrowsEnabled() const
+{
+    return m_sliderArrowsEnabled;
+}
+
+void Settings::setSliderArrowsEnabled(bool arg)
+{
+    if(m_sliderArrowsEnabled != arg)
+    {
+        m_sliderArrowsEnabled = arg;
+        emit sliderArrowsEnabledChanged(arg);
+    }
 }
 
 

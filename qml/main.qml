@@ -121,6 +121,8 @@ PageStackWindow {
             anchors.right: parent.right
             y: (parent.height / 3) * 2
             amplitude: 10
+            arrowsEnabled: settings.sliderArrowsEnabled
+            arrowsPath: "qrc:/images/images/arrow.svg"
             onYChanged: reset()
             onPressed: {
                 mainToolBar.shown = false
