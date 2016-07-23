@@ -416,12 +416,6 @@ PageStackWindow {
                 onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.FileManager)
             }
         }
-        QueryDialog {
-            id: openMenuInfoDialog
-            acceptButtonText: qsTr("OK")
-            titleText: qsTr("Not implemented!")
-            message: qsTr("Available only in extended version.")
-        }
     }
 
     QtObject {
