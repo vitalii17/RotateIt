@@ -65,17 +65,26 @@ Page {
 
     tools: ToolBarLayout {
         id: settingsPageToolBarLayout
-        ToolButton {
+        CustomToolButton {
             iconSource: "toolbar-back"
+            toolTip: toolTip
+            toolTipText: qsTr("Back")
             onClicked: {
                 back()
                 root.destroy()
             }
         }
-        ToolButton {
+        CustomToolButton {
             iconSource: "toolbar-menu"
+            toolTip: toolTip
+            toolTipText: qsTr("Menu")
             onClicked: settingsPageMenu.open()
         }
+    }
+
+    ToolTip {
+        id: toolTip
+        visible: false
     }
 
     Menu {

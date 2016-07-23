@@ -158,8 +158,10 @@ PageStackWindow {
 
         tools: ToolBarLayout {
             id: mainToolBarLayout
-            ToolButton {
+            CustomToolButton {
                 iconSource: "toolbar-back"
+                toolTip: toolTip
+                toolTipText: qsTr("Exit")
                 onClicked: {
                     if(mainPage.imageModified) {
                         saveDialog.openDialog("quit")
@@ -169,8 +171,10 @@ PageStackWindow {
                     }
                 }
             }
-            ToolButton {
+            CustomToolButton {
                 iconSource: "qrc:/images/images/open.png"
+                toolTip: toolTip
+                toolTipText: qsTr("Open")
                 onClicked: {
                     if(mainPage.imageModified) {
                         saveDialog.openDialog("open")
@@ -180,9 +184,11 @@ PageStackWindow {
                     }
                 }
             }
-            ToolButton {
+            CustomToolButton {
                 id: upToolButton
                 iconSource: "qrc:/images/images/up.png"
+                toolTip: toolTip
+                toolTipText: qsTr("Tools")
                 property bool checked: false
                 onClicked: checked = !checked
                 onCheckedChanged: mainToolBoard.shown = checked ? true : false
@@ -199,18 +205,27 @@ PageStackWindow {
                     }
                 }
             }
-            ToolButton {
+            CustomToolButton {
                 iconSource: "qrc:/images/images/save.svg"
+                toolTip: toolTip
+                toolTipText: qsTr("Save")
                 onClicked: {
                     engine.smoothPixmapTransformHint = true
                     engine.save(settings.quality)
                     mainPage.imageModified = false
                 }
             }
-            ToolButton {
+            CustomToolButton {
                 iconSource: "toolbar-menu"
+                toolTip: toolTip
+                toolTipText: qsTr("Menu")
                 onClicked: mainPageMenu.open()
             }
+        }
+
+        ToolTip {
+            id: toolTip
+            visible: false
         }
 
         TopBar {

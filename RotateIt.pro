@@ -85,3 +85,5 @@ HEADERS += \
 
 RESOURCES += \
     resources.qrc
+
+OTHER_FILES +=

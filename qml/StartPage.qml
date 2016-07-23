@@ -30,14 +30,23 @@ Page {
 
     tools: ToolBarLayout {
         id: startPageToolBarLayout
-        ToolButton {
+        CustomToolButton {
             iconSource: "toolbar-back"
             onClicked: Qt.quit()
+            toolTip: toolTip
+            toolTipText: qsTr("Exit")
         }
-        ToolButton {
+        CustomToolButton {
             iconSource: "toolbar-menu"
             onClicked: startPageMenu.open()
+            toolTip: toolTip
+            toolTipText: qsTr("Menu")
         }
+    }
+
+    ToolTip {
+        id: toolTip
+        visible: false
     }
 
     Menu {
