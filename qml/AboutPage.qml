@@ -30,7 +30,7 @@ Page {
                 color: "white"
                 onLinkActivated: Qt.openUrlExternally(link)
 
-                text: qsTr("<h2><p align = \"center\">Rotate It</p></h2>\
+                text: qsTr("<h2><p align = \"center\">Rotate It!</p></h2>\
     <p>Fix your photos directly on your smartphone. Correct the \
     \"littered horizon\" has never been so easy!</p>\
     <p>Developer: <a href=\"http://m.vk.com/vitalis17\">Vitalii Shunkov</a> \
