@@ -15,4 +15,5 @@ qrc_resources.cpp
 moc*
 lupdate.bat
 lrelease.bat
+translate.bat
 translation_helper.txt
