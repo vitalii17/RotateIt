@@ -178,23 +178,23 @@
         <translation>Горизонт</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="272"/>
+        <location filename="../qml/main.qml" line="277"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="277"/>
+        <location filename="../qml/main.qml" line="282"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="286"/>
+        <location filename="../qml/main.qml" line="291"/>
         <source>About</source>
         <translation>О Программе</translation>
     </message>
     <message>
         <location filename="../qml/main.qml" line="159"/>
-        <location filename="../qml/main.qml" line="301"/>
+        <location filename="../qml/main.qml" line="306"/>
         <source>Open</source>
         <translation>Открыть</translation>
     </message>
@@ -210,7 +210,7 @@
     </message>
     <message>
         <location filename="../qml/main.qml" line="193"/>
-        <location filename="../qml/main.qml" line="313"/>
+        <location filename="../qml/main.qml" line="318"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
@@ -220,32 +220,37 @@
         <translation>Меню</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="325"/>
+        <location filename="../qml/main.qml" line="267"/>
+        <source>View gallery</source>
+        <translation>Галерея</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="330"/>
         <source>Image does not saved</source>
         <translation>Изображение не сохранено</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="326"/>
+        <location filename="../qml/main.qml" line="331"/>
         <source>Do you want to save the modified image?</source>
         <translation>Желаете сохранить изображение?</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="327"/>
+        <location filename="../qml/main.qml" line="332"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="328"/>
+        <location filename="../qml/main.qml" line="333"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="410"/>
+        <location filename="../qml/main.qml" line="415"/>
         <source>From Gallery</source>
         <translation>Из Галереи</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="415"/>
+        <location filename="../qml/main.qml" line="420"/>
         <source>File Manager</source>
         <translation>Файловый Менеджер</translation>
     </message>

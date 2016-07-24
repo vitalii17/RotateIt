@@ -8,6 +8,7 @@
 #include "engine.h"
 #include "settings.h"
 #include "vibra.h"
+#include "process.h"
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
@@ -35,6 +36,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     Vibra    vibra;
     Settings settings;
+    Process  process;
 
     qmlRegisterType<ImageFetcher>("imagefetcher", 1, 0, "ImageFetcher");
     qmlRegisterType<ImageView>   ("imageview",    1, 0, "ImageView");
@@ -43,6 +45,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QDeclarativeView view;
     view.rootContext()->setContextProperty("vibra", &vibra);
     view.rootContext()->setContextProperty("settings", &settings);
+    view.rootContext()->setContextProperty("process", &process);
     view.setSource(QUrl("qrc:/gui/qml/main.qml"));
     view.showFullScreen();
 

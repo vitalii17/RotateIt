@@ -263,6 +263,11 @@ PageStackWindow {
                 iconSource: "qrc:/images/images/horizont-line.svg"
                 onClicked: horizontCursor.visible = !horizontCursor.visible
             }
+            ToolBoardItem {
+                text: qsTr("View gallery")
+                iconSource: "qrc:/images/images/gallery.svg"
+                onClicked: process.startDetached("glx.exe")
+            }
         }
 
         Menu {
