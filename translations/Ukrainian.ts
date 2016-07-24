@@ -73,47 +73,37 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="35"/>
-        <source>Landscape mode</source>
-        <translation>Ландшафтний режим</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="36"/>
-        <source>Enable for auto-rotate to landscape</source>
-        <translation>Активуйте для автоповороту</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="42"/>
         <source>Quality of final JPEG</source>
         <translation>Якість JPEG-файлу</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="43"/>
+        <location filename="../qml/SettingsPage.qml" line="36"/>
         <source>Set 90 or more for better quality</source>
         <translation>Вст. 90 та більше для кращої якості</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="44"/>
+        <location filename="../qml/SettingsPage.qml" line="37"/>
         <source>Quality</source>
         <translation>Якість</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="58"/>
+        <location filename="../qml/SettingsPage.qml" line="51"/>
         <source>Slider arrows</source>
         <translation>Стрілки повзунка</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="59"/>
+        <location filename="../qml/SettingsPage.qml" line="52"/>
         <source>Click to disable</source>
         <translation>Натисніть для вимкнення</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="71"/>
-        <location filename="../qml/SettingsPage.qml" line="93"/>
+        <location filename="../qml/SettingsPage.qml" line="64"/>
+        <location filename="../qml/SettingsPage.qml" line="86"/>
         <source>Back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="80"/>
+        <location filename="../qml/SettingsPage.qml" line="73"/>
         <source>Menu</source>
         <translation>Меню</translation>
     </message>
@@ -150,99 +140,99 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="241"/>
+        <location filename="../qml/main.qml" line="223"/>
         <source>Processing</source>
         <translation>Обробка</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="265"/>
+        <location filename="../qml/main.qml" line="247"/>
         <source>Rotate -90</source>
         <translation>Поворот -90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="270"/>
+        <location filename="../qml/main.qml" line="252"/>
         <source>Rotate 90</source>
         <translation>Поворот 90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="275"/>
+        <location filename="../qml/main.qml" line="257"/>
         <source>Refresh</source>
         <translation>Скидання</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="280"/>
+        <location filename="../qml/main.qml" line="262"/>
         <source>Line</source>
         <translation>Горизонт</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="290"/>
+        <location filename="../qml/main.qml" line="272"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="295"/>
+        <location filename="../qml/main.qml" line="277"/>
         <source>Settings</source>
         <translation>Налаштування</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="304"/>
+        <location filename="../qml/main.qml" line="286"/>
         <source>About</source>
         <translation>Про Програму</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="177"/>
-        <location filename="../qml/main.qml" line="319"/>
+        <location filename="../qml/main.qml" line="159"/>
+        <location filename="../qml/main.qml" line="301"/>
         <source>Open</source>
         <translation>Відкрити</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="164"/>
+        <location filename="../qml/main.qml" line="146"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="191"/>
+        <location filename="../qml/main.qml" line="173"/>
         <source>Tools</source>
         <translation>Інструменти</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="211"/>
-        <location filename="../qml/main.qml" line="331"/>
+        <location filename="../qml/main.qml" line="193"/>
+        <location filename="../qml/main.qml" line="313"/>
         <source>Save</source>
         <translation>Зберігти</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="221"/>
+        <location filename="../qml/main.qml" line="203"/>
         <source>Menu</source>
         <translation>Меню</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="343"/>
+        <location filename="../qml/main.qml" line="325"/>
         <source>Image does not saved</source>
         <translation>Файл не збережено</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="344"/>
+        <location filename="../qml/main.qml" line="326"/>
         <source>Do you want to save the modified image?</source>
         <translation>Бажаєте зберегти?</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="345"/>
+        <location filename="../qml/main.qml" line="327"/>
         <source>Yes</source>
         <translation>Так</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="346"/>
+        <location filename="../qml/main.qml" line="328"/>
         <source>No</source>
         <translation>Ні</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="428"/>
+        <location filename="../qml/main.qml" line="410"/>
         <source>From Gallery</source>
         <translation>З Галереї</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="433"/>
+        <location filename="../qml/main.qml" line="415"/>
         <source>File Manager</source>
         <translation>Файловий Менеджер</translation>
     </message>

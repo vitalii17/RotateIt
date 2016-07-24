@@ -31,13 +31,6 @@ Page {
                 onCheckedChanged: settings.vibraOn = checked
             }
 
-            CheckableListElement {
-                titleText: qsTr("Landscape mode")
-                subTitleText: qsTr("Enable for auto-rotate to landscape")
-                checked: settings.landscapeMode
-                onCheckedChanged: settings.landscapeMode = checked
-            }
-
             NumberListElement {
                 titleText: qsTr("Quality of final JPEG")
                 subTitleText: qsTr("Set 90 or more for better quality")

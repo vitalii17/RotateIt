@@ -9,7 +9,6 @@ Settings::Settings(QObject *parent) :
     m_quality             = m_pSettings->value("Quality", 96).toInt();
     m_isDefaultQuality    = m_pSettings->value("IsDefaultQuality", true).toBool();
     m_vibraOn             = m_pSettings->value("VibraOn", true).toBool();
-    m_landscapeMode       = m_pSettings->value("LandscapeMode", false).toBool();
     m_sliderArrowsEnabled = m_pSettings->value("SliderArrowsEnabled", true).toBool();
 }
 
@@ -33,11 +32,6 @@ Settings::~Settings()
     if(m_vibraOn != m_pSettings->value("VibraOn", true).toBool())
     {
         m_pSettings->setValue("VibraOn", m_vibraOn);
-    }
-
-    if(m_landscapeMode != m_pSettings->value("LandscapeMode", false).toBool())
-    {
-        m_pSettings->setValue("LandscapeMode", m_landscapeMode);
     }
 
     if(m_sliderArrowsEnabled != m_pSettings->value("SliderArrowsEnabled", true).toBool())
@@ -101,20 +95,6 @@ void Settings::setVibraOn(bool arg)
     {
         m_vibraOn = arg;
         emit vibraOnChanged(arg);
-    }
-}
-
-bool Settings::landscapeMode() const
-{
-    return m_landscapeMode;
-}
-
-void Settings::setLandscapeMode(bool arg)
-{
-    if(m_landscapeMode != arg)
-    {
-        m_landscapeMode = arg;
-        emit landscapeModeChanged(arg);
     }
 }
 
