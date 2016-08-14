@@ -21,14 +21,8 @@
     </message>
     <message>
         <location filename="../qml/AboutPage.qml" line="78"/>
-        <location filename="../qml/AboutPage.qml" line="101"/>
         <source>Back</source>
         <translation>Назад</translation>
-    </message>
-    <message>
-        <location filename="../qml/AboutPage.qml" line="87"/>
-        <source>Menu</source>
-        <translation>Меню</translation>
     </message>
 </context>
 <context>
@@ -98,14 +92,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="64"/>
-        <location filename="../qml/SettingsPage.qml" line="86"/>
         <source>Back</source>
         <translation>Назад</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="73"/>
-        <source>Menu</source>
-        <translation>Меню</translation>
     </message>
 </context>
 <context>
