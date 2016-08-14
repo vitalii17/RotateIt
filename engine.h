@@ -45,7 +45,7 @@ public:
     qreal rotation() const;
     void setRotation(qreal arg);
 
-    bool smoothPixmapTransformHint();
+    bool smoothPixmapTransformHint() const;
     void setSmoothPixmapTransformHint(bool hint);
 
     EngineState state() const;

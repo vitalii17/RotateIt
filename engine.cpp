@@ -108,7 +108,7 @@ void Engine::setRotation(qreal arg)
     rotate(arg);
 }
 
-bool Engine::smoothPixmapTransformHint()
+bool Engine::smoothPixmapTransformHint() const
 {
     return m_smoothPixmapTransformHint;
 }
