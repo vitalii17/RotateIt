@@ -67,27 +67,10 @@ Page {
                 root.destroy()
             }
         }
-        CustomToolButton {
-            iconSource: "toolbar-menu"
-            toolTip: toolTip
-            toolTipText: qsTr("Menu")
-            onClicked: settingsPageMenu.open()
-        }
     }
 
     ToolTip {
         id: toolTip
         visible: false
-    }
-
-    Menu {
-        id: settingsPageMenu
-        MenuItem {
-            text: qsTr("Back")
-            onClicked: {
-                back()
-                root.destroy()
-            }
-        }
     }
 }
