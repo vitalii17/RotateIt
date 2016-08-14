@@ -69,7 +69,7 @@ SOURCES += main.cpp \
     xqvibra_p.cpp \
     xqvibra.cpp \
     vibra.cpp \
-    process.cpp
+    process.cpp \
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -83,7 +83,7 @@ HEADERS += \
     xqvibra_p.h \
     xqvibra.h \
     vibra.h \
-    process.h
+    process.h \
 
 RESOURCES += \
     resources.qrc
