@@ -37,30 +37,15 @@ Page {
             toolTipText: qsTr("Exit")
         }
         CustomToolButton {
-            iconSource: "toolbar-menu"
-            onClicked: startPageMenu.open()
+            iconSource: "toolbar-settings"
+            onClicked: settings()
             toolTip: toolTip
-            toolTipText: qsTr("Menu")
+            toolTipText: qsTr("Settings")
         }
     }
 
     ToolTip {
         id: toolTip
         visible: false
-    }
-
-    Menu {
-        id: startPageMenu
-        MenuLayout {
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: settings()
-            }
-
-            MenuItem {
-                text: qsTr("Exit")
-                onClicked: Qt.quit()
-            }
-        }
     }
 }
