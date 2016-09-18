@@ -249,14 +249,14 @@ PageStackWindow {
                 onClicked: slider.offset = slider.offset - 90.0
             }
             ToolBoardItem {
-                text: qsTr("Rotate 90") + "°"
-                iconSource: "qrc:/images/images/rotate-right.png"
-                onClicked: slider.offset = slider.offset + 90.0
-            }
-            ToolBoardItem {
                 text: qsTr("Refresh")
                 iconSource: "qrc:/images/images/refresh.svg"
                 onClicked: { slider.offset = 0; slider.reset()}
+            }
+            ToolBoardItem {
+                text: qsTr("Rotate 90") + "°"
+                iconSource: "qrc:/images/images/rotate-right.png"
+                onClicked: slider.offset = slider.offset + 90.0
             }
             ToolBoardItem {
                 text: qsTr("Line")
