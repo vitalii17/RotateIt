@@ -16,6 +16,7 @@
         <file>qml/TopBar.qml</file>
         <file>qml/DynamicObject.js</file>
         <file>qml/CustomToolButton.qml</file>
+        <file>qml/CustomMenuItem.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>

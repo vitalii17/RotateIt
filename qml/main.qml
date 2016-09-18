@@ -408,13 +408,31 @@ PageStackWindow {
         }
     }
 
+    QueryDialog {
+        id: queryDialog
+        buttonTexts: [qsTr("Close")]
+        onClickedOutside: close()
+    }
+
     ContextMenu {
         id: openMenu
+
         MenuLayout {
-            MenuItem {
+            CustomMenuItem {
                 text: qsTr("From Gallery")
-                Component.onCompleted: enabled = (settings.galleryAvailable ? true : false)
-                onClicked: currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
+                Component.onCompleted: disabled = !settings.galleryAvailable
+
+                onClicked: {
+                    if(!disabled) {
+                     currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
+                    }
+                    else
+                    {
+                        queryDialog.titleText = qsTr("Not available")
+                        queryDialog.message = qsTr("Available only in extended version!")
+                        queryDialog.open()
+                    }
+                }
             }
             MenuItem {
                 text: qsTr("File Manager")
