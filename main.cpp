@@ -14,14 +14,26 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    QLabel *splashScreen = new QLabel;
+
 #ifdef Q_OS_SYMBIAN
-    QLabel *splashScreen = new QLabel("Symbian Zone");
-    QFont splashScreenFont("Helvetica");
-    splashScreenFont.setPixelSize(58);
-    splashScreen->setFont(splashScreenFont);
+    splashScreen->setText("Symbian Zone");
+#else
+    splashScreen->setText("Rotate It!");
+#endif
+
+    QFont font;
+    font.setPixelSize(10);
+
+    QFontMetrics fontMetrics(font);
+
+    font.setPixelSize(app.desktop()->screenGeometry().width() *
+                      font.pixelSize() /
+                      fontMetrics.width(splashScreen->text()));
+
+    splashScreen->setFont(font);
     splashScreen->setAlignment(Qt::AlignCenter);
     splashScreen->showFullScreen();
-#endif
 
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
