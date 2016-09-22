@@ -37,6 +37,8 @@ never been so easy! \
 (mail: Shynkov@bigmir.net) \
 <p>Special thanks: <a href=\"http://m.vk.com/symbian_zone\">\"Symbian Zone\"</a> and \
 <a href=\"http://forum.dailymobile.net\">\"dailymobile.net\"</a> \
+<p>Source code available on \
+<a href=\"https://github.com/Vitalii17/RotateIt\">\"GitHub.com\"</a> \
 <h3><p align = \"center\">License</h3> \
 <h4><p align = \"center\">The MIT License (MIT)</h4> \
 <p alifn = \"center\">Copyright (c) 2016 Vitalii Shunkov \
