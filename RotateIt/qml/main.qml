@@ -17,6 +17,8 @@ PageStackWindow {
         }
     }
 
+    Component.onCompleted: currentImagePath = startImagePath
+
     StartPage {
         id: startPage
         onOpen: openMenu.open()

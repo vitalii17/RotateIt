@@ -58,6 +58,16 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     view.rootContext()->setContextProperty("vibra", &vibra);
     view.rootContext()->setContextProperty("settings", &settings);
     view.rootContext()->setContextProperty("process", &process);
+
+    if(argc > 1)
+    {
+        view.rootContext()->setContextProperty("startImagePath", argv[1]);
+    }
+    else
+    {
+        view.rootContext()->setContextProperty("startImagePath", "");
+    }
+
     view.setSource(QUrl("qrc:/gui/qml/main.qml"));
     view.showFullScreen();
 
