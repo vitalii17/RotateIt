@@ -6,7 +6,6 @@ Item {
 
     property string backgroundColor: "black"
     property int offsetY: 0
-    property bool shown: false
 
     property int topPadding: 25
     property int bottomPadding: 25
@@ -16,6 +15,16 @@ Item {
 
     anchors.left: parent.left
     anchors.right: parent.right
+
+    state: "hidden"
+
+    function open() {
+        state = "shown"
+    }
+
+    function close() {
+        state = "hidden"
+    }
 
     Component.onCompleted: {
         for(var i = 0; i < root.children.length; i++) {
@@ -27,8 +36,6 @@ Item {
     }
 
     onWidthChanged: Js.layout()
-
-    state: shown ? "shown" : "hidden"
 
     Rectangle {
         id: backgroundrect

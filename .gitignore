@@ -5,6 +5,7 @@ Makefile
 *.autosave
 *.loc
 *.user
+*.user.*
 *.rss
 *.pkg
 *.mmp

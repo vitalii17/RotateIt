@@ -175,7 +175,8 @@ PageStackWindow {
                 toolTipText: qsTr("Tools")
                 property bool checked: false
                 onClicked: checked = !checked
-                onCheckedChanged: mainToolBoard.shown = checked ? true : false
+                onCheckedChanged: checked ? mainToolBoard.open() :
+                                            mainToolBoard.close()
                 rotation: checked ? 180.0 : 0.0
                 Behavior on rotation {
                     PropertyAnimation{}
@@ -242,8 +243,8 @@ PageStackWindow {
             Connections {
                 target: mainToolBar
                 onShownChanged: {
-                    if(mainToolBoard.shown && !mainToolBar.shown) {
-                        mainToolBoard.shown = false
+                    if(mainToolBoard.visible && !mainToolBar.shown) {
+                        mainToolBoard.close()
                     }
                 }
             }
