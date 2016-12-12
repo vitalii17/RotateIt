@@ -47,6 +47,21 @@ symbian {
     my_deployment.pkg_prerules = vendorinfo
     DEPLOYMENT += my_deployment
     DEPLOYMENT.display_name += Rotate It!
+
+    SOURCES += src/Symbian/xqvibra_p.cpp \
+        src/Symbian/xqvibra.cpp \
+
+    HEADERS += src/Symbian/xqvibra_p.h \
+        src/Symbian/xqvibra.h \
+}
+
+simulator {
+    DEFINES += Q_OS_SYMBIAN_SIMULATOR
+    DEFINES += MG_FETCH_DISABLED
+
+    SOURCES += src/Symbian_simulator/emptyvibra.cpp
+
+    HEADERS += src/Symbian_simulator/emptyvibra.h
 }
 
 # If your application uses the Qt Mobility libraries, uncomment the following
@@ -61,29 +76,24 @@ symbian {
 CONFIG += qt-components
 
 # The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp \
-    imageview.cpp \
-    engine.cpp \
-    imagefetcher.cpp \
-    settings.cpp \
-    xqvibra_p.cpp \
-    xqvibra.cpp \
-    vibra.cpp \
-    process.cpp \
+SOURCES += src/vibra.cpp \
+    src/settings.cpp \
+    src/process.cpp \
+    src/main.cpp \
+    src/imageview.cpp \
+    src/imagefetcher.cpp \
+    src/engine.cpp \
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
 
-HEADERS += \
-    imageview.h \
-    engine.h \
-    imagefetcher.h \
-    settings.h \
-    xqvibra_p.h \
-    xqvibra.h \
-    vibra.h \
-    process.h \
+HEADERS += src/vibra.h \
+    src/settings.h \
+    src/process.h \
+    src/imageview.h \
+    src/imagefetcher.h \
+    src/engine.h \
 
 RESOURCES += \
     resources.qrc

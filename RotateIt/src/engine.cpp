@@ -30,7 +30,7 @@ QImage Engine::previewImage() const
     return m_previewImage;
 }
 
-void Engine::setPreviewImage(QImage arg)
+void Engine::setPreviewImage(const QImage arg)
 {
     m_previewImage = arg;
     emit previewImageChanged();

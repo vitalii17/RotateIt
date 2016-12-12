@@ -1,6 +1,7 @@
 #include <QGraphicsProxyWidget>
 
 #include "imageview.h"
+#include <QElapsedTimer>
 
 ImageView::ImageView(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
@@ -20,21 +21,26 @@ ImageView::~ImageView()
     delete m_pLabel;
 }
 
-QImage ImageView::sourceImage() const
+QImage ImageView::sourceImage()
 {
     return m_sourceImage;
 }
 
-void ImageView::setSourceImage(const QImage &sourceImage)
+void ImageView::setSourceImage(const QImage arg)
 {
-    m_sourceImage = sourceImage;
+    if(arg.isNull())
+    {
+        return;
+    }
+
+    m_sourceImage = arg;
 
     m_pLabel->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
                                                                  Qt::KeepAspectRatio/*,
                                                                 Qt::SmoothTransformation*/));
 
     //m_pLabel->setPixmap(QPixmap::fromImage(sourceImage));
-    emit sourceImageChanged();
+    //emit sourceImageChanged();
 }
 
 void ImageView::widthUpdated()

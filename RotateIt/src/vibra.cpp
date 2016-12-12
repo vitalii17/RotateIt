@@ -2,9 +2,11 @@
 
 #include "vibra.h"
 
-Vibra::Vibra(QObject *parent) :
-    QObject(parent), m_pVibra(new XQVibra)
+Vibra::Vibra(QObject *parent) : QObject(parent)
 {
+
+    m_pVibra = new D_VIBRA;
+
     m_pVibra->setIntensity(70);
 }
 

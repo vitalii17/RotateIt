@@ -18,13 +18,13 @@ public:
     explicit ImageView(QDeclarativeItem *parent = 0);
     ~ImageView();
 
-    QImage sourceImage() const;
+    QImage sourceImage();
 
 signals:
     void sourceImageChanged();
     
 public slots:
-    void setSourceImage(const QImage &sourceImage);
+    void setSourceImage(const QImage arg);
 
 private slots:
 

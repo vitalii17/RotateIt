@@ -52,14 +52,16 @@ PageStackWindow {
         ImageView {
             id: imageView
             anchors.fill: parent
+            // !! Memory leak !!
+//            sourceImage: engine.previewImage
             Connections {
                 target: engine
                 onPreviewImageChanged: {
-                    //                    var startTime = new Date().getTime()
+//                                        var startTime = new Date().getTime()
                     imageView.sourceImage = engine.previewImage
                     gc()
-                    //                    var stopTime = new Date().getTime()
-                    //                    console.log(stopTime - startTime)
+//                                        var stopTime = new Date().getTime()
+//                                        console.log(stopTime - startTime)
                 }
             }
         }
@@ -201,7 +203,9 @@ PageStackWindow {
                 iconSource: "toolbar-menu"
                 toolTip: toolTip
                 toolTipText: qsTr("Menu")
-                onClicked: mainPageMenu.open()
+                onClicked: {
+                    mainPageMenu.open()
+                }
             }
         }
 

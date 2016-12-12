@@ -10,7 +10,8 @@ class Engine : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QImage      previewImage  READ previewImage  WRITE setPreviewImage)
+    Q_PROPERTY(QImage      previewImage READ previewImage  WRITE setPreviewImage
+               NOTIFY previewImageChanged)
     Q_PROPERTY(QString     imagePath     READ imagePath     WRITE setImagePath)
     Q_PROPERTY(int         previewWidth  READ previewWidth  WRITE setPreviewWidth)
     Q_PROPERTY(int         previewHeight READ previewHeight WRITE setPreviewHeight)
@@ -74,7 +75,7 @@ private:
 
 private slots:
 
-    void setPreviewImage(QImage arg);
+    void setPreviewImage(const QImage arg);
     void setInputPreviewImage(QImage arg);
     void setState(EngineState arg, PrivateEngineState privateState);
     void resetState();

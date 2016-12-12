@@ -2,7 +2,16 @@
 #define VIBRA_H
 
 #include <QObject>
-#include <xqvibra.h>
+
+#ifdef Q_OS_SYMBIAN
+#include "Symbian/xqvibra.h"
+#define D_VIBRA XQVibra
+#endif //Q_OS_SYMBIAN
+
+#ifdef Q_OS_SYMBIAN_SIMULATOR
+#include "Symbian_simulator/emptyvibra.h"
+#define D_VIBRA EmptyVibra
+#endif //Q_OS_SYMBIAN_SIMULATOR
 
 class Vibra : public QObject
 {
@@ -26,7 +35,7 @@ private slots:
     
 private:
 
-    XQVibra *m_pVibra;
+    D_VIBRA *m_pVibra;
     int m_period;
 };
 

@@ -38,62 +38,42 @@
  **
  ****************************************************************************/
 
- #ifndef XQVIBRA_H
- #define XQVIBRA_H
+#ifndef XQVIBRA_P_H
+#define XQVIBRA_P_H
 
- // INCLUDES
- #include <QObject>
+// INCLUDES
+#include "xqvibra.h"
+#include <hwrmvibra.h>
+#include <QTimer>
 
- // FORWARD DECLARATIONS
- class XQVibraPrivate;
+// CLASS DECLARATION
+class XQVibraPrivate: public CBase, public MHWRMVibraObserver
+{
 
- // CLASS DECLARATION
- class XQVibra : public QObject
- {
-     Q_OBJECT
+public:
+    XQVibraPrivate(XQVibra *vibra);
+    ~XQVibraPrivate();
 
- public:
-     static const int InfiniteDuration = 0;
-     static const int MaxIntensity = 100;
-     static const int MinIntensity = -100;
+    bool start(int aDuration = XQVibra::InfiniteDuration);
+    bool stop();
+    bool setIntensity(int aIntensity);
+    XQVibra::Status currentStatus() const;
+    XQVibra::Error error() const;
 
-     enum Error {
-         NoError = 0,
-         OutOfMemoryError,
-         ArgumentError,
-         VibraInUseError,
-         HardwareError,
-         TimeOutError,
-         VibraLockedError,
-         AccessDeniedError,
-         UnknownError = -1
-     };
+private: // From MHWRMVibraObserver
+    void VibraModeChanged(CHWRMVibra::TVibraModeState aStatus);
+    void VibraStatusChanged(CHWRMVibra::TVibraStatus aStatus);
 
-     enum Status {
-         StatusNotAllowed = 0,
-         StatusOff,
-         StatusOn
-     };
+private:
+    XQVibra *q;
+    XQVibra::Status iStatus;
+    CHWRMVibra *iVibra;
+    QTimer iTimer;
+    int iDuration;
+    int iIntensity;
+    int iError;
+};
 
-     XQVibra(QObject *parent = 0);
-     ~XQVibra();
+#endif /*XQVIBRA_P_H*/
 
-     XQVibra::Status currentStatus() const;
-     XQVibra::Error error() const;
-
- Q_SIGNALS:
-     void statusChanged(XQVibra::Status status);
-
- public Q_SLOTS:
-     bool start(int duration = InfiniteDuration);
-     bool stop();
-     bool setIntensity(int intensity);
-
- private:
-     friend class XQVibraPrivate;
-     XQVibraPrivate *d;
- };
-
- #endif // XQVIBRA_H
-
- // End of file
+// End of file
