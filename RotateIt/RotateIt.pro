@@ -5,6 +5,8 @@ CONFIG(debug, debug|release) {
     DEPLOYMENTFOLDERS = folder_01
 }
 
+include(exiv2/exiv2.pri)
+
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
@@ -82,7 +84,7 @@ SOURCES += src/vibra.cpp \
     src/main.cpp \
     src/imageview.cpp \
     src/imagefetcher.cpp \
-    src/engine.cpp \
+    src/engine.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -98,4 +100,5 @@ HEADERS += src/vibra.h \
 RESOURCES += \
     resources.qrc
 
-OTHER_FILES +=
+OTHER_FILES += \
+    exiv2/exiv2.pri
