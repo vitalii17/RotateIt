@@ -32,13 +32,18 @@ void ImageView::setSourceImage(const QImage arg)
     {
         return;
     }
-
+// static qint64 time_sum = 0;
+// static int counter = 0;
+// counter++;
+// QElapsedTimer timer; timer.start();
     m_sourceImage = arg;
 
     m_pLabel->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
                                                                  Qt::KeepAspectRatio/*,
                                                                 Qt::SmoothTransformation*/));
-
+// time_sum = time_sum + timer.elapsed();
+// qint64 average = time_sum / counter;
+// qDebug() << average;
     //m_pLabel->setPixmap(QPixmap::fromImage(sourceImage));
     //emit sourceImageChanged();
 }
