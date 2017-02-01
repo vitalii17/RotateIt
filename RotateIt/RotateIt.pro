@@ -61,8 +61,9 @@ simulator {
     DEFINES += Q_OS_SYMBIAN_SIMULATOR
     DEFINES += MG_FETCH_DISABLED
 
-    SOURCES += src/Symbian_simulator/emptyvibra.cpp
+    LIBS += -lpsapi -lws2_32 # For exiv2
 
+    SOURCES += src/Symbian_simulator/emptyvibra.cpp
     HEADERS += src/Symbian_simulator/emptyvibra.h
 }
 
@@ -84,7 +85,8 @@ SOURCES += src/vibra.cpp \
     src/main.cpp \
     src/imageview.cpp \
     src/imagefetcher.cpp \
-    src/engine.cpp
+    src/engine.cpp \
+    src/exiftools.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -96,6 +98,7 @@ HEADERS += src/vibra.h \
     src/imageview.h \
     src/imagefetcher.h \
     src/engine.h \
+    src/exiftools.h
 
 RESOURCES += \
     resources.qrc
