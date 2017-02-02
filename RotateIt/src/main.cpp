@@ -37,6 +37,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("VS");
     QCoreApplication::setApplicationName("RotateIt");
+    QCoreApplication::setApplicationVersion(QString(APP_VERSION).remove('\"'));
 
     QString translationPath = ":/translations/" +
             QLocale::languageToString(QLocale::system().language());
@@ -58,6 +59,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     view.rootContext()->setContextProperty("vibra", &vibra);
     view.rootContext()->setContextProperty("settings", &settings);
     view.rootContext()->setContextProperty("process", &process);
+    view.rootContext()->setContextProperty("appVersion",
+                                           QCoreApplication::applicationVersion());
 
     if(argc > 1)
     {

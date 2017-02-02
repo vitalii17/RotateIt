@@ -20,6 +20,7 @@ QML_IMPORT_PATH =
 #symbian:DEPLOYMENT.installer_header = 0x2002CCCF
 
 VERSION = 0.1.0
+DEFINES += "APP_VERSION=\"\\\"$$VERSION\\\"\""
 
 symbian {
     TARGET.EPOCHEAPSIZE = 0x00001000 0x1FFFFFFF
