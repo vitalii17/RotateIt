@@ -86,7 +86,8 @@ SOURCES += src/vibra.cpp \
     src/imageview.cpp \
     src/imagefetcher.cpp \
     src/engine.cpp \
-    src/exiftools.cpp
+    src/exiftools.cpp \
+    src/rotator.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -98,7 +99,8 @@ HEADERS += src/vibra.h \
     src/imageview.h \
     src/imagefetcher.h \
     src/engine.h \
-    src/exiftools.h
+    src/exiftools.h \
+    src/rotator.h
 
 RESOURCES += \
     resources.qrc
