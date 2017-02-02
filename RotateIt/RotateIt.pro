@@ -19,8 +19,9 @@ QML_IMPORT_PATH =
 # 0x2002CCCF value if protected UID is given to the application
 #symbian:DEPLOYMENT.installer_header = 0x2002CCCF
 
+VERSION = 0.1.0
+
 symbian {
-    VERSION = 0.1.0
     TARGET.EPOCHEAPSIZE = 0x00001000 0x1FFFFFFF
     ICON = RotateIt.svg
 
