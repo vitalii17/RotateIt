@@ -1,12 +1,12 @@
 #include <QDebug>
-#include <QPainter>
-#include <qmath.h>
 
 #include <QElapsedTimer> // For performance measurement
 #include <QTime>
 
 #include "engine.h"
+
 #include "rotator.h"
+#include "resizer.h"
 
 Engine::Engine(QObject *parent) :
     QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false),
@@ -54,7 +54,7 @@ void Engine::setImagePath(QString arg)
     {
         setState(Engine::Processing, Engine::Opening);
         QThread *thread = new QThread();
-        Resize *resizer = new Resize();
+        Resizer *resizer = new Resizer();
         resizer->moveToThread(thread);
         resizer->setInputImagePath(imagePath());
         resizer->setWidth(previewWidth());
@@ -195,47 +195,6 @@ void Engine::resetPrivateSavingState()
     resetState();
 }
 
-
-// Resizer
-
-Resize::Resize(QObject *parent) : QObject(parent)
-{
-
-}
-
-int Resize::width() const
-{
-    return m_width;
-}
-
-int Resize::height() const
-{
-    return m_height;
-}
-
-void Resize::process()
-{
-    m_outputImage = QImage(m_path).
-            scaled(width(), height(), Qt::KeepAspectRatio).
-            convertToFormat(QImage::Format_ARGB32_Premultiplied);
-    emit finished();
-    emit finished(m_outputImage);
-}
-
-void Resize::setInputImagePath(QString path)
-{
-    m_path = path;
-}
-
-void Resize::setWidth(int arg)
-{
-    m_width = arg;
-}
-
-void Resize::setHeight(int arg)
-{
-    m_height = arg;
-}
 
 
 
