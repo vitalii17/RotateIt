@@ -20,7 +20,6 @@
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>
-        <file>translations/Ukrainian.qm</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/open.png</file>
