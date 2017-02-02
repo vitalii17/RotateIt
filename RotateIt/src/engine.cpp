@@ -2,8 +2,9 @@
 #include <QPainter>
 #include <qmath.h>
 
-#include <QElapsedTimer> // For performance measurement
+#include "exiftools.h"
 
+#include <QElapsedTimer> // For performance measurement
 #include <QTime>
 
 #include "engine.h"
@@ -435,7 +436,23 @@ void Rotate::process()
                 convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
         image = rotate(image, angle(), spth());
-        image.save(m_outputImagePath, 0, quality());
+
+        bool saveReturnCode;
+        saveReturnCode = image.save(m_outputImagePath, 0, quality());
+
+        if(saveReturnCode)
+        {
+            try
+            {
+                ExifTools::copyExif(m_inputImagePath,
+                                    m_outputImagePath,
+                                    "Edited by \"Rotate It!\" on Symbian");
+            }
+            catch(Exiv2::Error &error)
+            {
+
+            }
+        }
     }
     emit finished();
 }
@@ -448,5 +465,10 @@ void Rotate::setInputImagePath(QString path)
 void Rotate::setInputImage(QImage &image)
 {
     m_inputImage = image;
+}
+
+void Rotate::setPreviewImage(const QImage &arg)
+{
+    m_previewImage = arg;
 }
 

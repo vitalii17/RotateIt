@@ -171,11 +171,13 @@ public slots:
     void process();
     void setInputImagePath(QString path);
     void setInputImage(QImage &image);
+    void setPreviewImage(const QImage &arg);
 
 private:
 
     qreal m_angle;
     QImage m_inputImage;
+    QImage m_previewImage;
     QString m_inputImagePath;
     QString m_outputImagePath;
     int m_quality;
