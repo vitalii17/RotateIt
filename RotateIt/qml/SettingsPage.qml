@@ -53,6 +53,13 @@ Page {
                 checked: settings.sliderArrowsEnabled
                 onCheckedChanged: settings.sliderArrowsEnabled = checked
             }
+
+            CheckableListElement {
+                titleText: qsTr("Save EXIF metadata")
+                subTitleText: qsTr("Experimental feature")
+                checked: settings.exifEnabled
+                onCheckedChanged: settings.exifEnabled = checked
+            }
         }
     }
 

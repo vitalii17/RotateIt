@@ -10,6 +10,7 @@ Settings::Settings(QObject *parent) :
     m_isDefaultQuality    = m_pSettings->value("IsDefaultQuality", true).toBool();
     m_vibraOn             = m_pSettings->value("VibraOn", true).toBool();
     m_sliderArrowsEnabled = m_pSettings->value("SliderArrowsEnabled", true).toBool();
+    m_exifEnabled         = m_pSettings->value("ExifEnabled", false).toBool();
 }
 
 Settings::~Settings()
@@ -37,6 +38,11 @@ Settings::~Settings()
     if(m_sliderArrowsEnabled != m_pSettings->value("SliderArrowsEnabled", true).toBool())
     {
         m_pSettings->setValue("SliderArrowsEnabled", m_sliderArrowsEnabled);
+    }
+
+    if(m_exifEnabled != m_pSettings->value("ExifEnabled", false).toBool())
+    {
+        m_pSettings->setValue("ExifEnabled", m_exifEnabled);
     }
 
     delete m_pSettings;
@@ -118,6 +124,20 @@ void Settings::setSliderArrowsEnabled(bool arg)
     {
         m_sliderArrowsEnabled = arg;
         emit sliderArrowsEnabledChanged(arg);
+    }
+}
+
+bool Settings::exifEnabled() const
+{
+    return m_exifEnabled;
+}
+
+void Settings::setExifEnabled(bool arg)
+{
+    if(m_exifEnabled != arg)
+    {
+        m_exifEnabled = arg;
+        emit exifEnabledChanged(arg);
     }
 }
 
