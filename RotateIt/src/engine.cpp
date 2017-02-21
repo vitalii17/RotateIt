@@ -20,7 +20,7 @@ void Engine::rotate(qreal angle)
     if(!m_previewImage.isNull())
     {
         m_previewImage = Rotator::rotate(m_inputPreviewImage, angle,
-                                        smoothPixmapTransformHint());
+                                         smoothPixmapTransformHint());
         emit previewImageChanged();
     }
 }
@@ -30,15 +30,21 @@ QImage Engine::previewImage() const
     return m_previewImage;
 }
 
-void Engine::setPreviewImage(const QImage arg)
+void Engine::setPreviewImage(const QImage image)
 {
-    m_previewImage = arg;
-    emit previewImageChanged();
+    if(m_previewImage != image)
+    {
+        m_previewImage = image;
+        emit previewImageChanged();
+    }
 }
 
-void Engine::setInputPreviewImage(QImage arg)
+void Engine::setInputPreviewImage(QImage image)
 {
-    m_inputPreviewImage = arg;
+    if(m_inputPreviewImage != image)
+    {
+        m_inputPreviewImage = image;
+    }
 }
 
 QString Engine::imagePath() const
@@ -46,32 +52,35 @@ QString Engine::imagePath() const
     return m_imagePath;
 }
 
-void Engine::setImagePath(QString arg)
+void Engine::setImagePath(QString path)
 {
-    m_imagePath = arg;
-
-    if(!m_imagePath.isEmpty())
+    if(m_imagePath != path)
     {
-        setState(Engine::Processing, Engine::Opening);
-        QThread *thread = new QThread();
-        Resizer *resizer = new Resizer();
-        resizer->moveToThread(thread);
-        resizer->setInputImagePath(imagePath());
-        resizer->setWidth(previewWidth());
-        resizer->setHeight(previewHeight());
+        m_imagePath = path;
 
-        connect(thread, SIGNAL(started()), resizer, SLOT(process()));
-        connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setPreviewImage(QImage)));
-        connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setInputPreviewImage(QImage)));
-        connect(resizer, SIGNAL(finished()), thread, SLOT(quit()));
-        connect(resizer, SIGNAL(finished()), resizer, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), this, SLOT(resetPrivateOpeningState()));
-        thread->start();
-        thread->setPriority(QThread::LowPriority);
+        if(!m_imagePath.isEmpty())
+        {
+            setState(Engine::Processing, Engine::Opening);
+            QThread *thread = new QThread();
+            Resizer *resizer = new Resizer();
+            resizer->moveToThread(thread);
+            resizer->setInputImagePath(imagePath());
+            resizer->setWidth(previewWidth());
+            resizer->setHeight(previewHeight());
+
+            connect(thread, SIGNAL(started()), resizer, SLOT(process()));
+            connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setPreviewImage(QImage)));
+            connect(resizer, SIGNAL(finished(QImage)), this, SLOT(setInputPreviewImage(QImage)));
+            connect(resizer, SIGNAL(finished()), thread, SLOT(quit()));
+            connect(resizer, SIGNAL(finished()), resizer, SLOT(deleteLater()));
+            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+            connect(thread, SIGNAL(finished()), this, SLOT(resetPrivateOpeningState()));
+            thread->start();
+            thread->setPriority(QThread::LowPriority);
+        }
+
+        emit imagePathChanged();
     }
-
-    emit imagePathChanged();
 }
 
 int Engine::previewWidth() const
@@ -79,10 +88,13 @@ int Engine::previewWidth() const
     return m_previewWidth;
 }
 
-void Engine::setPreviewWidth(int arg)
+void Engine::setPreviewWidth(int width)
 {
-    m_previewWidth = arg;
-    emit previewWidthChanged();
+    if(m_previewWidth != width)
+    {
+        m_previewWidth = width;
+        emit previewWidthChanged();
+    }
 }
 
 int Engine::previewHeight() const
@@ -90,10 +102,13 @@ int Engine::previewHeight() const
     return m_previewHeight;
 }
 
-void Engine::setPreviewHeight(int arg)
+void Engine::setPreviewHeight(int height)
 {
-    m_previewHeight = arg;
-    emit previewHeightChanged();
+    if(m_previewHeight != height)
+    {
+        m_previewHeight = height;
+        emit previewHeightChanged();
+    }
 }
 
 qreal Engine::rotation() const
@@ -101,11 +116,14 @@ qreal Engine::rotation() const
     return m_rotation;
 }
 
-void Engine::setRotation(qreal arg)
+void Engine::setRotation(qreal rotation)
 {
-    m_rotation = arg;
-    emit rotationChanged();
-    rotate(arg);
+    if(m_rotation != rotation)
+    {
+        m_rotation = rotation;
+        emit rotationChanged();
+        rotate(m_rotation);
+    }
 }
 
 bool Engine::smoothPixmapTransformHint() const
@@ -115,7 +133,10 @@ bool Engine::smoothPixmapTransformHint() const
 
 void Engine::setSmoothPixmapTransformHint(bool hint)
 {
-    m_smoothPixmapTransformHint = hint;
+    if(m_smoothPixmapTransformHint != hint)
+    {
+        m_smoothPixmapTransformHint = hint;
+    }
 }
 
 Engine::EngineState Engine::state() const
@@ -153,25 +174,28 @@ void Engine::save(int quality)
     }
 }
 
-void Engine::setState(Engine::EngineState arg, Engine::PrivateEngineState privateState)
+void Engine::setState(Engine::EngineState state, Engine::PrivateEngineState privateState)
 {
-    m_state = arg;
-
-    switch(privateState)
+    if(m_state != state)
     {
-    case Engine::Opening:
-        m_privateOpeningState = true;
-        break;
+        m_state = state;
 
-    case Engine::Saving:
-        m_privateSavingState = true;
-        break;
+        switch(privateState)
+        {
+        case Engine::Opening:
+            m_privateOpeningState = true;
+            break;
 
-    default:
-        break;
+        case Engine::Saving:
+            m_privateSavingState = true;
+            break;
+
+        default:
+            break;
+        }
+
+        emit stateChanged();
     }
-
-    emit stateChanged();
 }
 
 void Engine::resetState()

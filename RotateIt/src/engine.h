@@ -10,16 +10,28 @@ class Engine : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QImage      previewImage READ previewImage  WRITE setPreviewImage
-               NOTIFY previewImageChanged)
-    Q_PROPERTY(QString     imagePath     READ imagePath     WRITE setImagePath)
-    Q_PROPERTY(int         previewWidth  READ previewWidth  WRITE setPreviewWidth)
-    Q_PROPERTY(int         previewHeight READ previewHeight WRITE setPreviewHeight)
-    Q_PROPERTY(qreal       rotation      READ rotation      WRITE setRotation)
-    Q_PROPERTY(EngineState state         READ state         RESET resetState)
-    Q_PROPERTY(bool smoothPixmapTransformHint
-               READ smoothPixmapTransformHint
-               WRITE setSmoothPixmapTransformHint)
+    Q_PROPERTY(QImage      previewImage
+               READ        previewImage
+               WRITE       setPreviewImage
+               NOTIFY      previewImageChanged)
+    Q_PROPERTY(QString     imagePath
+               READ        imagePath
+               WRITE       setImagePath)
+    Q_PROPERTY(int         previewWidth
+               READ        previewWidth
+               WRITE       setPreviewWidth)
+    Q_PROPERTY(int         previewHeight
+               READ        previewHeight
+               WRITE       setPreviewHeight)
+    Q_PROPERTY(qreal       rotation
+               READ        rotation
+               WRITE       setRotation)
+    Q_PROPERTY(EngineState state
+               READ        state
+               RESET       resetState)
+    Q_PROPERTY(bool        smoothPixmapTransformHint
+               READ        smoothPixmapTransformHint
+               WRITE       setSmoothPixmapTransformHint)
 
     Q_ENUMS(EngineState)
 
@@ -35,22 +47,23 @@ public:
     QImage previewImage() const;
 
     QString imagePath() const;
-    void setImagePath(QString arg);
+    void setImagePath(QString path);
 
     int previewWidth() const;
-    void setPreviewWidth(int arg);
+    void setPreviewWidth(int width);
 
     int previewHeight() const;
-    void setPreviewHeight(int arg);
+    void setPreviewHeight(int height);
 
     qreal rotation() const;
-    void setRotation(qreal arg);
+    void setRotation(qreal rotation);
 
     bool smoothPixmapTransformHint() const;
     void setSmoothPixmapTransformHint(bool hint);
 
     EngineState state() const;
 
+    Q_INVOKABLE void rotate(qreal angle);
     Q_INVOKABLE void save(int quality = -1);
 
 signals:
@@ -75,17 +88,15 @@ private:
 
 private slots:
 
-    void setPreviewImage(const QImage arg);
-    void setInputPreviewImage(QImage arg);
-    void setState(EngineState arg, PrivateEngineState privateState);
+    void setPreviewImage(const QImage image);
+    void setInputPreviewImage(QImage image);
+    void setState(EngineState state, PrivateEngineState privateState);
     void resetState();
 
     void resetPrivateOpeningState();
     void resetPrivateSavingState();
 
 private:
-
-    void rotate(qreal angle);
     
     QImage m_previewImage;
     QImage m_inputPreviewImage;

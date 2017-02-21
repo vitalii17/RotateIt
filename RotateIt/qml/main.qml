@@ -120,7 +120,7 @@ PageStackWindow {
             onReleased: {
                 if(!settings.spthPreview) {
                     engine.smoothPixmapTransformHint = true
-                    engine.rotation = value
+                    engine.rotate(value)
                     engine.smoothPixmapTransformHint = false
                 }
             }
