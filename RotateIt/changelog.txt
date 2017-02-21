@@ -1,0 +1,6 @@
+0.1.0 September 22, 2016:
+    -First release.
+
+0.2.0 
+    - Added EXIF support;
+    - Some UI fixes.
