@@ -24,7 +24,7 @@ signals:
     void sourceImageChanged();
     
 public slots:
-    void setSourceImage(const QImage arg);
+    void setSourceImage(const QImage image);
 
 private slots:
 

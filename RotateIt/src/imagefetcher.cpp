@@ -95,9 +95,9 @@ bool ImageFetcher::fetched() const
     return m_fetched;
 }
 
-void ImageFetcher::setFetched(bool arg)
+void ImageFetcher::setFetched(bool fetched)
 {
-    m_fetched = arg;
+    m_fetched = fetched;
     emit fetchedChanged();
 }
 

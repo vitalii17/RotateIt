@@ -160,9 +160,12 @@ qreal Rotator::angle() const
     return m_angle;
 }
 
-void Rotator::setAngle(qreal value)
+void Rotator::setAngle(qreal angle)
 {
-    m_angle = value;
+    if(m_angle != angle)
+    {
+        m_angle = angle;
+    }
 }
 
 int Rotator::quality() const
@@ -185,9 +188,12 @@ bool Rotator::spth() const
     return m_spth;
 }
 
-void Rotator::setQuality(int value)
+void Rotator::setQuality(int quality)
 {
-    m_quality = value;
+    if(m_quality != quality)
+    {
+        m_quality = quality;
+    }
 }
 
 void Rotator::process()

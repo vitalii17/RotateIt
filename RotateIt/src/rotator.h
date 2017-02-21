@@ -18,9 +18,9 @@ public:
                          bool smoothPixmapTransformHint = false);
 
     qreal angle() const;
-    void setAngle(qreal value);
+    void setAngle(qreal angle);
 
-    void setQuality(int value);
+    void setQuality(int quality);
     int quality() const;
 
     void setOutputImagePath(QString &path);

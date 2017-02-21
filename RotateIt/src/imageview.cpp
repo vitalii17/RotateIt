@@ -26,26 +26,29 @@ QImage ImageView::sourceImage()
     return m_sourceImage;
 }
 
-void ImageView::setSourceImage(const QImage arg)
+void ImageView::setSourceImage(const QImage image)
 {
-    if(arg.isNull())
+    if(m_sourceImage != image)
     {
-        return;
-    }
-// static qint64 time_sum = 0;
-// static int counter = 0;
-// counter++;
-// QElapsedTimer timer; timer.start();
-    m_sourceImage = arg;
+        if(image.isNull())
+        {
+            return;
+        }
+    // static qint64 time_sum = 0;
+    // static int counter = 0;
+    // counter++;
+    // QElapsedTimer timer; timer.start();
+        m_sourceImage = image;
 
-    m_pLabel->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
-                                                                 Qt::KeepAspectRatio/*,
-                                                                Qt::SmoothTransformation*/));
-// time_sum = time_sum + timer.elapsed();
-// qint64 average = time_sum / counter;
-// qDebug() << average;
-    //m_pLabel->setPixmap(QPixmap::fromImage(sourceImage));
-    //emit sourceImageChanged();
+        m_pLabel->setPixmap(QPixmap::fromImage(m_sourceImage).scaled(width(), height(),
+                                                                     Qt::KeepAspectRatio/*,
+                                                                    Qt::SmoothTransformation*/));
+    // time_sum = time_sum + timer.elapsed();
+    // qint64 average = time_sum / counter;
+    // qDebug() << average;
+        //m_pLabel->setPixmap(QPixmap::fromImage(sourceImage));
+        //emit sourceImageChanged();
+    }
 }
 
 void ImageView::widthUpdated()

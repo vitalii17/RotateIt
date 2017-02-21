@@ -23,8 +23,8 @@ public slots:
     void process();
     void setInputImagePath(QString path);
 
-    void setWidth(int arg);
-    void setHeight(int arg);
+    void setWidth(int width);
+    void setHeight(int height);
 
 signals:
 

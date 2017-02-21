@@ -25,7 +25,7 @@ public:
     Q_INVOKABLE QString fetchImage(FetchMethod method);
 
     bool fetched() const;
-    void setFetched(const bool arg);
+    void setFetched(bool fetched);
 
 signals:
 

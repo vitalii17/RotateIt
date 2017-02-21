@@ -29,12 +29,18 @@ void Resizer::setInputImagePath(QString path)
     m_path = path;
 }
 
-void Resizer::setWidth(int arg)
+void Resizer::setWidth(int width)
 {
-    m_width = arg;
+    if(m_width != width)
+    {
+        m_width = width;
+    }
 }
 
-void Resizer::setHeight(int arg)
+void Resizer::setHeight(int height)
 {
-    m_height = arg;
+    if(m_height != height)
+    {
+        m_height = height;
+    }
 }
