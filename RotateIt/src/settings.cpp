@@ -53,12 +53,12 @@ bool Settings::spthPreview() const
     return m_spthPreview;
 }
 
-void Settings::setSpthPreview(bool arg)
+void Settings::setSpthPreview(bool spth)
 {
-    if(m_spthPreview != arg)
+    if(m_spthPreview != spth)
     {
-        m_spthPreview = arg;
-        emit spthPreviewChanged(arg);
+        m_spthPreview = spth;
+        emit spthPreviewChanged(m_spthPreview);
     }
 }
 
@@ -67,12 +67,12 @@ int Settings::quality() const
     return m_quality;
 }
 
-void Settings::setQuality(int arg)
+void Settings::setQuality(int quality)
 {
-    if(m_quality != arg)
+    if(m_quality != quality)
     {
-        m_quality = arg;
-        emit qualityChanged(arg);
+        m_quality = quality;
+        emit qualityChanged(m_quality);
     }
 }
 
@@ -81,12 +81,12 @@ bool Settings::isDefaultQuality() const
     return m_isDefaultQuality;
 }
 
-void Settings::setIsDefaultQuality(bool arg)
+void Settings::setIsDefaultQuality(bool isDefQuality)
 {
-    if(m_isDefaultQuality != arg)
+    if(m_isDefaultQuality != isDefQuality)
     {
-        m_isDefaultQuality = arg;
-        emit isDefaultQualityChanged(arg);
+        m_isDefaultQuality = isDefQuality;
+        emit isDefaultQualityChanged(m_isDefaultQuality);
     }
 }
 
@@ -95,12 +95,12 @@ bool Settings::vibraOn() const
     return m_vibraOn;
 }
 
-void Settings::setVibraOn(bool arg)
+void Settings::setVibraOn(bool vibraOn)
 {
-    if(m_vibraOn != arg)
+    if(m_vibraOn != vibraOn)
     {
-        m_vibraOn = arg;
-        emit vibraOnChanged(arg);
+        m_vibraOn = vibraOn;
+        emit vibraOnChanged(m_vibraOn);
     }
 }
 
@@ -118,12 +118,12 @@ bool Settings::sliderArrowsEnabled() const
     return m_sliderArrowsEnabled;
 }
 
-void Settings::setSliderArrowsEnabled(bool arg)
+void Settings::setSliderArrowsEnabled(bool arrowsEn)
 {
-    if(m_sliderArrowsEnabled != arg)
+    if(m_sliderArrowsEnabled != arrowsEn)
     {
-        m_sliderArrowsEnabled = arg;
-        emit sliderArrowsEnabledChanged(arg);
+        m_sliderArrowsEnabled = arrowsEn;
+        emit sliderArrowsEnabledChanged(m_sliderArrowsEnabled);
     }
 }
 
@@ -132,12 +132,12 @@ bool Settings::exifEnabled() const
     return m_exifEnabled;
 }
 
-void Settings::setExifEnabled(bool arg)
+void Settings::setExifEnabled(bool exifEn)
 {
-    if(m_exifEnabled != arg)
+    if(m_exifEnabled != exifEn)
     {
-        m_exifEnabled = arg;
-        emit exifEnabledChanged(arg);
+        m_exifEnabled = exifEn;
+        emit exifEnabledChanged(m_exifEnabled);
     }
 }
 

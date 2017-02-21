@@ -41,32 +41,32 @@ public:
     ~Settings();
     
     bool spthPreview() const;
-    void setSpthPreview(bool arg);
+    void setSpthPreview(bool spth);
 
     int quality() const;
-    void setQuality(int arg);
+    void setQuality(int quality);
 
     bool isDefaultQuality() const;
-    void setIsDefaultQuality(bool arg);
+    void setIsDefaultQuality(bool isDefQuality);
 
     bool vibraOn() const;
-    void setVibraOn(bool arg);
+    void setVibraOn(bool vibraOn);
 
     bool galleryAvailable() const;
 
     bool sliderArrowsEnabled() const;
-    void setSliderArrowsEnabled(bool arg);
+    void setSliderArrowsEnabled(bool arrowsEn);
 
     bool exifEnabled() const;
-    void setExifEnabled(bool arg);
+    void setExifEnabled(bool exifEn);
 
 signals:
-    void spthPreviewChanged(bool arg);
-    void qualityChanged(int arg);
-    void isDefaultQualityChanged(bool arg);
-    void vibraOnChanged(bool arg);
-    void sliderArrowsEnabledChanged(bool arg);
-    void exifEnabledChanged(bool arg);
+    void spthPreviewChanged(bool spth);
+    void qualityChanged(int quality);
+    void isDefaultQualityChanged(bool isDefQuality);
+    void vibraOnChanged(bool vibraOn);
+    void sliderArrowsEnabledChanged(bool arrowsEn);
+    void exifEnabledChanged(bool exifEn);
 
 public slots:
 
