@@ -14,7 +14,7 @@ QImage Rotator::rotate(QImage &image, qreal angle,
     QImage resultImage;
     if(!image.isNull())
     {
-        //Source https://rsdn.ru/forum/alg/3797164.all
+        //Source https://rsdn.org/forum/alg/3797164.all
         //With my optimizations
         qreal angle_rad = qAbs((M_PI / 180) * angle);
         qreal cos_angle = qCos(angle_rad);
