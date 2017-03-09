@@ -273,7 +273,7 @@ PageStackWindow {
             ToolBoardItem {
                 text: qsTr("View gallery")
                 iconSource: "qrc:/images/images/gallery.svg"
-                onClicked: process.startDetached("glx.exe")
+                onClicked: extAppLauncher.startDetached("glx.exe")
             }
         }
 

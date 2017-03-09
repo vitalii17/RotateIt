@@ -83,14 +83,14 @@ CONFIG += qt-components
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += src/vibra.cpp \
     src/settings.cpp \
-    src/process.cpp \
     src/main.cpp \
     src/imageview.cpp \
     src/imagefetcher.cpp \
     src/engine.cpp \
     src/exiftools.cpp \
     src/rotator.cpp \
-    src/resizer.cpp
+    src/resizer.cpp \
+    src/extapplauncher.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -98,13 +98,13 @@ qtcAddDeployment()
 
 HEADERS += src/vibra.h \
     src/settings.h \
-    src/process.h \
     src/imageview.h \
     src/imagefetcher.h \
     src/engine.h \
     src/exiftools.h \
     src/rotator.h \
-    src/resizer.h
+    src/resizer.h \
+    src/extapplauncher.h
 
 RESOURCES += \
     resources.qrc
