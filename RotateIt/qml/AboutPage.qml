@@ -42,7 +42,7 @@ never been so easy! \
 <a href=\"https://github.com/Vitalii17/RotateIt\">\"GitHub.com\"</a> \
 <h3><p align = \"center\">License</h3> \
 <h4><p align = \"center\">The MIT License (MIT)</h4> \
-<p alifn = \"center\">Copyright (c) 2016 Vitalii Shunkov \
+<p alifn = \"center\">Copyright (c) 2017 Vitalii Shunkov \
 <p>Permission is hereby granted, free of charge, to any person obtaining a copy of \
 this software and associated documentation files (the \"Software\"), to deal in the \
 Software with out restriction, including without limitation the rights to use, copy, \
