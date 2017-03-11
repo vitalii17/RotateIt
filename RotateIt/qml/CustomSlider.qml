@@ -15,8 +15,6 @@ Item {
                                                   containerItem.width / 2) * 4) *
                                                 amplitude + offset, stepSize)
     property real offset: 0
-    property bool arrowsEnabled: true
-    property string arrowsPath: ""
 
     onOffsetChanged: {
         if(offset >= 360) {
@@ -46,19 +44,41 @@ Item {
         }
     }
 
+    Rectangle {
+        id: leftLineRect
+        anchors.left: parent.left
+        width: slider.x + slider.width / 2
+        anchors.verticalCenter: parent.verticalCenter
+        height: 2
+        color: "grey"
+        opacity: 0.5
+    }
+    Rectangle {
+        id: rightLineRect
+        width: parent.width - leftLineRect.width - slider.width - slider.border.width
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        height: 2
+        color: "grey"
+        opacity: 0.5
+    }
+
     Item {
         id: containerItem
 
         height: root.height
-        width: root.width - slider.width
+        width: root.width - slider.width - slider.border.width
         anchors.centerIn: root
 
         Rectangle {
             id: slider
+            anchors.verticalCenter: parent.verticalCenter
             color: "grey"
+            radius: width / 2
             opacity: 0.5
             width: 85
-            height: root.height
+            height: width
+            smooth: true
             x: containerItem.width / 2 - width / 2
             border.color: color
             border.width: 3
@@ -66,48 +86,39 @@ Item {
             Text {
                 text: root.value
                 color: "white"
-                font.pixelSize: 31
+                smooth: true
+                font.pixelSize: (Math.abs(root.value) <= 10) ? slider.width / 2 :
+                                                               slider.width / 3
                 anchors.centerIn: parent
             }
 
-            SequentialAnimation {
+            ParallelAnimation {
                 id: borderAnimation
-                PropertyAnimation {
-                    target: slider
-                    property: "border.color"
-                    to: "blue"
+                SequentialAnimation {
+                    PropertyAnimation {
+                        targets: [leftLineRect, rightLineRect]
+                        properties: "border.color"
+                        to: "blue"
+                    }
+                    PropertyAnimation {
+                        targets: [leftLineRect, rightLineRect]
+                        properties: "border.color"
+                        to: leftLineRect.color
+                    }
                 }
-                PropertyAnimation {
-                    target: slider
-                    property: "border.color"
-                    to: target.color
+                SequentialAnimation {
+                    PropertyAnimation {
+                        target: slider
+                        property: "border.color"
+                        to: "blue"
+                    }
+                    PropertyAnimation {
+                        target: slider
+                        property: "border.color"
+                        to: target.color
+                    }
                 }
             }
-        }
-
-        Image {
-            source: root.arrowsEnabled ? root.arrowsPath : ""
-            width: slider.width / 5
-            height: slider.height
-            sourceSize.width: width
-            sourceSize.height: height
-            anchors.right: slider.left
-            anchors.verticalCenter: slider.verticalCenter
-            anchors.rightMargin: 5
-            opacity: slider.opacity
-        }
-
-        Image {
-            source: root.arrowsEnabled ? root.arrowsPath : ""
-            width: slider.width / 5
-            height: slider.height
-            sourceSize.width: width
-            sourceSize.height: height
-            anchors.left: slider.right
-            anchors.verticalCenter: slider.verticalCenter
-            anchors.leftMargin: 5 + 1 // QImage bug (???)
-            rotation: 180
-            opacity: slider.opacity
         }
 
         MouseArea {

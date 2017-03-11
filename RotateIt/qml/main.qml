@@ -74,7 +74,7 @@ PageStackWindow {
             height: 2
             opacity: 0.4
             width: parent.width
-            y: parent.height / 2
+            y: parent.height / 4
             function blink() { borderAnimation.start() }
 
             SequentialAnimation {
@@ -106,10 +106,8 @@ PageStackWindow {
             id: slider
             anchors.left: parent.left
             anchors.right: parent.right
-            y: (parent.height / 3) * 2
+            y: (parent.height / 3) * 2 - height / 2
             amplitude: 10
-            arrowsEnabled: settings.sliderArrowsEnabled
-            arrowsPath: "qrc:/images/images/arrow.svg"
             onYChanged: reset()
             onPressed: {
                 mainToolBar.shown = false

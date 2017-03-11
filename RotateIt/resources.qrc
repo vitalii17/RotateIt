@@ -29,7 +29,6 @@
         <file>images/up.png</file>
         <file>images/refresh.svg</file>
         <file>images/horizont-line.svg</file>
-        <file>images/arrow.svg</file>
         <file>images/gallery.svg</file>
     </qresource>
 </RCC>
