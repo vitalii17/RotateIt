@@ -32,10 +32,10 @@ class Engine : public QObject
     Q_PROPERTY(bool        smoothPixmapTransformHint
                READ        smoothPixmapTransformHint
                WRITE       setSmoothPixmapTransformHint)
-    Q_PROPERTY(bool        saveExifEnable
-               READ        saveExifEnable
-               WRITE       setSaveExifEnable
-               NOTIFY      saveExifEnableChanged)
+    Q_PROPERTY(bool        exifEnabled
+               READ        exifEnabled
+               WRITE       setExifEnabled
+               NOTIFY      exifEnabledChanged)
 
     Q_ENUMS(EngineState)
 
@@ -65,8 +65,8 @@ public:
     bool smoothPixmapTransformHint() const;
     void setSmoothPixmapTransformHint(bool hint);
 
-    bool saveExifEnable() const;
-    void setSaveExifEnable(bool exifEn);
+    bool exifEnabled() const;
+    void setExifEnabled(bool exifEn);
 
     EngineState state() const;
 
@@ -80,7 +80,7 @@ signals:
     void previewWidthChanged();
     void previewHeightChanged();
     void rotationChanged();
-    void saveExifEnableChanged();
+    void exifEnabledChanged();
 
     void stateChanged();
     void savingFinished();
@@ -114,7 +114,7 @@ private:
     qreal       m_rotation;
     bool        m_smoothPixmapTransformHint;
     EngineState m_state;
-    bool        m_saveExifEnable;
+    bool        m_exifEnabled;
 
     bool        m_privateOpeningState;
     bool        m_privateSavingState;

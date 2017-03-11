@@ -8,8 +8,8 @@
 class Rotator : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qreal angle      READ angle      WRITE setAngle)
-    Q_PROPERTY(bool  saveExifEn READ saveExifEn WRITE setSaveExifEn)
+    Q_PROPERTY(qreal angle       READ angle       WRITE setAngle)
+    Q_PROPERTY(bool  exifEnabled READ exifEnabled WRITE setExifEnabled)
 
 public:
 
@@ -29,8 +29,8 @@ public:
     void setSpth(bool hint);
     bool spth() const;
 
-    void setSaveExifEn(bool exifEn);
-    bool saveExifEn() const;
+    void setExifEnabled(bool exifEn);
+    bool exifEnabled() const;
 
 signals:
 
@@ -53,7 +53,7 @@ private:
     QString m_outputImagePath;
     int     m_quality;
     bool    m_spth;
-    bool    m_saveExifEn;
+    bool    m_exifEnabled;
 };
 
 #endif // ROTATOR_H

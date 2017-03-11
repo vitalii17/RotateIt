@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QDebug>
 
-Rotator::Rotator(QObject *parent) : QObject(parent), m_angle(0), m_saveExifEn(false)
+Rotator::Rotator(QObject *parent) : QObject(parent), m_angle(0), m_exifEnabled(false)
 {
 
 }
@@ -189,17 +189,17 @@ bool Rotator::spth() const
     return m_spth;
 }
 
-void Rotator::setSaveExifEn(bool exifEn)
+void Rotator::setExifEnabled(bool exifEn)
 {
-    if(m_saveExifEn != exifEn)
+    if(m_exifEnabled != exifEn)
     {
-        m_saveExifEn = saveExifEn();
+        m_exifEnabled = exifEn;
     }
 }
 
-bool Rotator::saveExifEn() const
+bool Rotator::exifEnabled() const
 {
-    return m_saveExifEn;
+    return m_exifEnabled;
 }
 
 void Rotator::setQuality(int quality)
