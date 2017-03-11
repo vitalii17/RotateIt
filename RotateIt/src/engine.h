@@ -32,6 +32,10 @@ class Engine : public QObject
     Q_PROPERTY(bool        smoothPixmapTransformHint
                READ        smoothPixmapTransformHint
                WRITE       setSmoothPixmapTransformHint)
+    Q_PROPERTY(bool        saveExifEnable
+               READ        saveExifEnable
+               WRITE       setSaveExifEnable
+               NOTIFY      saveExifEnableChanged)
 
     Q_ENUMS(EngineState)
 
@@ -61,6 +65,9 @@ public:
     bool smoothPixmapTransformHint() const;
     void setSmoothPixmapTransformHint(bool hint);
 
+    bool saveExifEnable() const;
+    void setSaveExifEnable(bool exifEn);
+
     EngineState state() const;
 
     Q_INVOKABLE void rotate(qreal angle);
@@ -73,6 +80,7 @@ signals:
     void previewWidthChanged();
     void previewHeightChanged();
     void rotationChanged();
+    void saveExifEnableChanged();
 
     void stateChanged();
     void savingFinished();
@@ -98,17 +106,18 @@ private slots:
 
 private:
     
-    QImage m_previewImage;
-    QImage m_inputPreviewImage;
-    QString m_imagePath;
-    int m_previewWidth;
-    int m_previewHeight;
-    qreal m_rotation;
-    bool m_smoothPixmapTransformHint;
+    QImage      m_previewImage;
+    QImage      m_inputPreviewImage;
+    QString     m_imagePath;
+    int         m_previewWidth;
+    int         m_previewHeight;
+    qreal       m_rotation;
+    bool        m_smoothPixmapTransformHint;
     EngineState m_state;
+    bool        m_saveExifEnable;
 
-    bool m_privateOpeningState;
-    bool m_privateSavingState;
+    bool        m_privateOpeningState;
+    bool        m_privateSavingState;
 };
 
 

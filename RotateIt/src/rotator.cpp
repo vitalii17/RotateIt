@@ -1,9 +1,10 @@
 #include "rotator.h"
 #include <qmath.h>
 #include <QPainter>
+#include <QDir>
 #include <QDebug>
 
-Rotator::Rotator(QObject *parent) : QObject(parent), m_angle(0)
+Rotator::Rotator(QObject *parent) : QObject(parent), m_angle(0), m_saveExifEn(false)
 {
 
 }
@@ -188,6 +189,19 @@ bool Rotator::spth() const
     return m_spth;
 }
 
+void Rotator::setSaveExifEn(bool exifEn)
+{
+    if(m_saveExifEn != exifEn)
+    {
+        m_saveExifEn = saveExifEn();
+    }
+}
+
+bool Rotator::saveExifEn() const
+{
+    return m_saveExifEn;
+}
+
 void Rotator::setQuality(int quality)
 {
     if(m_quality != quality)
@@ -209,7 +223,7 @@ void Rotator::process()
         saveReturnCode = image.save(m_outputImagePath, 0, quality());
 
         if(saveReturnCode)
-        {
+        {   
             try
             {
                 ExifTools::copyExif(m_inputImagePath,
@@ -221,6 +235,7 @@ void Rotator::process()
                 qDebug() << "Exception(errMsg):" << Exiv2::errMsg(error.code());
                 qDebug() << "Exception(what)  :" << error.what();
                 qDebug() << "Exception(code)  :" << error.code();
+
             }
         }
     }
