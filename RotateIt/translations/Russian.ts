@@ -4,10 +4,14 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <location filename="../qml/AboutPage.qml" line="33"/>
-        <source>&lt;h2&gt;&lt;p align = &quot;center&quot;&gt;Rotate It!&lt;/h2&gt; &lt;p&gt;Fix your photos directly on your smartphone. Correct the &quot;littered horizon&quot; has never been so easy! &lt;p&gt;Developer: &lt;a href=&quot;http://m.vk.com/vitalis17&quot;&gt;Vitalii Shunkov&lt;/a&gt; (mail: Shynkov@bigmir.net) &lt;p&gt;Special thanks: &lt;a href=&quot;http://m.vk.com/symbian_zone&quot;&gt;&quot;Symbian Zone&quot;&lt;/a&gt; and &lt;a href=&quot;http://forum.dailymobile.net&quot;&gt;&quot;dailymobile.net&quot;&lt;/a&gt; &lt;p&gt;Source code available on &lt;a href=&quot;https://github.com/Vitalii17/RotateIt&quot;&gt;&quot;GitHub.com&quot;&lt;/a&gt; &lt;h3&gt;&lt;p align = &quot;center&quot;&gt;License&lt;/h3&gt; &lt;h4&gt;&lt;p align = &quot;center&quot;&gt;The MIT License (MIT)&lt;/h4&gt; &lt;p alifn = &quot;center&quot;&gt;Copyright (c) 2016 Vitalii Shunkov &lt;p&gt;Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software with out restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:&lt;p&gt;The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.&lt;p&gt;THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</source>
-        <translation>&lt;h2&gt;&lt;p align = &quot;center&quot;&gt;Rotate It!&lt;/h2&gt;
-&lt;p&gt;Исправляйте Ваши фотографии прямо на смартфоне. Поправить &quot;заваленный горизонт&quot; никогда 
+        <location filename="../qml/AboutPage.qml" line="34"/>
+        <source>Version</source>
+        <translation>Версия</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="35"/>
+        <source>&lt;p&gt;Fix your photos directly on your smartphone. Correct the &quot;littered horizon&quot; has never been so easy! &lt;p&gt;Developer: &lt;a href=&quot;http://m.vk.com/vitalis17&quot;&gt;Vitalii Shunkov&lt;/a&gt; (mail: Shynkov@bigmir.net) &lt;p&gt;Special thanks: &lt;a href=&quot;http://m.vk.com/symbian_zone&quot;&gt;&quot;Symbian Zone&quot;&lt;/a&gt; and &lt;a href=&quot;http://forum.dailymobile.net&quot;&gt;&quot;dailymobile.net&quot;&lt;/a&gt; &lt;p&gt;Source code available on &lt;a href=&quot;https://github.com/Vitalii17/RotateIt&quot;&gt;&quot;GitHub.com&quot;&lt;/a&gt; &lt;h3&gt;&lt;p align = &quot;center&quot;&gt;License&lt;/h3&gt; &lt;h4&gt;&lt;p align = &quot;center&quot;&gt;The MIT License (MIT)&lt;/h4&gt; &lt;p alifn = &quot;center&quot;&gt;Copyright (c) 2016 Vitalii Shunkov &lt;p&gt;Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software with out restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:&lt;p&gt;The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.&lt;p&gt;THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</source>
+        <translation>&lt;p&gt;Исправляйте Ваши фотографии прямо на смартфоне. Поправить &quot;заваленный горизонт&quot; никогда 
 не было так просто!
 &lt;p&gt;Разработчик: &lt;a href=&quot;http://m.vk.com/vitalis17&quot;&gt;Виталий Шунков&lt;/a&gt; 
 (mail: Shynkov@bigmir.net)
@@ -35,7 +39,7 @@
 ОБЕСПЕЧЕНИЕМ.</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="79"/>
+        <location filename="../qml/AboutPage.qml" line="80"/>
         <source>Back</source>
         <translation>Назад</translation>
     </message>
@@ -137,119 +141,119 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="223"/>
+        <location filename="../qml/main.qml" line="230"/>
         <source>Processing</source>
         <translation>Обработка</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="247"/>
+        <location filename="../qml/main.qml" line="254"/>
         <source>Rotate -90</source>
         <translation>Поворот -90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="257"/>
+        <location filename="../qml/main.qml" line="264"/>
         <source>Rotate 90</source>
         <translation>Поворот 90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="252"/>
+        <location filename="../qml/main.qml" line="259"/>
         <source>Refresh</source>
         <translation>Сброс</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="262"/>
+        <location filename="../qml/main.qml" line="269"/>
         <source>Line</source>
         <translation>Горизонт</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="277"/>
+        <location filename="../qml/main.qml" line="284"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="282"/>
+        <location filename="../qml/main.qml" line="289"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="291"/>
+        <location filename="../qml/main.qml" line="298"/>
         <source>About</source>
         <translation>О Программе</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="159"/>
-        <location filename="../qml/main.qml" line="306"/>
+        <location filename="../qml/main.qml" line="163"/>
+        <location filename="../qml/main.qml" line="313"/>
         <source>Open</source>
         <translation>Открыть</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="146"/>
+        <location filename="../qml/main.qml" line="150"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="173"/>
+        <location filename="../qml/main.qml" line="177"/>
         <source>Tools</source>
         <translation>Инструменты</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="193"/>
-        <location filename="../qml/main.qml" line="318"/>
+        <location filename="../qml/main.qml" line="198"/>
+        <location filename="../qml/main.qml" line="325"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="203"/>
+        <location filename="../qml/main.qml" line="208"/>
         <source>Menu</source>
         <translation>Меню</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="267"/>
+        <location filename="../qml/main.qml" line="274"/>
         <source>View gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="330"/>
+        <location filename="../qml/main.qml" line="337"/>
         <source>Image does not saved</source>
         <translation>Изображение не сохранено</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="331"/>
+        <location filename="../qml/main.qml" line="338"/>
         <source>Do you want to save the modified image?</source>
         <translation>Желаете сохранить изображение?</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="332"/>
+        <location filename="../qml/main.qml" line="339"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="333"/>
+        <location filename="../qml/main.qml" line="340"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="413"/>
+        <location filename="../qml/main.qml" line="420"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="422"/>
+        <location filename="../qml/main.qml" line="429"/>
         <source>From Gallery</source>
         <translation>Из Галереи</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="431"/>
+        <location filename="../qml/main.qml" line="438"/>
         <source>Not available</source>
         <translation>Не доступно</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="432"/>
+        <location filename="../qml/main.qml" line="439"/>
         <source>Available only in extended version!</source>
         <translation>Доступно только в расширенной версии!</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="438"/>
+        <location filename="../qml/main.qml" line="445"/>
         <source>File Manager</source>
         <translation>Файловый Менеджер</translation>
     </message>
