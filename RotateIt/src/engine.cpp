@@ -10,7 +10,7 @@
 
 Engine::Engine(QObject *parent) :
     QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false),
-    m_privateOpeningState(false), m_privateSavingState(false)
+    m_privateOpeningState(false), m_privateSavingState(false), m_saveExifEnable(false)
 {
 
 }
@@ -139,6 +139,20 @@ void Engine::setSmoothPixmapTransformHint(bool hint)
     }
 }
 
+bool Engine::saveExifEnable() const
+{
+    return m_saveExifEnable;
+}
+
+void Engine::setSaveExifEnable(bool exifEn)
+{
+    if(m_saveExifEnable != exifEn)
+    {
+        m_saveExifEnable = exifEn;
+        emit saveExifEnableChanged();
+    }
+}
+
 Engine::EngineState Engine::state() const
 {
     return m_state;
@@ -162,6 +176,7 @@ void Engine::save(int quality)
         rotator->setQuality(quality);
         rotator->setOutputImagePath(outputPath);
         rotator->setSpth(smoothPixmapTransformHint());
+        rotator->setSaveExifEn(saveExifEnable());
 
         connect(thread, SIGNAL(started()), rotator, SLOT(process()));
         connect(rotator, SIGNAL(finished()), thread, SLOT(quit()));
