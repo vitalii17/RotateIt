@@ -26,10 +26,6 @@ class Settings : public QObject
                NOTIFY vibraOnChanged)
     Q_PROPERTY(bool   galleryAvailable // Must be moved to other class!
                READ   galleryAvailable)
-    Q_PROPERTY(bool   sliderArrowsEnabled
-               READ   sliderArrowsEnabled
-               WRITE  setSliderArrowsEnabled
-               NOTIFY sliderArrowsEnabledChanged)
     Q_PROPERTY(bool   exifEnabled
                READ   exifEnabled
                WRITE  setExifEnabled
@@ -54,9 +50,6 @@ public:
 
     bool galleryAvailable() const;
 
-    bool sliderArrowsEnabled() const;
-    void setSliderArrowsEnabled(bool arrowsEn);
-
     bool exifEnabled() const;
     void setExifEnabled(bool exifEn);
 
@@ -65,7 +58,6 @@ signals:
     void qualityChanged(int quality);
     void isDefaultQualityChanged(bool isDefQuality);
     void vibraOnChanged(bool vibraOn);
-    void sliderArrowsEnabledChanged(bool arrowsEn);
     void exifEnabledChanged(bool exifEn);
 
 public slots:
@@ -76,7 +68,6 @@ private:
     int m_quality;
     bool m_isDefaultQuality;
     bool m_vibraOn;
-    bool m_sliderArrowsEnabled;
     bool m_exifEnabled;
 
 };

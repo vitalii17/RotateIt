@@ -9,7 +9,6 @@ Settings::Settings(QObject *parent) :
     m_quality             = m_pSettings->value("Quality", 96).toInt();
     m_isDefaultQuality    = m_pSettings->value("IsDefaultQuality", true).toBool();
     m_vibraOn             = m_pSettings->value("VibraOn", true).toBool();
-    m_sliderArrowsEnabled = m_pSettings->value("SliderArrowsEnabled", true).toBool();
     m_exifEnabled         = m_pSettings->value("ExifEnabled", false).toBool();
 }
 
@@ -33,11 +32,6 @@ Settings::~Settings()
     if(m_vibraOn != m_pSettings->value("VibraOn", true).toBool())
     {
         m_pSettings->setValue("VibraOn", m_vibraOn);
-    }
-
-    if(m_sliderArrowsEnabled != m_pSettings->value("SliderArrowsEnabled", true).toBool())
-    {
-        m_pSettings->setValue("SliderArrowsEnabled", m_sliderArrowsEnabled);
     }
 
     if(m_exifEnabled != m_pSettings->value("ExifEnabled", false).toBool())
@@ -111,20 +105,6 @@ bool Settings::galleryAvailable() const
 #elif MG_FETCH_DISABLED
     return false;
 #endif
-}
-
-bool Settings::sliderArrowsEnabled() const
-{
-    return m_sliderArrowsEnabled;
-}
-
-void Settings::setSliderArrowsEnabled(bool arrowsEn)
-{
-    if(m_sliderArrowsEnabled != arrowsEn)
-    {
-        m_sliderArrowsEnabled = arrowsEn;
-        emit sliderArrowsEnabledChanged(m_sliderArrowsEnabled);
-    }
 }
 
 bool Settings::exifEnabled() const

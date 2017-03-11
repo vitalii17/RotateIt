@@ -48,13 +48,6 @@ Page {
             }
 
             CheckableListElement {
-                titleText: qsTr("Slider arrows")
-                subTitleText: qsTr("Click to disable")
-                checked: settings.sliderArrowsEnabled
-                onCheckedChanged: settings.sliderArrowsEnabled = checked
-            }
-
-            CheckableListElement {
                 titleText: qsTr("Save EXIF metadata")
                 subTitleText: qsTr("Experimental feature")
                 checked: settings.exifEnabled
