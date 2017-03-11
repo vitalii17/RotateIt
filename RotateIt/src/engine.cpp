@@ -166,7 +166,7 @@ void Engine::save(int quality)
 
         QString outputPath = imagePath().
                 insert(imagePath().lastIndexOf("."), "_rotated(" +
-                       QTime::currentTime().toString("mmss") + ")");
+                       QTime::currentTime().toString("sszzz") + ")");
 
         QThread *thread = new QThread();
         Rotator *rotator = new Rotator();
