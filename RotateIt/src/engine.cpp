@@ -10,7 +10,7 @@
 
 Engine::Engine(QObject *parent) :
     QObject(parent), m_rotation(0), m_smoothPixmapTransformHint(false),
-    m_privateOpeningState(false), m_privateSavingState(false), m_exifEnabled(false)
+    m_exifEnabled(false), m_privateOpeningState(false), m_privateSavingState(false)
 {
 
 }
