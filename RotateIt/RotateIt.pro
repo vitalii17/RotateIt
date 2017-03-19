@@ -109,5 +109,4 @@ HEADERS += src/vibra.h \
 RESOURCES += \
     resources.qrc
 
-OTHER_FILES += \
-    exiv2/exiv2.pri
+OTHER_FILES +=
