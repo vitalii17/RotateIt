@@ -7,11 +7,12 @@ Item {
     property string backgroundColor: "black"
     property int offsetY: 0
 
-    property int topPadding: 25
-    property int bottomPadding: 25
-    property int leftPadding: 25
-    property int rightPadding: 25
-    property int spacing: 35
+    property int  topPadding: 25
+    property int  bottomPadding: 25
+    property int  leftPadding: 25
+    property int  rightPadding: 25
+    property int  spacing: 35
+    property bool shown: (state === "shown") ? true : false
 
     anchors.left: parent.left
     anchors.right: parent.right
@@ -22,7 +23,7 @@ Item {
         state = "shown"
     }
 
-    function close() {
+    function hide() {
         state = "hidden"
     }
 
