@@ -8,13 +8,17 @@ ToolButton {
     property string toolTipText: ""
 
     onPlatformPressAndHold: {
-        toolTip.target = root
-        toolTip.text = root.toolTipText
-        toolTip.show()
+        if(toolTip) {
+            toolTip.target = root
+            toolTip.text = root.toolTipText
+            toolTip.show()
+        }
     }
 
     onPlatformReleased: {
-        toolTip.hide()
+        if(toolTip) {
+            toolTip.hide()
+        }
     }
 }
 
