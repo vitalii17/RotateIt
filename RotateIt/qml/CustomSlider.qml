@@ -55,7 +55,8 @@ Item {
     }
     Rectangle {
         id: rightLineRect
-        width: parent.width - leftLineRect.width - slider.width - slider.border.width
+        width: parent.width - leftLineRect.width - slider.width -
+               slider.border.width - slider.border.width / 4
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: 2
