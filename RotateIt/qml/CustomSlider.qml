@@ -5,6 +5,7 @@ Item {
 
     signal pressed
     signal released
+    signal clicked
 
     height: 55
 
@@ -134,6 +135,7 @@ Item {
             drag.axis: Drag.XAxis
             drag.minimumX: 0 - drag.target.width / 2
             drag.maximumX: parent.width - drag.target.width / 2
+            onClicked: root.clicked()
             onPressed: {
                 root.pressed()
                 blink()
