@@ -184,7 +184,7 @@ PageStackWindow {
             CustomToolButton {
                 id: upToolButton
                 iconSource: "qrc:/images/images/up.png"
-                toolTip: toolTip
+                toolTip: checked ? null : toolTip
                 toolTipText: qsTr("Tools")
                 property bool checked: false
                 onClicked: checked = !checked
