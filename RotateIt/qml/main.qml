@@ -43,6 +43,15 @@ PageStackWindow {
 
         property bool imageModified: false
 
+        function handleClickToScreen() {
+            if(mainToolBoard.shown) {
+                mainToolBoard.hide()
+            }
+            else {
+                mainToolBar.hide()
+            }
+        }
+
         Connections {
             target: window
             onCurrentImagePathChanged: {
@@ -98,7 +107,7 @@ PageStackWindow {
             drag.axis: Drag.YAxis
             drag.minimumY: 0
             drag.maximumY: parent.height - horizontCursor.height
-            onClicked: mainToolBar.shown = false
+            onClicked: parent.handleClickToScreen()
             onPressed: horizontCursor.blink()
         }
 
@@ -109,13 +118,17 @@ PageStackWindow {
             y: (parent.height / 3) * 2 - height / 2
             amplitude: 10
             onYChanged: reset()
+            property bool tempToolBarStatus
+            onClicked: parent.handleClickToScreen()
             onPressed: {
-                mainToolBar.shown = false
+                tempToolBarStatus = mainToolBar.shown
+                mainToolBar.hide()
                 if(!settings.spthPreview) {
                     engine.smoothPixmapTransformHint = false
                 }
             }
             onReleased: {
+                mainToolBar.shown = tempToolBarStatus
                 if(!settings.spthPreview) {
                     engine.smoothPixmapTransformHint = true
                     engine.rotate(value)
@@ -176,17 +189,15 @@ PageStackWindow {
                 property bool checked: false
                 onClicked: checked = !checked
                 onCheckedChanged: checked ? mainToolBoard.open() :
-                                            mainToolBoard.close()
+                                            mainToolBoard.hide()
                 rotation: checked ? 180.0 : 0.0
                 Behavior on rotation {
                     PropertyAnimation{}
                 }
                 Connections {
-                    target: mainToolBar
+                    target: mainToolBoard
                     onShownChanged: {
-                        if(upToolButton.checked && !mainToolBar.shown) {
-                            upToolButton.checked = false
-                        }
+                        upToolButton.checked = mainToolBoard.shown
                     }
                 }
             }
@@ -244,7 +255,7 @@ PageStackWindow {
                 target: mainToolBar
                 onShownChanged: {
                     if(mainToolBoard.visible && !mainToolBar.shown) {
-                        mainToolBoard.close()
+                        mainToolBoard.hide()
                     }
                 }
             }
