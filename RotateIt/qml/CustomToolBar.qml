@@ -47,7 +47,15 @@ Item {
     property Item tools: null
 
     //property string background: privateStyle.imagePath("qtg_fr_toolbar", root.platformInverted)
-    property bool shown: true
+    property bool shown: (state === "shown") ? true : false
+
+    function show() {
+        shown = true
+    }
+
+    function hide() {
+        shown = false
+    }
 
     state: shown ? "shown" : "hidden"
 
