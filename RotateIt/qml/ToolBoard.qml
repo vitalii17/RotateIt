@@ -56,6 +56,7 @@ Item {
             PropertyChanges {
                 target: root
                 anchors.bottomMargin: offsetY
+                visible: true
             }
         },
         State {
@@ -63,6 +64,7 @@ Item {
             PropertyChanges {
                 target: root
                 anchors.bottomMargin: -root.height - offsetY
+                visible: false
             }
         }
     ]
@@ -71,10 +73,17 @@ Item {
         Transition {
             from: "shown"
             to: "hidden"
-            PropertyAnimation {
-                target: root
-                property: "anchors.bottomMargin"
-                easing.type: Easing.InQuad
+            SequentialAnimation{
+                PropertyAnimation {
+                    target: root
+                    property: "anchors.bottomMargin"
+                    easing.type: Easing.InQuad
+                }
+                PropertyAnimation {
+                    target: root
+                    property: "visible"
+                    duration: 0
+                }
             }
         },
         Transition {

@@ -59,12 +59,15 @@ Item {
 
     state: shown ? "shown" : "hidden"
 
+    onVisibleChanged: console.log("visble", visible)
+
     states: [
         State {
             name: "shown"
             PropertyChanges {
                 target: root
                 anchors.bottomMargin: 0
+                visible: true
             }
         },
         State {
@@ -72,6 +75,7 @@ Item {
             PropertyChanges {
                 target: root
                 anchors.bottomMargin: -root.height
+                visible: false
             }
         }
     ]
@@ -80,10 +84,17 @@ Item {
         Transition {
             from: "shown"
             to: "hidden"
-            PropertyAnimation {
-                target: root
-                property: "anchors.bottomMargin"
-                easing.type: Easing.InQuad
+            SequentialAnimation {
+                PropertyAnimation {
+                    target: root
+                    property: "anchors.bottomMargin"
+                    easing.type: Easing.InQuad
+                }
+                PropertyAnimation {
+                    target: root
+                    property: "visible"
+                    duration: 0
+                }
             }
         },
         Transition {
