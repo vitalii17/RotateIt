@@ -59,8 +59,6 @@ Item {
 
     state: shown ? "shown" : "hidden"
 
-    onVisibleChanged: console.log("visble", visible)
-
     states: [
         State {
             name: "shown"
