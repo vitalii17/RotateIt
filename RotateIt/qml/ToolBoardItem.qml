@@ -1,4 +1,5 @@
 import QtQuick 1.1
+import "UiConstants.js" as UiConstants
 
 Item {
     id: root
@@ -46,6 +47,7 @@ Item {
         anchors.topMargin: 5
         color: "white"
         smooth: root.pressed ? true : false
+        font.pointSize: UiConstants.toolBoardFontPixelSize
     }
 
     MouseArea {
