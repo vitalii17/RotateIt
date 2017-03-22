@@ -160,7 +160,7 @@
     <message>
         <location filename="../qml/main.qml" line="252"/>
         <source>Rotate -90</source>
-        <translation>Поворот -90°</translation>
+        <translation>Поворот -90</translation>
     </message>
     <message>
         <location filename="../qml/main.qml" line="257"/>
@@ -170,7 +170,7 @@
     <message>
         <location filename="../qml/main.qml" line="262"/>
         <source>Rotate 90</source>
-        <translation>Поворот 90°</translation>
+        <translation>Поворот 90</translation>
     </message>
     <message>
         <location filename="../qml/main.qml" line="267"/>
