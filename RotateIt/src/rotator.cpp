@@ -226,19 +226,7 @@ void Rotator::process()
         {   
             if(m_exifEnabled)
             {
-                try
-                {
-                    ExifTools::copyExif(m_inputImagePath,
-                                        m_outputImagePath,
-                                        "Edited by \"Rotate It!\" on Symbian");
-                }
-                catch(Exiv2::Error &error)
-                {
-                    qDebug() << "Exception(errMsg):" << Exiv2::errMsg(error.code());
-                    qDebug() << "Exception(what)  :" << error.what();
-                    qDebug() << "Exception(code)  :" << error.code();
-
-                }
+                ExifTools::copyExif(m_inputImagePath, m_outputImagePath);
             }
         }
         else{}
