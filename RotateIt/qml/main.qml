@@ -363,7 +363,6 @@ PageStackWindow {
                     }
                     else if(_cause === "open") {
                         engine.smoothPixmapTransformHint = true
-                        engine.save(settings.quality)
                         openMenu.open()
                     }
             }
