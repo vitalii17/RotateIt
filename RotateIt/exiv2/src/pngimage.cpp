@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,34 +20,37 @@
  */
 /*
   File:    pngimage.cpp
-  Version: $Rev: 3815 $
-  Author(s): Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
-  History: 12-Jun-06, gc: submitted
-  Credits: See header file
+  Version: $Rev$
  */
 // *****************************************************************************
+
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pngimage.cpp 3815 2015-05-10 09:37:34Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
 
 #ifdef   EXV_HAVE_LIBZ
 #include "pngchunk_int.hpp"
+#include "image_int.hpp"
 #include "pngimage.hpp"
 #include "jpgimage.hpp"
+#include "tiffimage.hpp"
 #include "image.hpp"
 #include "image_int.hpp"
 #include "basicio.hpp"
 #include "error.hpp"
 #include "futils.hpp"
+#include "types.hpp"
 
 // + standard includes
 #include <string>
+#include <iterator>
 #include <cstring>
 #include <iostream>
 #include <cassert>
 
+#include <zlib.h>     // To uncompress IccProfiles
 // Signature from front of PNG file
 const unsigned char pngSignature[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
@@ -92,12 +95,113 @@ namespace Exiv2 {
         return "image/png";
     }
 
-    void PngImage::printStructure(std::ostream& out, PrintStructureOption option)
+    static bool zlibToDataBuf(const byte* bytes,long length, DataBuf& result)
+    {
+        uLongf uncompressedLen = length * 2; // just a starting point
+        int    zlibResult;
+
+        do {
+            result.alloc(uncompressedLen);
+            zlibResult = uncompress((Bytef*)result.pData_,&uncompressedLen,bytes,length);
+            // if result buffer is large than necessary, redo to fit perfectly.
+            if (zlibResult == Z_OK && (long) uncompressedLen < result.size_ ) {
+                result.release();
+                result.alloc(uncompressedLen);
+                zlibResult = uncompress((Bytef*)result.pData_,&uncompressedLen,bytes,length);
+            }
+            if (zlibResult == Z_BUF_ERROR) {
+                // the uncompressed buffer needs to be larger
+                result.release();
+
+                // Sanity - never bigger than 16mb
+                if  (uncompressedLen > 16*1024*1024) zlibResult = Z_DATA_ERROR;
+                else uncompressedLen *= 2;
+            }
+        } while (zlibResult == Z_BUF_ERROR);
+
+        return zlibResult == Z_OK ;
+    }
+
+    static bool zlibToCompressed(const byte* bytes,long length, DataBuf& result)
+    {
+        uLongf compressedLen = length; // just a starting point
+        int    zlibResult;
+
+        do {
+            result.alloc(compressedLen);
+            zlibResult = compress((Bytef*)result.pData_,&compressedLen,bytes,length);
+            if (zlibResult == Z_BUF_ERROR) {
+                // the compressedArray needs to be larger
+                result.release();
+                compressedLen *= 2;
+            } else {
+                result.release();
+                result.alloc(compressedLen);
+                zlibResult = compress((Bytef*)result.pData_,&compressedLen,bytes,length);
+            }
+        } while (zlibResult == Z_BUF_ERROR);
+
+        return zlibResult == Z_OK ;
+    }
+
+    static bool tEXtToDataBuf(const byte* bytes,long length,DataBuf& result)
+    {
+        static const char* hexdigits = "0123456789ABCDEF";
+        static int         value   [256] ;
+        static bool        bFirst = true ;
+        if ( bFirst ) {
+            for ( int i = 0 ; i < 256 ; i++ )
+                value[i] = 0;
+            for ( int i = 0 ; i < 16 ; i++ ) {
+                value[tolower(hexdigits[i])]=i+1;
+                value[toupper(hexdigits[i])]=i+1;
+            }
+            bFirst = false;
+        }
+
+        // calculate length and allocate result;
+        long        count=0;
+        const byte* p = bytes ;
+        // header is \nsomething\n number\n hex
+        while ( count < 3 )
+            if ( *p++ == '\n' )
+                count++;
+        for ( long i = 0 ; i < length ; i++ )
+            if ( value[p[i]] )
+                ++count;
+        result.alloc((count+1)/2) ;
+
+        // hex to binary
+        count   = 0 ;
+        byte* r = result.pData_;
+        int   n = 0 ; // nibble
+        for ( long i = 0 ; i < length ; i++ ) {
+            if ( value[p[i]] ) {
+                int v = value[p[i]]-1 ;
+                if ( ++count % 2 ) n = v*16 ; // leading digit
+                else *r++ =        n + v    ; // trailing
+            }
+        }
+        return true;
+    }
+
+    std::string upper(const std::string& str)
+    {
+        std::string result;
+        transform(str.begin(), str.end(), std::back_inserter(result), toupper);
+        return result;
+    }
+
+    std::string::size_type findi(const std::string& str, const std::string& substr)
+    {
+        return upper(str).find(upper(substr) );
+    }
+
+    void PngImage::printStructure(std::ostream& out, PrintStructureOption option, int depth)
     {
         if (io_->open() != 0) {
             throw Error(9, io_->path(), strError());
         }
-        IoCloser closer(*io_);
         // Ensure that this is the correct image type
         if (!isPngType(*io_, true)) {
             if (io_->error() || io_->eof()) throw Error(14);
@@ -108,14 +212,23 @@ namespace Exiv2 {
         chType[0]=0;
         chType[4]=0;
 
-        if ( option == kpsBasic || option == kpsXMP ) {
+        if ( option == kpsBasic || option == kpsXMP || option == kpsIccProfile || option == kpsRecursive ) {
 
-            if ( option == kpsBasic ) {
+            const std::string xmpKey  = "XML:com.adobe.xmp";
+            const std::string exifKey = "Raw profile type exif";
+            const std::string app1Key = "Raw profile type APP1";
+            const std::string iptcKey = "Raw profile type iptc";
+            const std::string iccKey  = "icc";
+            const std::string softKey = "Software";
+            const std::string commKey = "Comment";
+            const std::string descKey = "Description";
+
+            bool bPrint = option == kpsBasic || option == kpsRecursive ;
+            if ( bPrint ) {
                 out << "STRUCTURE OF PNG FILE: " << io_->path() << std::endl;
-                out << " address | index | chunk_type |  length | data" << std::endl;
+                out << " address | chunk |  length | data                           | checksum" << std::endl;
             }
 
-            long       index   = 0;
             const long imgSize = io_->size();
             DataBuf    cheaderBuf(8);
 
@@ -129,48 +242,131 @@ namespace Exiv2 {
 
                 // Decode chunk data length.
                 uint32_t dataOffset = Exiv2::getULong(cheaderBuf.pData_, Exiv2::bigEndian);
-                long pos = io_->tell();
-                if (   pos == -1
-                    || dataOffset > uint32_t(0x7FFFFFFF)
-                    || static_cast<long>(dataOffset) > imgSize - pos) throw Exiv2::Error(14);
-
                 for (int i = 4; i < 8; i++) {
                     chType[i-4]=cheaderBuf.pData_[i];
                 }
 
-                uint32_t    blen = 32   ;
-                uint32_t    dOff = dataOffset;
-                std::string dataString ;
-
-                if ( dataOffset > blen ) {
-                    DataBuf buff(blen+1);
-                    io_->read(buff.pData_,blen);
-                    dataOffset -=  blen ;
-                    dataString  = Internal::binaryToString(buff, blen);
+                // test that we haven't hit EOF, or wanting to read excessive data
+                long restore = io_->tell();
+                if(  restore == -1
+                ||  dataOffset > uint32_t(0x7FFFFFFF)
+                ||  static_cast<long>(dataOffset) > imgSize - restore
+                ){
+                    throw Exiv2::Error(14);
                 }
 
-                if ( option == kpsBasic ) out << Internal::stringFormat("%8d | %5d | %10s |%8d | ",(uint32_t)address, index++,chType,dOff) << dataString << std::endl;
-                // for XMP, back up and read the whole block
-                const char* key = "XML:com.adobe.xmp" ;
-                size_t      start = ::strlen(key);
+                DataBuf   buff(dataOffset);
+                io_->read(buff.pData_,dataOffset);
+                io_->seek(restore, BasicIo::beg);
 
-                if ( option == kpsXMP && dataString.find(key)==0 ) {
-#if defined(_MSC_VER)
-                    io_->seek(-static_cast<int64_t>(blen) , BasicIo::cur);
-#else
-                    io_->seek(-static_cast<long>(blen) , BasicIo::cur);
+                // format output
+                const int    iMax = 30 ;
+                uint32_t     blen = dataOffset > iMax ? iMax : dataOffset ;
+                std::string  dataString = Internal::binaryToString(buff, blen);
+                while (      dataString.size() < iMax ) dataString += ' ';
+                dataString = dataString.substr(0,iMax);
+
+                if ( bPrint ) {
+                    io_->seek(dataOffset, BasicIo::cur);// jump to checksum
+                    byte checksum[4];
+                    io_->read(checksum,4);
+                    io_->seek(restore, BasicIo::beg)   ;// restore file pointer
+
+                    out << Internal::stringFormat("%8d | %-5s |%8d | "
+                                                  ,(uint32_t)address, chType,dataOffset)
+                        << dataString
+                        << Internal::stringFormat(" | 0x%02x%02x%02x%02x"
+                                                   ,checksum[0],checksum[1],checksum[2],checksum[3])
+                        << std::endl;
+                }
+
+                // chunk type
+                bool tEXt  = std::strcmp(chType,"tEXt")== 0;
+                bool zTXt  = std::strcmp(chType,"zTXt")== 0;
+                bool iCCP  = std::strcmp(chType,"iCCP")== 0;
+                bool iTXt  = std::strcmp(chType,"iTXt")== 0;
+
+                // for XMP, ICC etc: read and format data
+                bool bXMP  = option == kpsXMP        && findi(dataString,xmpKey)==0;
+                bool bICC  = option == kpsIccProfile && findi(dataString,iccKey)==0;
+                bool bExif = option == kpsRecursive  &&(findi(dataString,exifKey)==0 || findi(dataString,app1Key)==0);
+                bool bIptc = option == kpsRecursive  && findi(dataString,iptcKey)==0;
+                bool bSoft = option == kpsRecursive  && findi(dataString,softKey)==0;
+                bool bComm = option == kpsRecursive  && findi(dataString,commKey)==0;
+                bool bDesc = option == kpsRecursive  && findi(dataString,descKey)==0;
+                bool bDump = bXMP || bICC || bExif || bIptc || bSoft || bComm || bDesc ;
+
+                if( bDump ) {
+                    DataBuf   dataBuf;
+                    byte*     data   = new byte[dataOffset+1];
+                    data[dataOffset] = 0;
+                    io_->read(data,dataOffset);
+                    io_->seek(restore, BasicIo::beg);
+                    uint32_t  name_l = (uint32_t) std::strlen((const char*)data)+1; // leading string length
+                    uint32_t  start  = name_l;
+                    bool      bLF    = false;
+
+                    // decode the chunk
+                    bool bGood = false;
+                    if ( tEXt ) {
+                        bGood = tEXtToDataBuf(data+name_l,dataOffset-name_l,dataBuf);
+                    }
+                    if ( zTXt || iCCP ) {
+                        bGood = zlibToDataBuf(data+name_l+1,dataOffset-name_l-1,dataBuf); // +1 = 'compressed' flag
+                    }
+                    if ( iTXt ) {
+                        bGood = (start+3) < dataOffset ;    // good if not a nul chunk
+                    }
+
+                    // format is content dependent
+                    if ( bGood ) {
+                        if ( bXMP ) {
+                            while ( !data[start] && start < dataOffset) start++; // skip leading nul bytes
+                            out <<  data+start;             // output the xmp
+                        }
+
+                        if ( bExif || bIptc ) {
+                            DataBuf parsedBuf = PngChunk::readRawProfile(dataBuf,tEXt);
+#if DEBUG
+                            std::cerr << Exiv2::Internal::binaryToString(parsedBuf.pData_, parsedBuf.size_>50?50:parsedBuf.size_,0) << std::endl;
 #endif
-                    dataOffset = dOff ;
-                    byte* xmp  = new byte[dataOffset+5];
-                    io_->read(xmp,dataOffset+4);
-                    xmp[dataOffset]=0;
-                    while ( xmp[start] == 0 ) start++; // crawl over the '\0' bytes between XML:....\0\0<xml stuff
-                    out << xmp+start;                  // output the xml
-                    delete [] xmp;
-                    dataOffset = 0;
-                }
+                            if ( parsedBuf.size_ ) {
+                                if ( bExif ) {
+                                    // create memio object with the data, then print the structure
+                                    BasicIo::AutoPtr p = BasicIo::AutoPtr(new MemIo(parsedBuf.pData_+6,parsedBuf.size_-6));
+                                    printTiffStructure(*p,out,option,depth);
+                                }
+                                if ( bIptc ) {
+                                    IptcData::printStructure(out,parsedBuf.pData_,parsedBuf.size_,depth);
+                                }
+                            }
+                        }
 
-                if ( dataOffset ) io_->seek(dataOffset + 4 , BasicIo::cur);
+                        if ( bSoft && dataBuf.size_ > 0) {
+                            DataBuf     s(dataBuf.size_+1);               // allocate buffer with an extra byte
+                            memcpy(s.pData_,dataBuf.pData_,dataBuf.size_);// copy in the dataBuf
+                            s.pData_[dataBuf.size_] = 0 ;                 // nul terminate it
+                            const char* str = (const char*) s.pData_;     // give it name
+                            out << Internal::indent(depth) << (const char*) buff.pData_ << ": " << str ;
+                            bLF=true;
+                        }
+
+                        if ( bICC || bComm ) {
+                            out.write((const char*) dataBuf.pData_,dataBuf.size_);
+                            bLF = bComm ;
+                        }
+
+                        if ( bDesc && iTXt ) {
+                            DataBuf decoded = PngChunk::decodeTXTChunk(buff,PngChunk::iTXt_Chunk );
+                            out.write((const char*)decoded.pData_,decoded.size_);
+                            bLF = true;
+                        }
+
+                        if ( bLF ) out << std::endl;
+                    }
+                    delete[] data;
+                }
+                io_->seek(dataOffset+4, BasicIo::cur);// jump past checksum
                 if (io_->error()) throw Error(14);
             }
         }
@@ -222,7 +418,8 @@ namespace Exiv2 {
                 !memcmp(cheaderBuf.pData_ + 4, "IHDR", 4) ||
                 !memcmp(cheaderBuf.pData_ + 4, "tEXt", 4) ||
                 !memcmp(cheaderBuf.pData_ + 4, "zTXt", 4) ||
-                !memcmp(cheaderBuf.pData_ + 4, "iTXt", 4))
+                !memcmp(cheaderBuf.pData_ + 4, "iTXt", 4) ||
+                !memcmp(cheaderBuf.pData_ + 4, "iCCP", 4))
             {
                 // Extract chunk data.
 
@@ -267,6 +464,14 @@ namespace Exiv2 {
 #endif
                     PngChunk::decodeTXTChunk(this, cdataBuf, PngChunk::iTXt_Chunk);
                 }
+                else if (!memcmp(cheaderBuf.pData_ + 4, "iCCP", 4))
+                {
+                    zlibToDataBuf(cdataBuf.pData_ +12+1,dataOffset-13,iccProfile_); // +1 = 'compressed' flag
+#ifdef DEBUG
+                    std::cout << "Exiv2::PngImage::readMetadata: Found iCCP chunk length: " << dataOffset  << std::endl;
+                    std::cout << "Exiv2::PngImage::readMetadata: iccProfile.size_ : " << iccProfile_.size_ << std::endl;
+#endif
+                }
 
                 // Set dataOffset to null like chunk data have been extracted previously.
                 dataOffset = 0;
@@ -289,7 +494,7 @@ namespace Exiv2 {
             throw Error(9, io_->path(), strError());
         }
         IoCloser closer(*io_);
-        BasicIo::AutoPtr tempIo(io_->temporary()); // may throw
+        BasicIo::AutoPtr tempIo(new MemIo);
         assert (tempIo.get() != 0);
 
         doWriteMetadata(*tempIo); // may throw
@@ -341,6 +546,10 @@ namespace Exiv2 {
             bufRead = io_->read(chunkBuf.pData_ + 8, dataOffset + 4); // Extract chunk data + CRC
             if (io_->error()) throw Error(14);
             if (bufRead != (long)(dataOffset + 4)) throw Error(20);
+
+            char szChunk[5];
+            memcpy(szChunk,cheaderBuf.pData_ + 4,4);
+            szChunk[4]  = 0;
 
             if (!memcmp(cheaderBuf.pData_ + 4, "IEND", 4))
             {
@@ -402,6 +611,40 @@ namespace Exiv2 {
                     }
                 }
 
+                if ( iccProfileDefined() ) {
+                    DataBuf compressed;
+                    if ( zlibToCompressed(iccProfile_.pData_,iccProfile_.size_,compressed) ) {
+
+                        const byte* header   = (const byte*) "ICC PROFILE\0\0" ; // \0 = default compression
+                        const byte*  type    = (const byte*) "iCCP";
+                        uint32_t headerLen   = 13 ;
+                        uint32_t typeLen     = 4;
+                        uint32_t chunkLength = headerLen + compressed.size_ ;
+                        byte     length[4];
+                        ul2Data (length,chunkLength,bigEndian);
+
+                        // calculate CRC
+                        uLong   tmp = crc32(0L, Z_NULL, 0);
+                        tmp         = crc32(tmp, (const Bytef*)header           ,headerLen);
+                        tmp         = crc32(tmp, (const Bytef*)compressed.pData_,compressed.size_);
+                        byte    crc[4];
+                        ul2Data(crc, tmp, bigEndian);
+
+                        if( outIo.write(length,4)         != 4
+                        ||  outIo.write(type  ,typeLen)   != (long) typeLen
+                        ||  outIo.write(header,headerLen) != (long) headerLen
+                        ||  outIo.write (compressed.pData_,compressed.size_) != compressed.size_
+                        ||  outIo.write(crc,4)            != 4
+                        ){
+                            throw Error(21);
+                        }
+#ifdef DEBUG
+                        std::cout << "Exiv2::PngImage::doWriteMetadata: build iCCP"
+                        << " chunk (length: " << compressed.size_ + headerLen << ")" << std::endl;
+#endif
+                    }
+                }
+
                 if (writeXmpFromPacket() == false) {
                     if (XmpParser::encode(xmpPacket_, xmpData_) > 1) {
 #ifndef SUPPRESS_WARNINGS
@@ -419,7 +662,8 @@ namespace Exiv2 {
             }
             else if (!memcmp(cheaderBuf.pData_ + 4, "tEXt", 4) ||
                      !memcmp(cheaderBuf.pData_ + 4, "zTXt", 4) ||
-                     !memcmp(cheaderBuf.pData_ + 4, "iTXt", 4))
+                     !memcmp(cheaderBuf.pData_ + 4, "iTXt", 4) ||
+                     !memcmp(cheaderBuf.pData_ + 4, "iCCP", 4))
             {
                 DataBuf key = PngChunk::keyTXTChunk(chunkBuf, true);
                 if (memcmp("Raw profile type exif", key.pData_, 21) == 0 ||
@@ -427,18 +671,20 @@ namespace Exiv2 {
                     memcmp("Raw profile type iptc", key.pData_, 21) == 0 ||
                     memcmp("Raw profile type xmp",  key.pData_, 20) == 0 ||
                     memcmp("XML:com.adobe.xmp",     key.pData_, 17) == 0 ||
+                    memcmp("icc",                   key.pData_,  3) == 0 || // see test/data/imagemagick.png
+                    memcmp("ICC",                   key.pData_,  3) == 0 ||
                     memcmp("Description",           key.pData_, 11) == 0)
                 {
 #ifdef DEBUG
-                    std::cout << "Exiv2::PngImage::doWriteMetadata: strip " << cheaderBuf.pData_ + 4
-                              << " chunk (key: " << key.pData_ << ")\n";
+                    std::cout << "Exiv2::PngImage::doWriteMetadata: strip " << szChunk
+                              << " chunk (length: " << dataOffset << ")" << std::endl;
 #endif
                 }
                 else
                 {
 #ifdef DEBUG
-                    std::cout << "Exiv2::PngImage::doWriteMetadata: write " << cheaderBuf.pData_ + 4
-                              << " chunk (length: " << dataOffset << ")\n";
+                    std::cout << "Exiv2::PngImage::doWriteMetadata: write " << szChunk
+                              << " chunk (length: " << dataOffset << ")" << std::endl;
 #endif
                     if (outIo.write(chunkBuf.pData_, chunkBuf.size_) != chunkBuf.size_) throw Error(21);
                 }
@@ -447,8 +693,8 @@ namespace Exiv2 {
             {
                 // Write all others chunk as well.
 #ifdef DEBUG
-                std::cout << "Exiv2::PngImage::doWriteMetadata: write " << cheaderBuf.pData_ + 4
-                          << " chunk (length: " << dataOffset << ")\n";
+                std::cout << "Exiv2::PngImage::doWriteMetadata:  copy " << szChunk
+                          << " chunk (length: " << dataOffset << ")" << std::endl;
 #endif
                 if (outIo.write(chunkBuf.pData_, chunkBuf.size_) != chunkBuf.size_) throw Error(21);
 

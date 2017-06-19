@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      fujimn.cpp
-  Version:   $Rev: 3831 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (gc) <caulier dot gilles at gmail dot com>
   History:   18-Feb-04, ahu: created
@@ -29,7 +29,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: fujimn.cpp 3831 2015-05-20 01:27:32Z asp $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -97,11 +97,13 @@ namespace Exiv2 {
 
     //! FlashMode, tag 0x1010
     extern const TagDetails fujiFlashMode[] = {
-        { 0, N_("Auto")              },
-        { 1, N_("On")                },
-        { 2, N_("Off")               },
-        { 3, N_("Red-eye reduction") },
-        { 3, N_("Red-eye reduction") }          // To silence compiler warning
+        {  0, N_("Auto")              },
+        {  1, N_("On")                },
+        {  2, N_("Off")               },
+        {  3, N_("Red-eye reduction") },
+        {  4, N_("External")          },
+        { 16, N_("Commander")         },
+        { 16, N_("Commander")         }         // To silence compiler warning
     };
 
     //! FocusMode, tag 0x1021
@@ -157,11 +159,17 @@ namespace Exiv2 {
 
     //! FilmMode, tag 0x1401
     extern const TagDetails fujiFilmMode[] = {
-        {    0, N_("F0/Standard")           },
-        {  256, N_("F1/Studio portrait")    },
-        {  512, N_("F2/Fujichrome")         },
-        {  768, N_("F3/Studio portrait Ex") },
-        { 1024, N_("F4/Velvia")             }
+        {    0, N_("F0/Standard (Provia)")                         },
+        {  256, N_("F1/Studio Portrait")                           },
+        {  272, N_("F1a/Studio Portrait Enhanced Saturation")      },
+        {  288, N_("F1b/Studio Portrait Smooth Skin Tone (Astia)") },
+        {  304, N_("F1c/Studio Portrait Increased Sharpness")      },
+        {  512, N_("F2/Fujichrome (Velvia)")                       },
+        {  768, N_("F3/Studio Portrait Ex")                        },
+        { 1024, N_("F4/Velvia")                                    },
+        { 1280, N_("Pro Neg. Std")                                 },
+        { 1281, N_("Pro Neg. Hi")                                  },
+        { 1536, N_("Classic Chrome")                               },
     };
 
     //! DynamicRange, tag 0x1402

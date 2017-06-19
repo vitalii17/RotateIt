@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,11 @@
  */
 /*
   File:      tiffimage.cpp
-  Version:   $Rev: 3846 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-  History:   15-Mar-06, ahu: created
-
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffimage.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -36,12 +33,15 @@ EXIV2_RCSID("@(#) $Id: tiffimage.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
 #include "tiffimage_int.hpp"
 #include "tiffcomposite_int.hpp"
 #include "tiffvisitor_int.hpp"
+#include "orfimage.hpp"
 #include "makernote_int.hpp"
+#include "nikonmn_int.hpp"
 #include "image.hpp"
 #include "image_int.hpp"
 #include "error.hpp"
 #include "futils.hpp"
 #include "types.hpp"
+#include "basicio.hpp"
 #include "i18n.h"                // NLS support.
 
 // + standard includes
@@ -184,12 +184,26 @@ namespace Exiv2 {
             throw Error(3, "TIFF");
         }
         clearMetadata();
+
+        // recursively print the structure to /dev/null to ensure all metadata is in memory
+        // must be recursive to handle NEFs which stores the raw image in a subIFDs
+        std::ofstream devnull;
+        printStructure(devnull,kpsRecursive,0);
         ByteOrder bo = TiffParser::decode(exifData_,
                                           iptcData_,
                                           xmpData_,
                                           io_->mmap(),
                                           io_->size());
         setByteOrder(bo);
+
+        // read profile from the metadata
+        Exiv2::ExifKey            key("Exif.Image.InterColorProfile");
+        Exiv2::ExifData::iterator pos   = exifData_.findKey(key);
+        if ( pos != exifData_.end()  ) {
+            iccProfile_.alloc(pos->count());
+            pos->copy(iccProfile_.pData_,bo);
+        }
+
     } // TiffImage::readMetadata
 
     void TiffImage::writeMetadata()
@@ -216,6 +230,22 @@ namespace Exiv2 {
             bo = littleEndian;
         }
         setByteOrder(bo);
+
+        // fixup ICC profile
+        Exiv2::ExifKey            key("Exif.Image.InterColorProfile");
+        Exiv2::ExifData::iterator pos   = exifData_.findKey(key);
+        bool                      found = pos != exifData_.end();
+        if ( iccProfileDefined() ) {
+            Exiv2::DataValue value(iccProfile_.pData_,iccProfile_.size_);
+            if ( found ) pos->setValue(&value);
+            else     exifData_.add(key,&value);
+        } else {
+            if ( found ) exifData_.erase(pos);
+        }
+
+        // set usePacket to influence TiffEncoder::encodeXmp() called by TiffVisitor.encode()
+        xmpData().usePacket(writeXmpFromPacket());
+
         TiffParser::encode(*io_, pData, size, bo, exifData_, iptcData_, xmpData_); // may throw
     } // TiffImage::writeMetadata
 
@@ -303,261 +333,19 @@ namespace Exiv2 {
         return rc;
     }
 
-    bool isBigEndian()
-    {
-        union {
-            uint32_t i;
-            char c[4];
-        } e = { 0x01000000 };
-
-        return e.c[0]?true:false;
-    }
-    bool isLittleEndian() { return !isBigEndian(); }
-
-
-    // http://en.wikipedia.org/wiki/Endianness
-    static uint32_t byteSwap(uint32_t value,bool bSwap)
-    {
-        uint32_t result = 0;
-        result |= (value & 0x000000FF) << 24;
-        result |= (value & 0x0000FF00) << 8;
-        result |= (value & 0x00FF0000) >> 8;
-        result |= (value & 0xFF000000) >> 24;
-        return bSwap ? result : value;
-    }
-
-    static uint16_t byteSwap(uint16_t value,bool bSwap)
-    {
-        uint16_t result = 0;
-        result |= (value & 0x00FF) << 8;
-        result |= (value & 0xFF00) >> 8;
-        return bSwap ? result : value;
-    }
-
-    static uint16_t byteSwap2(DataBuf& buf,size_t offset,bool bSwap)
-    {
-        uint16_t v;
-        char*    p = (char*) &v;
-        p[0] = buf.pData_[offset];
-        p[1] = buf.pData_[offset+1];
-        return byteSwap(v,bSwap);
-    }
-
-    static uint32_t byteSwap4(DataBuf& buf,size_t offset,bool bSwap)
-    {
-        uint32_t v;
-        char*    p = (char*) &v;
-        p[0] = buf.pData_[offset];
-        p[1] = buf.pData_[offset+1];
-        p[2] = buf.pData_[offset+2];
-        p[3] = buf.pData_[offset+3];
-        return byteSwap(v,bSwap);
-    }
-
-    static const char* typeName(uint16_t tag)
-    {
-        //! List of TIFF image tags
-        const char* result = NULL;
-        switch (tag ) {
-            case Exiv2::unsignedByte     : result = "BYTE"      ; break;
-            case Exiv2::asciiString      : result = "ASCII"     ; break;
-            case Exiv2::unsignedShort    : result = "SHORT"     ; break;
-            case Exiv2::unsignedLong     : result = "LONG"      ; break;
-            case Exiv2::unsignedRational : result = "RATIONAL"  ; break;
-            case Exiv2::signedByte       : result = "SBYTE"     ; break;
-            case Exiv2::undefined        : result = "UNDEFINED" ; break;
-            case Exiv2::signedShort      : result = "SSHORT"    ; break;
-            case Exiv2::signedLong       : result = "SLONG"     ; break;
-            case Exiv2::signedRational   : result = "SRATIONAL" ; break;
-            case Exiv2::tiffFloat        : result = "FLOAT"     ; break;
-            case Exiv2::tiffDouble       : result = "DOUBLE"    ; break;
-            default                      : result = "unknown"   ; break;
-        }
-        return result;
-    }
-
-    static const char* tagName(uint16_t tag,size_t nMaxLength)
-    {
-        const char* result = NULL;
-
-        // build a static map of tags for fast search
-        static std::map<int,std::string> tags;
-        static bool init  = true;
-        static char buffer[80];
-
-        if ( init ) {
-            int idx;
-            const TagInfo* ti ;
-            for (ti = Exiv2::  mnTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
-            for (ti = Exiv2:: iopTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
-            for (ti = Exiv2:: gpsTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
-            for (ti = Exiv2:: ifdTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
-            for (ti = Exiv2::exifTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
-        }
-        init = false;
-
-        try {
-            result = tags[tag].c_str();
-            if ( nMaxLength > sizeof(buffer) -2 )
-                 nMaxLength = sizeof(buffer) -2;
-            strncpy(buffer,result,nMaxLength);
-            result = buffer;
-        } catch ( ... ) {}
-
-        return result ;
-    }
-
-    static bool isStringType(uint16_t type)
-    {
-        return type == Exiv2::asciiString
-            || type == Exiv2::unsignedByte
-            || type == Exiv2::signedByte
-            ;
-    }
-    static bool isShortType(uint16_t type) {
-         return type == Exiv2::unsignedShort
-             || type == Exiv2::signedShort
-             ;
-    }
-    static bool isLongType(uint16_t type) {
-         return type == Exiv2::unsignedLong
-             || type == Exiv2::signedLong
-             ;
-    }
-    static bool isRationalType(uint16_t type) {
-         return type == Exiv2::unsignedRational
-             || type == Exiv2::signedRational
-             ;
-    }
-    static bool is2ByteType(uint16_t type)
-    {
-        return isShortType(type);
-    }
-    static bool is4ByteType(uint16_t type)
-    {
-        return isLongType(type)
-            || isRationalType(type)
-            ;
-    }
-    static bool isPrintXMP(uint16_t type, Exiv2::PrintStructureOption option)
-    {
-        return type == 700 && option == kpsXMP;
-    }
-
-#define MIN(a,b) ((a)<(b))?(b):(a)
-
-    void TiffImage::printStructure(std::ostream& out, Exiv2::PrintStructureOption option)
+    void TiffImage::printStructure(std::ostream& out, Exiv2::PrintStructureOption option,int depth)
     {
         if (io_->open() != 0) throw Error(9, io_->path(), strError());
         // Ensure that this is the correct image type
+        if ( imageType() == ImageType::none )
         if (!isTiffType(*io_, false)) {
             if (io_->error() || io_->eof()) throw Error(14);
             throw Error(15);
         }
 
-        if ( option == kpsBasic || option == kpsXMP ) {
-            io_->seek(0,BasicIo::beg);
-            // buffer
-            const size_t dirSize = 32;
-            DataBuf  dir(dirSize);
+        io_->seek(0,BasicIo::beg);
 
-            // read header (we already know for certain that we have a Tiff file)
-            io_->read(dir.pData_,  8);
-            char c = (char) dir.pData_[0] ;
-            bool bSwap   = ( c == 'M' && isLittleEndian() )
-                        || ( c == 'I' && isBigEndian()    )
-                        ;
-
-            if ( option == kpsBasic ) {
-                out << Internal::stringFormat("STRUCTURE OF TIFF FILE (%c%c): ",c,c) << io_->path() << std::endl;
-                out << " address |    tag                           |      type |    count |   offset | value\n";
-            }
-
-            uint32_t start = byteSwap4(dir,4,bSwap);
-            while  ( start ) {
-                // if ( option == kpsBasic ) out << Internal::stringFormat("bSwap, start = %d %u\n",bSwap,offset);
-
-                // Read top of directory
-                io_->seek(start,BasicIo::beg);
-                io_->read(dir.pData_, 2);
-                uint16_t   dirLength = byteSwap2(dir,0,bSwap);
-
-                // Read the dictionary
-                for ( int i = 0 ; i < dirLength ; i ++ ) {
-                    io_->read(dir.pData_, 12);
-                    uint16_t tag    = byteSwap2(dir,0,bSwap);
-                    uint16_t type   = byteSwap2(dir,2,bSwap);
-                    uint32_t count  = byteSwap4(dir,4,bSwap);
-                    uint32_t offset = byteSwap4(dir,8,bSwap);
-
-                    std::string sp = "" ; // output spacer
-
-                    //prepare to print the value
-                    uint16_t kount = isPrintXMP(tag,option) ? count // restrict long arrays
-                                   : isStringType(type)     ? (count > 32 ? 32 : count)
-                                   : count > 5              ? 5
-                                   : count
-                                   ;
-                    uint32_t pad   = isStringType(type) ? 1 : 0;
-                    uint32_t size  = isStringType(type) ? 1
-                                   : is2ByteType(type)  ? 2
-                                   : is4ByteType(type)  ? 4
-                                   : 1
-                                   ;
-
-                    DataBuf  buf(MIN(size*kount + pad,48));  // allocate a buffer
-                    if ( isStringType(type) || count*size > 4 ) {          // data is in the directory => read into buffer
-                        size_t   restore = io_->tell();  // save
-                        io_->seek(offset,BasicIo::beg);  // position
-                        io_->read(buf.pData_,kount*size);// read
-                        io_->seek(restore,BasicIo::beg); // restore
-                    } else {                         // move data from directory to the buffer
-                        std::memcpy(buf.pData_,dir.pData_+8,12);
-                    }
-
-                    if ( option == kpsBasic ) {
-                        uint32_t address = start + 2 + i*12 ;
-                        out << Internal::stringFormat("%8u | %#06x %-25s |%10s |%9u |%9u | ",address,tag,tagName(tag,25),typeName(type),count,offset);
-
-                        if ( isShortType(type) ){
-                            for ( uint16_t k = 0 ; k < kount ; k++ ) {
-                                out << sp << byteSwap2(buf,k*size,bSwap);
-                                sp = " ";
-                            }
-                        } else if ( isLongType(type) ){
-                            for ( uint16_t k = 0 ; k < kount ; k++ ) {
-                                out << sp << byteSwap4(buf,k*size,bSwap);
-                                sp = " ";
-                            }
-                        } else if ( isRationalType(type) ){
-                            for ( uint16_t k = 0 ; k < kount ; k++ ) {
-                            	uint16_t a = byteSwap2(buf,k*size+0,bSwap);
-                            	uint16_t b = byteSwap2(buf,k*size+2,bSwap);
-                            	if ( isLittleEndian() ) {
-                                	if ( bSwap ) out << sp << b << "/" << a;
-                                	else         out << sp << a << "/" << b;
-                                } else {
-                                	if ( bSwap ) out << sp << a << "/" << b;
-                                	else         out << sp << b << "/" << a;
-                                }
-                                sp = " ";
-                            }
-                        } else if ( isStringType(type) ) {
-                            out << sp << Internal::binaryToString(buf, kount);
-                        }
-                        sp = kount == count ? "" : " ...";
-                        out << sp << std::endl;
-                    }
-
-                    if ( isPrintXMP(tag,option) ) {
-                        buf.pData_[count]=0;
-                        out << (char*) buf.pData_;
-                    }
-                }
-                io_->read(dir.pData_, 4);
-                start = byteSwap4(dir,0,bSwap);
-            } // while offset
-        }
+        printTiffStructure(io(),out,option,depth-1);
     }
 
 }                                       // namespace Exiv2
@@ -635,6 +423,18 @@ namespace Exiv2 {
         false,            // No fillers
         false,            // Don't concatenate gaps
         { 0, ttUnsignedShort, 1 }
+    };
+
+    //! Canon Time Info binary array - configuration
+    extern const ArrayCfg canonTiCfg = {
+        canonTiId,        // Group for the elements
+        invalidByteOrder, // Use byte order from parent
+        ttSignedLong,     // Type for array entry and size element
+        notEncrypted,     // Not encrypted
+        true,             // With size element
+        false,            // No fillers
+        false,            // Don't concatenate gaps
+        { 0, ttSignedLong, 1 }
     };
 
     //! Canon File Info binary array - configuration
@@ -1449,6 +1249,7 @@ namespace Exiv2 {
         { Tag::root, canonPaId,        canonId,          0x0005    },
         { Tag::root, canonCfId,        canonId,          0x000f    },
         { Tag::root, canonPiId,        canonId,          0x0012    },
+        { Tag::root, canonTiId,        canonId,          0x0035    },
         { Tag::root, canonFiId,        canonId,          0x0093    },
         { Tag::root, canonPrId,        canonId,          0x00a0    },
         { Tag::root, nikon1Id,         exifId,           0x927c    },
@@ -1526,6 +1327,7 @@ namespace Exiv2 {
       Each entry of the table defines for a particular tag and group combination
       the corresponding TIFF component create function.
      */
+#define ignoreTiffComponent 0
     const TiffGroupStruct TiffCreator::tiffGroupStruct_[] = {
         // ext. tag  group             create function
         //---------  ----------------- -----------------------------------------
@@ -1553,7 +1355,7 @@ namespace Exiv2 {
         {    0x0145, subImage1Id,      newTiffImageSize<0x0144, subImage1Id>     },
         {    0x0201, subImage1Id,      newTiffImageData<0x0202, subImage1Id>     },
         {    0x0202, subImage1Id,      newTiffImageSize<0x0201, subImage1Id>     },
-        { Tag::next, subImage1Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage1Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage1Id,      newTiffEntry                              },
 
         // Subdir subImage2
@@ -1563,7 +1365,7 @@ namespace Exiv2 {
         {    0x0145, subImage2Id,      newTiffImageSize<0x0144, subImage2Id>     },
         {    0x0201, subImage2Id,      newTiffImageData<0x0202, subImage2Id>     },
         {    0x0202, subImage2Id,      newTiffImageSize<0x0201, subImage2Id>     },
-        { Tag::next, subImage2Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage2Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage2Id,      newTiffEntry                              },
 
         // Subdir subImage3
@@ -1573,7 +1375,7 @@ namespace Exiv2 {
         {    0x0145, subImage3Id,      newTiffImageSize<0x0144, subImage3Id>     },
         {    0x0201, subImage3Id,      newTiffImageData<0x0202, subImage3Id>     },
         {    0x0202, subImage3Id,      newTiffImageSize<0x0201, subImage3Id>     },
-        { Tag::next, subImage3Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage3Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage3Id,      newTiffEntry                              },
 
         // Subdir subImage4
@@ -1583,7 +1385,7 @@ namespace Exiv2 {
         {    0x0145, subImage4Id,      newTiffImageSize<0x0144, subImage4Id>     },
         {    0x0201, subImage4Id,      newTiffImageData<0x0202, subImage4Id>     },
         {    0x0202, subImage4Id,      newTiffImageSize<0x0201, subImage4Id>     },
-        { Tag::next, subImage4Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage4Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage4Id,      newTiffEntry                              },
 
         // Subdir subImage5
@@ -1593,7 +1395,7 @@ namespace Exiv2 {
         {    0x0145, subImage5Id,      newTiffImageSize<0x0144, subImage5Id>     },
         {    0x0201, subImage5Id,      newTiffImageData<0x0202, subImage5Id>     },
         {    0x0202, subImage5Id,      newTiffImageSize<0x0201, subImage5Id>     },
-        { Tag::next, subImage5Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage5Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage5Id,      newTiffEntry                              },
 
         // Subdir subImage6
@@ -1603,7 +1405,7 @@ namespace Exiv2 {
         {    0x0145, subImage6Id,      newTiffImageSize<0x0144, subImage6Id>     },
         {    0x0201, subImage6Id,      newTiffImageData<0x0202, subImage6Id>     },
         {    0x0202, subImage6Id,      newTiffImageSize<0x0201, subImage6Id>     },
-        { Tag::next, subImage6Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage6Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage6Id,      newTiffEntry                              },
 
         // Subdir subImage7
@@ -1613,7 +1415,7 @@ namespace Exiv2 {
         {    0x0145, subImage7Id,      newTiffImageSize<0x0144, subImage7Id>     },
         {    0x0201, subImage7Id,      newTiffImageData<0x0202, subImage7Id>     },
         {    0x0202, subImage7Id,      newTiffImageSize<0x0201, subImage7Id>     },
-        { Tag::next, subImage7Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage7Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage7Id,      newTiffEntry                              },
 
         // Subdir subImage8
@@ -1623,7 +1425,7 @@ namespace Exiv2 {
         {    0x0145, subImage8Id,      newTiffImageSize<0x0144, subImage8Id>     },
         {    0x0201, subImage8Id,      newTiffImageData<0x0202, subImage8Id>     },
         {    0x0202, subImage8Id,      newTiffImageSize<0x0201, subImage8Id>     },
-        { Tag::next, subImage8Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage8Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage8Id,      newTiffEntry                              },
 
         // Subdir subImage9
@@ -1633,21 +1435,21 @@ namespace Exiv2 {
         {    0x0145, subImage9Id,      newTiffImageSize<0x0144, subImage9Id>     },
         {    0x0201, subImage9Id,      newTiffImageData<0x0202, subImage9Id>     },
         {    0x0202, subImage9Id,      newTiffImageSize<0x0201, subImage9Id>     },
-        { Tag::next, subImage9Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subImage9Id,      ignoreTiffComponent                       },
         {  Tag::all, subImage9Id,      newTiffEntry                              },
 
         // Exif subdir
         {    0xa005, exifId,           newTiffSubIfd<iopId>                      },
         {    0x927c, exifId,           newTiffMnEntry                            },
-        { Tag::next, exifId,           newTiffDirectory<ignoreId>                },
+        { Tag::next, exifId,           ignoreTiffComponent                       },
         {  Tag::all, exifId,           newTiffEntry                              },
 
         // GPS subdir
-        { Tag::next, gpsId,            newTiffDirectory<ignoreId>                },
+        { Tag::next, gpsId,            ignoreTiffComponent                       },
         {  Tag::all, gpsId,            newTiffEntry                              },
 
         // IOP subdir
-        { Tag::next, iopId,            newTiffDirectory<ignoreId>                },
+        { Tag::next, iopId,            ignoreTiffComponent                       },
         {  Tag::all, iopId,            newTiffEntry                              },
 
         // IFD1
@@ -1668,7 +1470,7 @@ namespace Exiv2 {
         {    0x0145, subThumb1Id,      newTiffImageSize<0x0144, subThumb1Id>     },
         {    0x0201, subThumb1Id,      newTiffImageData<0x0202, subThumb1Id>     },
         {    0x0202, subThumb1Id,      newTiffImageSize<0x0201, subThumb1Id>     },
-        { Tag::next, subThumb1Id,      newTiffDirectory<ignoreId>                },
+        { Tag::next, subThumb1Id,      ignoreTiffComponent                       },
         {  Tag::all, subThumb1Id,      newTiffEntry                              },
 
         // IFD2 (eg, in Pentax PEF and Canon CR2 files)
@@ -1688,14 +1490,14 @@ namespace Exiv2 {
         {    0x0145, ifd1Id,           newTiffImageSize<0x0144, ifd3Id>          },
         {    0x0201, ifd3Id,           newTiffImageData<0x0202, ifd3Id>          },
         {    0x0202, ifd3Id,           newTiffImageSize<0x0201, ifd3Id>          },
-        { Tag::next, ifd3Id,           newTiffDirectory<ignoreId>                },
+        { Tag::next, ifd3Id,           ignoreTiffComponent                       },
         {  Tag::all, ifd3Id,           newTiffEntry                              },
 
         // Olympus makernote - some Olympus cameras use Minolta structures
         // Todo: Adding such tags will not work (maybe result in a Minolta makernote), need separate groups
         {    0x0001, olympusId,        EXV_SIMPLE_BINARY_ARRAY(minoCsoCfg)       },
         {    0x0003, olympusId,        EXV_SIMPLE_BINARY_ARRAY(minoCsnCfg)       },
-        { Tag::next, olympusId,        newTiffDirectory<ignoreId>                },
+        { Tag::next, olympusId,        ignoreTiffComponent                       },
         {  Tag::all, olympusId,        newTiffEntry                              },
 
         // Olympus2 makernote
@@ -1717,7 +1519,7 @@ namespace Exiv2 {
         {    0x2800, olympus2Id,       newTiffSubIfd<olympusFe8Id>               },
         {    0x2900, olympus2Id,       newTiffSubIfd<olympusFe9Id>               },
         {    0x3000, olympus2Id,       newTiffSubIfd<olympusRiId>                },
-        { Tag::next, olympus2Id,       newTiffDirectory<ignoreId>                },
+        { Tag::next, olympus2Id,       ignoreTiffComponent                       },
         {  Tag::all, olympus2Id,       newTiffEntry                              },
 
         // Olympus2 equipment subdir
@@ -1771,7 +1573,7 @@ namespace Exiv2 {
         {  Tag::all, olympusRiId,        newTiffEntry                            },
 
         // Fujifilm makernote
-        { Tag::next, fujiId,           newTiffDirectory<ignoreId>                },
+        { Tag::next, fujiId,           ignoreTiffComponent                       },
         {  Tag::all, fujiId,           newTiffEntry                              },
 
         // Canon makernote
@@ -1780,9 +1582,10 @@ namespace Exiv2 {
         {    0x0005, canonId,          EXV_SIMPLE_BINARY_ARRAY(canonPaCfg)       },
         {    0x000f, canonId,          EXV_SIMPLE_BINARY_ARRAY(canonCfCfg)       },
         {    0x0012, canonId,          EXV_SIMPLE_BINARY_ARRAY(canonPiCfg)       },
+        {    0x0035, canonId,          EXV_SIMPLE_BINARY_ARRAY(canonTiCfg)       },
         {    0x0093, canonId,          EXV_BINARY_ARRAY(canonFiCfg, canonFiDef)  },
         {    0x00a0, canonId,          EXV_SIMPLE_BINARY_ARRAY(canonPrCfg)  },
-        { Tag::next, canonId,          newTiffDirectory<ignoreId>                },
+        { Tag::next, canonId,          ignoreTiffComponent                       },
         {  Tag::all, canonId,          newTiffEntry                              },
 
         // Canon makernote composite tags
@@ -1791,19 +1594,20 @@ namespace Exiv2 {
         {  Tag::all, canonPaId,        newTiffBinaryElement                      },
         {  Tag::all, canonCfId,        newTiffBinaryElement                      },
         {  Tag::all, canonPiId,        newTiffBinaryElement                      },
+        {  Tag::all, canonTiId,        newTiffBinaryElement                      },
         {  Tag::all, canonFiId,        newTiffBinaryElement                      },
         {  Tag::all, canonPrId,        newTiffBinaryElement                      },
 
         // Nikon1 makernote
-        { Tag::next, nikon1Id,         newTiffDirectory<ignoreId>                },
+        { Tag::next, nikon1Id,         ignoreTiffComponent                       },
         {  Tag::all, nikon1Id,         newTiffEntry                              },
 
         // Nikon2 makernote
-        { Tag::next, nikon2Id,         newTiffDirectory<ignoreId>                },
+        { Tag::next, nikon2Id,         ignoreTiffComponent                       },
         {  Tag::all, nikon2Id,         newTiffEntry                              },
 
         // Nikon3 makernote
-        { Tag::next, nikon3Id,         newTiffDirectory<ignoreId>                },
+        { Tag::next, nikon3Id,         ignoreTiffComponent                       },
         {    0x0011, nikon3Id,         newTiffSubIfd<nikonPvId>                  },
         {    0x001f, nikon3Id,         EXV_BINARY_ARRAY(nikonVrCfg, nikonVrDef)  },
         {    0x0023, nikon3Id,         EXV_BINARY_ARRAY(nikonPcCfg, nikonPcDef)  },
@@ -1823,7 +1627,7 @@ namespace Exiv2 {
         // Nikon3 makernote preview subdir
         {    0x0201, nikonPvId,        newTiffThumbData<0x0202, nikonPvId>       },
         {    0x0202, nikonPvId,        newTiffThumbSize<0x0201, nikonPvId>       },
-        { Tag::next, nikonPvId,        newTiffDirectory<ignoreId>                },
+        { Tag::next, nikonPvId,        ignoreTiffComponent                       },
         {  Tag::all, nikonPvId,        newTiffEntry                              },
 
         // Nikon3 vibration reduction
@@ -1880,25 +1684,25 @@ namespace Exiv2 {
         {  Tag::all, nikonLd3Id,       newTiffBinaryElement                      },
 
         // Panasonic makernote
-        { Tag::next, panasonicId,      newTiffDirectory<ignoreId>                },
+        { Tag::next, panasonicId,      ignoreTiffComponent                       },
         {  Tag::all, panasonicId,      newTiffEntry                              },
 
         // Pentax DNG makernote
         {    0x0003, pentaxDngId,      newTiffThumbSize<0x0004, pentaxDngId>     },
         {    0x0004, pentaxDngId,      newTiffThumbData<0x0003, pentaxDngId>     },
-        { Tag::next, pentaxDngId,      newTiffDirectory<ignoreId>                },
+        { Tag::next, pentaxDngId,      ignoreTiffComponent                       },
         {  Tag::all, pentaxDngId,      newTiffEntry                              },
 
         // Pentax makernote
         {    0x0003, pentaxId,         newTiffThumbSize<0x0004, pentaxId>        },
         {    0x0004, pentaxId,         newTiffThumbData<0x0003, pentaxId>        },
-        { Tag::next, pentaxId,         newTiffDirectory<ignoreId>                },
+        { Tag::next, pentaxId,         ignoreTiffComponent                       },
         {  Tag::all, pentaxId,         newTiffEntry                              },
 
         // Samsung2 makernote
         {    0x0021, samsung2Id,       EXV_BINARY_ARRAY(samsungPwCfg, samsungPwDef) },
         {    0x0035, samsung2Id,       newTiffSubIfd<samsungPvId>                },
-        { Tag::next, samsung2Id,       newTiffDirectory<ignoreId>                },
+        { Tag::next, samsung2Id,       ignoreTiffComponent                       },
         {  Tag::all, samsung2Id,       newTiffEntry                              },
 
         // Samsung PictureWizard binary array
@@ -1907,17 +1711,17 @@ namespace Exiv2 {
         // Samsung2 makernote preview subdir
         {    0x0201, samsungPvId,      newTiffThumbData<0x0202, samsungPvId>     },
         {    0x0202, samsungPvId,      newTiffThumbSize<0x0201, samsungPvId>     },
-        { Tag::next, samsungPvId,      newTiffDirectory<ignoreId>                },
+        { Tag::next, samsungPvId,      ignoreTiffComponent                       },
         {  Tag::all, samsungPvId,      newTiffEntry                              },
 
         // Sigma/Foveon makernote
-        { Tag::next, sigmaId,          newTiffDirectory<ignoreId>                },
+        { Tag::next, sigmaId,          ignoreTiffComponent                       },
         {  Tag::all, sigmaId,          newTiffEntry                              },
 
         // Sony1 makernote
         {    0x0114, sony1Id,          EXV_COMPLEX_BINARY_ARRAY(sony1CsSet, sonyCsSelector) },
         {    0xb028, sony1Id,          newTiffSubIfd<sonyMltId>                  },
-        { Tag::next, sony1Id,          newTiffDirectory<ignoreId>                },
+        { Tag::next, sony1Id,          ignoreTiffComponent                       },
         {  Tag::all, sony1Id,          newTiffEntry                              },
 
         // Sony1 camera settings
@@ -1926,7 +1730,7 @@ namespace Exiv2 {
 
         // Sony2 makernote
         {    0x0114, sony2Id,          EXV_COMPLEX_BINARY_ARRAY(sony2CsSet, sonyCsSelector) },
-        { Tag::next, sony2Id,          newTiffDirectory<ignoreId>                },
+        { Tag::next, sony2Id,          ignoreTiffComponent                       },
         {  Tag::all, sony2Id,          newTiffEntry                              },
 
         // Sony2 camera settings
@@ -1940,7 +1744,7 @@ namespace Exiv2 {
         {    0x0088, sonyMltId,        newTiffThumbData<0x0089, sonyMltId>       },
         {    0x0089, sonyMltId,        newTiffThumbSize<0x0088, sonyMltId>       },
         {    0x0114, sonyMltId,        EXV_BINARY_ARRAY(sony1MCsA100Cfg, sony1MCsA100Def)},
-        { Tag::next, sonyMltId,        newTiffDirectory<ignoreId>                },
+        { Tag::next, sonyMltId,        ignoreTiffComponent                       },
         {  Tag::all, sonyMltId,        newTiffEntry                              },
 
         // Sony1 Minolta makernote composite tags
@@ -1956,7 +1760,7 @@ namespace Exiv2 {
         {    0x0088, minoltaId,        newTiffThumbData<0x0089, minoltaId>       },
         {    0x0089, minoltaId,        newTiffThumbSize<0x0088, minoltaId>       },
         {    0x0114, minoltaId,        EXV_BINARY_ARRAY(minoCs5Cfg, minoCs5Def)  },
-        { Tag::next, minoltaId,        newTiffDirectory<ignoreId>                },
+        { Tag::next, minoltaId,        ignoreTiffComponent                       },
         {  Tag::all, minoltaId,        newTiffEntry                              },
 
         // Minolta makernote composite tags
@@ -1974,20 +1778,20 @@ namespace Exiv2 {
         {    0x8825, panaRawId,        newTiffSubIfd<gpsId>                      },
 //        {    0x0111, panaRawId,        newTiffImageData<0x0117, panaRawId>       },
 //        {    0x0117, panaRawId,        newTiffImageSize<0x0111, panaRawId>       },
-        { Tag::next, panaRawId,        newTiffDirectory<ignoreId>                },
+        { Tag::next, panaRawId,        ignoreTiffComponent                       },
         {  Tag::all, panaRawId,        newTiffEntry                              },
 
         // Casio makernote
-        { Tag::next, casioId,          newTiffDirectory<ignoreId>                },
+        { Tag::next, casioId,          ignoreTiffComponent                       },
         {  Tag::all, casioId,          newTiffEntry                              },
 
         // Casio2 makernote
-        { Tag::next, casio2Id,          newTiffDirectory<ignoreId>                },
+        { Tag::next, casio2Id,          ignoreTiffComponent                       },
         {  Tag::all, casio2Id,          newTiffEntry                              },
 
         // -----------------------------------------------------------------------
         // Tags which are not de/encoded
-        { Tag::next, ignoreId,           newTiffDirectory<ignoreId>              },
+        { Tag::next, ignoreId,           ignoreTiffComponent                     },
         {  Tag::all, ignoreId,           newTiffEntry                            }
     };
 
@@ -2164,7 +1968,7 @@ namespace Exiv2 {
             encoder.add(createdTree.get(), parsedTree.get(), root);
             // Write binary representation from the composite tree
             DataBuf header = pHeader->write();
-            BasicIo::AutoPtr tempIo(io.temporary()); // may throw
+            BasicIo::AutoPtr tempIo(new MemIo);
             assert(tempIo.get() != 0);
             IoWrapper ioWrapper(*tempIo, header.pData_, header.size_, pOffsetWriter);
             uint32_t imageIdx(uint32_t(-1));
@@ -2265,10 +2069,10 @@ namespace Exiv2 {
     {
         if (!pData || size < 8) return false;
 
-        if (pData[0] == 0x49 && pData[1] == 0x49) {
+        if (pData[0] == 'I' && pData[0] == pData[1]) {
             byteOrder_ = littleEndian;
         }
-        else if (pData[0] == 0x4d && pData[1] == 0x4d) {
+        else if (pData[0] == 'M' && pData[0] == pData[1]) {
             byteOrder_ = bigEndian;
         }
         else {
@@ -2285,17 +2089,16 @@ namespace Exiv2 {
         DataBuf buf(8);
         switch (byteOrder_) {
         case littleEndian:
-            buf.pData_[0] = 0x49;
-            buf.pData_[1] = 0x49;
+            buf.pData_[0] = 'I';
             break;
         case bigEndian:
-            buf.pData_[0] = 0x4d;
-            buf.pData_[1] = 0x4d;
+            buf.pData_[0] = 'M';
             break;
         case invalidByteOrder:
             assert(false);
             break;
         }
+        buf.pData_[1]=buf.pData_[0];
         us2Data(buf.pData_ + 2, tag_, byteOrder_);
         ul2Data(buf.pData_ + 4, 0x00000008, byteOrder_);
         return buf;
@@ -2420,7 +2223,7 @@ namespace Exiv2 {
             { 0x0214, ifd0Id }, // Exif.Image.ReferenceBlackWhite
             { 0x828d, ifd0Id }, // Exif.Image.CFARepeatPatternDim
             { 0x828e, ifd0Id }, // Exif.Image.CFAPattern
-            { 0x8773, ifd0Id }, // Exif.Image.InterColorProfile
+        //  { 0x8773, ifd0Id }, // Exif.Image.InterColorProfile
             { 0x8824, ifd0Id }, // Exif.Image.SpectralSensitivity
             { 0x8828, ifd0Id }, // Exif.Image.OECF
             { 0x9102, ifd0Id }, // Exif.Image.CompressedBitsPerPixel

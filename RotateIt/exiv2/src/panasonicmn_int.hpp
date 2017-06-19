@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -24,7 +24,7 @@
            <a href="http://www.compton.nu/panasonic.html">Panasonic MakerNote Information</a> by Tom Hughes,
            Panasonic.pm of <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">ExifTool</a> by Phil Harvey,
            <a href="http://www.ozhiker.com/electronics/pjmt/jpeg_info/panasonic_mn.html">Panasonic Makernote Format Specification</a> by Evan Hunter.
-  @version $Rev: 3777 $
+  @version $Rev$
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Gilles Caulier (gc)
@@ -73,6 +73,8 @@ namespace Exiv2 {
         static std::ostream& print0x0036(std::ostream& os, const Value& value, const ExifData*);
         //! Print ISO
         static std::ostream& print0x003c(std::ostream& os, const Value& value, const ExifData*);
+        //! Print Manometer Pressure
+        static std::ostream& printPressure(std::ostream& os, const Value& value, const ExifData*);
         //! Print special text values: title, landmark, county and so on
         static std::ostream& printPanasonicText(std::ostream& os, const Value& value, const ExifData*);
         //! Print accerometer readings

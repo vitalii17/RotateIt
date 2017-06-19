@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      samsungmn.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   27-Sep-10, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: samsungmn.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -63,7 +63,7 @@ namespace Exiv2 {
         { 10, "Samsung NX 45mm F1.8"                          },
         { 11, "Samsung NX 45mm F1.8 2D/3D"                    },
         { 12, "Samsung NX 12-24mm F4-5.6 ED"                  },
-        { 13, "Saumsun NX 16-50mm F2-2.8 S ED OIS"            },
+        { 13, "Samsung NX 16-50mm F2-2.8 S ED OIS"            },
         { 14, "Samsung NX 10mm F3.5 Fisheye"                  },
         { 15, "Samsung NX 16-50mm F3.5-5.6 Power Zoom ED OIS" },
         { 20, "Samsung NX 50-150mm F2.8 S ED OIS"             },

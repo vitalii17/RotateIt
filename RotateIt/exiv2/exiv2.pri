@@ -4,10 +4,10 @@ INCLUDEPATH += $$PWD/src
 HEADERS += \
     exiv2/src/xmpsidecar.hpp \
     exiv2/src/xmp.hpp \
+    exiv2/src/webpimage.hpp \
     exiv2/src/version.hpp \
     exiv2/src/value.hpp \
     exiv2/src/utilsvideo.hpp \
-    exiv2/src/utils.hpp \
     exiv2/src/tzfile.h \
     exiv2/src/types.hpp \
     exiv2/src/timegm.h \
@@ -51,6 +51,7 @@ HEADERS += \
     exiv2/src/jpgimage.hpp \
     exiv2/src/jp2image.hpp \
     exiv2/src/iptc.hpp \
+    exiv2/src/ini.hpp \
     exiv2/src/image_int.hpp \
     exiv2/src/image.hpp \
     exiv2/src/i18n.h \
@@ -58,8 +59,7 @@ HEADERS += \
     exiv2/src/gifimage.hpp \
     exiv2/src/futils.hpp \
     exiv2/src/fujimn_int.hpp \
-    exiv2/src/exv_msvc-webready.h \
-    exiv2/src/exv_msvc.h \
+    exiv2/src/fff.h \
     exiv2/src/exv_conf.h \
     exiv2/src/exif.hpp \
     exiv2/src/error.hpp \
@@ -78,13 +78,14 @@ HEADERS += \
     exiv2/src/basicio.hpp \
     exiv2/src/asfvideo.hpp
 
+
 SOURCES += \
     exiv2/src/xmpsidecar.cpp \
     exiv2/src/xmp.cpp \
+    exiv2/src/webpimage.cpp \
     exiv2/src/version.cpp \
     exiv2/src/value.cpp \
     exiv2/src/utilsvideo.cpp \
-    exiv2/src/utils.cpp \
     exiv2/src/types.cpp \
     exiv2/src/tiffvisitor.cpp \
     exiv2/src/tiffimage.cpp \
@@ -119,6 +120,7 @@ SOURCES += \
     exiv2/src/jpgimage.cpp \
     exiv2/src/jp2image.cpp \
     exiv2/src/iptc.cpp \
+    exiv2/src/ini.cpp \
     exiv2/src/image.cpp \
     exiv2/src/http.cpp \
     exiv2/src/gifimage.cpp \
@@ -137,3 +139,4 @@ SOURCES += \
     exiv2/src/bmpimage.cpp \
     exiv2/src/basicio.cpp \
     exiv2/src/asfvideo.cpp
+

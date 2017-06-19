@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      tiffvisitor.cpp
-  Version:   $Rev: 3846 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   11-Apr-06, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffvisitor.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -618,10 +618,14 @@ namespace Exiv2 {
             exifData_.erase(pos);
         }
         std::string xmpPacket;
-        if (XmpParser::encode(xmpPacket, xmpData_) > 1) {
+        if ( xmpData_.usePacket() ) {
+        	xmpPacket = xmpData_.xmpPacket();
+        } else {
+            if (XmpParser::encode(xmpPacket, xmpData_) > 1) {
 #ifndef SUPPRESS_WARNINGS
-            EXV_ERROR << "Failed to encode XMP metadata.\n";
+                EXV_ERROR << "Failed to encode XMP metadata.\n";
 #endif
+            }
         }
         if (!xmpPacket.empty()) {
             // Set the XMP Exif tag to the new value
@@ -1229,7 +1233,7 @@ namespace Exiv2 {
         if (pos != dirList_.end()) {
 #ifndef SUPPRESS_WARNINGS
             EXV_ERROR << groupName(group) << " pointer references previously read "
-                      << groupName(pos->second) << " directory. Ignored.\n";
+                      << groupName(pos->second) << " directory; ignored.\n";
 #endif
             return true;
         }
@@ -1313,7 +1317,7 @@ namespace Exiv2 {
 #ifndef SUPPRESS_WARNINGS
                 if (tc.get() == 0) {
                     EXV_WARNING << "Directory " << groupName(object->group())
-                                << " has an unhandled next pointer.\n";
+                                << " has an unexpected next pointer; ignored.\n";
                 }
 #endif
             }
@@ -1344,9 +1348,8 @@ namespace Exiv2 {
             uint32_t maxi = 9;
             if (object->group() == ifd1Id) maxi = 1;
             for (uint32_t i = 0; i < object->count(); ++i) {
-                int32_t offset = getLong(object->pData() + 4*i, byteOrder());
-                if (   baseOffset() + offset > size_
-                    || static_cast<int32_t>(baseOffset()) + offset < 0) {
+                uint32_t offset = getLong(object->pData() + 4*i, byteOrder());
+                if (   baseOffset() + offset > size_ ) {
 #ifndef SUPPRESS_WARNINGS
                     EXV_ERROR << "Directory " << groupName(object->group())
                               << ", entry 0x" << std::setw(4)
@@ -1489,12 +1492,17 @@ namespace Exiv2 {
             return;
         }
         p += 4;
+        uint32_t isize= 0; // size of Exif.Sony1.PreviewImage
         uint32_t size = typeSize * count;
-        int32_t offset = getLong(p, byteOrder());
+        uint32_t offset = getLong(p, byteOrder());
         byte* pData = p;
         if (   size > 4
             && (   baseOffset() + offset >= size_
                 || static_cast<int32_t>(baseOffset()) + offset <= 0)) {
+                // #1143
+                if ( object->tag() == 0x2001 && std::string(groupName(object->group())) == "Sony1" ) {
+                	isize=size;
+                } else {
 #ifndef SUPPRESS_WARNINGS
             EXV_ERROR << "Offset of directory " << groupName(object->group())
                       << ", entry 0x" << std::setw(4)
@@ -1504,6 +1512,7 @@ namespace Exiv2 {
                       << std::setfill('0') << std::hex << offset
                       << "; truncating the entry\n";
 #endif
+				}
                 size = 0;
         }
         if (size > 4) {
@@ -1528,7 +1537,17 @@ namespace Exiv2 {
         }
         Value::AutoPtr v = Value::create(typeId);
         assert(v.get());
-        v->read(pData, size, byteOrder());
+        if ( !isize ) {
+        	v->read(pData, size, byteOrder());
+        } else {
+        	// #1143 Write a "hollow" buffer for the preview image
+        	//       Sadly: we don't know the exact location of the image in the source (it's near offset)
+        	//       And neither TiffReader nor TiffEntryBase have access to the BasicIo object being processed
+        	byte* buffer = (byte*) ::malloc(isize);
+        	::memset(buffer,0,isize);
+        	v->read(buffer,isize, byteOrder());
+        	::free(buffer);
+        }
 
         object->setValue(v);
         object->setData(pData, size);

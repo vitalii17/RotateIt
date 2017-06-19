@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -33,7 +33,6 @@
 
 // included header files
 #include "config.h"
-
 #include "version.hpp"
 
 // + standard includes
@@ -44,18 +43,29 @@
 #include <algorithm>
 #include <sstream>
 
+#ifdef _MSC_VER
+// Don't assume the value of EXV_HAVE_STDINT_H in exv_msvc.h has been set correctly
+# ifdef  EXV_HAVE_STDINT_H
+#  undef EXV_HAVE_STDINT_H
+# endif
+// Visual Studio 2010 and later has stdint.h
+# if   _MSC_VER >= _MSC_VER_2010
+#  include <stdint.h>
+# else
+// Earlier compilers have MS C99 equivalents such as __int8
+   typedef unsigned __int8  uint8_t;
+   typedef unsigned __int16 uint16_t;
+   typedef unsigned __int32 uint32_t;
+   typedef unsigned __int64 uint64_t;
+   typedef          __int8  int8_t;
+   typedef          __int16 int16_t;
+   typedef          __int32 int32_t;
+   typedef          __int64 int64_t;
+# endif
+#endif
+
 #ifdef EXV_HAVE_STDINT_H
 # include <stdint.h>
-#elif defined(_MSC_VER)
-// MSVC (before 2010) doesn't provide C99 types, but it has MS specific variants
-typedef unsigned __int8  uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-typedef __int8           int8_t;
-typedef __int16          int16_t;
-typedef __int32          int32_t;
-typedef __int64          int64_t;
 #endif
 
 // MSVC macro to convert a string to a wide string
@@ -102,7 +112,7 @@ namespace Exiv2 {
     enum WriteMethod { wmIntrusive, wmNonIntrusive };
 
     //! An identifier for each type of metadata
-    enum MetadataId { mdNone=0, mdExif=1, mdIptc=2, mdComment=4, mdXmp=8 };
+    enum MetadataId { mdNone=0, mdExif=1, mdIptc=2, mdComment=4, mdXmp=8, mdIccProfile=16 };
 
     //! An identifier for each mode of metadata support
     enum AccessMode { amNone=0, amRead=1, amWrite=2, amReadWrite=3 };
@@ -353,7 +363,6 @@ namespace Exiv2 {
     EXIV2API std::wstring s2ws(const std::string& s);
     //! Convert a unicode std::wstring s to an std::string.
     EXIV2API std::string ws2s(const std::wstring& s);
-
 #endif
     /*!
       @brief Return a \em long set to the value represented by \em s.

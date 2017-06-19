@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:    pgfimage.cpp
-  Version: $Rev: 3777 $
+  Version: $Rev$
   Author(s): Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
   History: 16-Jun-09, gc: submitted
   Credits: See header file
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pgfimage.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -58,12 +58,37 @@ const unsigned char pgfBlank[] = { 0x50,0x47,0x46,0x36,0x10,0x00,0x00,0x00,0x01,
                                    0x00,0x78,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00
                                  };
 
+
 // *****************************************************************************
 // class member definitions
+
 namespace Exiv2 {
+
+    static uint32_t byteSwap_(uint32_t value,bool bSwap)
+    {
+        uint32_t result = 0;
+        result |= (value & 0x000000FF) << 24;
+        result |= (value & 0x0000FF00) << 8;
+        result |= (value & 0x00FF0000) >> 8;
+        result |= (value & 0xFF000000) >> 24;
+        return bSwap ? result : value;
+    }
+
+    static uint32_t byteSwap_(Exiv2::DataBuf& buf,size_t offset,bool bSwap)
+    {
+        uint32_t v;
+        char*    p = (char*) &v;
+        int      i;
+        for ( i = 0 ; i < 4 ; i++ ) p[i] = buf.pData_[offset+i];
+        uint32_t result = byteSwap_(v,bSwap);
+        p               = (char*) &result;
+        for ( i = 0 ; i < 4 ; i++ ) buf.pData_[offset+i] = p[i];
+        return result;
+    }
 
     PgfImage::PgfImage(BasicIo::AutoPtr io, bool create)
             : Image(ImageType::pgf, mdExif | mdIptc| mdXmp | mdComment, io)
+            , bSwap_(isBigEndianPlatform())
     {
         if (create)
         {
@@ -104,8 +129,7 @@ namespace Exiv2 {
         readPgfMagicNumber(*io_);
 
         uint32_t headerSize = readPgfHeaderSize(*io_);
-
-        readPgfHeaderStructure(*io_, &pixelWidth_, &pixelHeight_);
+        readPgfHeaderStructure(*io_, pixelWidth_, pixelHeight_);
 
         // And now, the most interresting, the user data byte array where metadata are stored as small image.
 
@@ -139,7 +163,7 @@ namespace Exiv2 {
             throw Error(9, io_->path(), strError());
         }
         IoCloser closer(*io_);
-        BasicIo::AutoPtr tempIo(io_->temporary()); // may throw
+        BasicIo::AutoPtr tempIo(new MemIo);
         assert (tempIo.get() != 0);
 
         doWriteMetadata(*tempIo); // may throw
@@ -171,7 +195,7 @@ namespace Exiv2 {
         readPgfHeaderSize(*io_);
 
         int w, h;
-        DataBuf header      = readPgfHeaderStructure(*io_, &w, &h);
+        DataBuf header      = readPgfHeaderStructure(*io_, w, h);
 
         Image::AutoPtr img  = ImageFactory::create(ImageType::png);
 
@@ -179,8 +203,8 @@ namespace Exiv2 {
         img->setIptcData(iptcData_);
         img->setXmpData(xmpData_);
         img->writeMetadata();
-        int imgSize    = img->io().size();
-        DataBuf imgBuf = img->io().read(imgSize);
+        int     imgSize  = img->io().size();
+        DataBuf imgBuf   = img->io().read(imgSize);
 
 #ifdef DEBUG
         std::cout << "Exiv2::PgfImage::doWriteMetadata: Creating image to host metadata (" << imgSize << " bytes)\n";
@@ -198,6 +222,7 @@ namespace Exiv2 {
         uint32_t newHeaderSize = header.size_ + imgSize;
         DataBuf buffer(4);
         memcpy (buffer.pData_, &newHeaderSize, 4);
+        byteSwap_(buffer,0,bSwap_);
         if (outIo.write(buffer.pData_, 4) != 4) throw Error(21);
 
 #ifdef DEBUG
@@ -250,8 +275,7 @@ namespace Exiv2 {
         if (iIo.error()) throw Error(14);
         if (bufRead != buffer.size_) throw Error(20);
 
-        uint32_t headerSize = 0;
-        memcpy (&headerSize, buffer.pData_, 4);      // TODO : check endianness.
+        int headerSize = (int) byteSwap_(buffer,0,bSwap_);
         if (headerSize <= 0 ) throw Error(22);
 
 #ifdef DEBUG
@@ -261,15 +285,17 @@ namespace Exiv2 {
         return headerSize;
     } // PgfImage::readPgfHeaderSize
 
-    DataBuf PgfImage::readPgfHeaderStructure(BasicIo& iIo, int* width, int* height)
+    DataBuf PgfImage::readPgfHeaderStructure(BasicIo& iIo, int& width, int& height)
     {
         DataBuf header(16);
         long bufRead = iIo.read(header.pData_, header.size_);
         if (iIo.error()) throw Error(14);
         if (bufRead != header.size_) throw Error(20);
 
-        memcpy(width,  &header.pData_[0], 4);      // TODO : check endianness.
-        memcpy(height, &header.pData_[4], 4);      // TODO : check endianness.
+        DataBuf work(8);  // don't disturb the binary data - doWriteMetadata reuses it
+        memcpy (work.pData_,header.pData_,8);
+        width   = byteSwap_(work,0,bSwap_);
+        height  = byteSwap_(work,4,bSwap_);
 
         /* NOTE: properties not yet used
         byte nLevels  = buffer.pData_[8];

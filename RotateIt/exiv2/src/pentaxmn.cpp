@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,31 +20,25 @@
  */
 /*
   File:      pentaxmn.cpp
-  Version:   $Rev: 3835 $
-  Author(s): Michal Cihar <michal@cihar.com>
-  Based on fujimn.cpp by:
-             Andreas Huggel (ahu) <ahuggel@gmx.net>
-             Gilles Caulier (gc) <caulier dot gilles at gmail dot com>
-  History:   27-Sep-07 created
-  Credits:   See header file.
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pentaxmn.cpp 3835 2015-05-22 03:18:31Z nkbj $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
 #include "types.hpp"
 #include "pentaxmn_int.hpp"
+#include "makernote_int.hpp"
 #include "value.hpp"
+#include "exif.hpp"
+#include "tags.hpp"
+#include "metadatum.hpp"
 #include "i18n.h"                // NLS support.
 
 // + standard includes
 #include <string>
-#include <sstream>
-#include <iomanip>
-#include <cassert>
-#include <cstring>
 
 // *****************************************************************************
 // class member definitions
@@ -190,8 +184,13 @@ namespace Exiv2 {
         {    0x13024, "K-S2" },
         {    0x1302e, "Q-S1" },
         {    0x13056, "WG-30" },
+        {    0x1307e, "WG-30W" },
         {    0x13088, "WG-5 GPS" },
+        {    0x13092, "K-1" },
         {    0x1309c, "K-3 II" },
+        {    0x131f0, "WG-M2" },
+        {    0x13222, "K-70" },
+        {    0x1322c, "KP" },
     };
 
     //! Quality, tag 0x0008
@@ -353,6 +352,12 @@ namespace Exiv2 {
         {    37, "128000" },
         {    38, "160000" },
         {    39, "204800" },
+        {    40, "256000" },
+        {    41, "320000" },
+        {    42, "409600" },
+        {    43, "512000" },
+        {    44, "640000" },
+        {    45, "819200" },
         {    50, "50" },
         {    100, "100" },
         {    200, "200" },
@@ -382,7 +387,14 @@ namespace Exiv2 {
         {    276, "25600" },
         {    277, "36000" },
         {    278, "51200" },
-
+        {    279, "72000" },
+        {    280, "102400" },
+        {    281, "144000" },
+        {    282, "204800" },
+        {    283, "288000" },
+        {    284, "409600" },
+        {    285, "576000" },
+        {    286, "819200" },
     };
 
     //! Generic for Off/On switches
@@ -697,29 +709,30 @@ namespace Exiv2 {
         { 0x0314, "smc PENTAX-F 35-80mm F4-5.6" },
         { 0x0315, "smc PENTAX-F 80-200mm F4.7-5.6" },
         { 0x0316, "smc PENTAX-F FISH-EYE 17-28mm F3.5-4.5" },
-        { 0x0317, "smc PENTAX-F 100-300mm F4.5-5.6" },			//0
-        { 0x0317, "Sigma AF 28-300mm F3.5-6.3 DG IF Macro" },		//1
-        { 0x0317, "Tokina 80-200mm F2.8 ATX-Pro" },			//2
+        { 0x0317, "smc PENTAX-F 100-300mm F4.5-5.6" },                   //0
+        { 0x0317, "Sigma AF 28-300mm F3.5-6.3 DG IF Macro" },            //1
+        { 0x0317, "Tokina 80-200mm F2.8 ATX-Pro" },                      //2
         { 0x0318, "smc PENTAX-F 35-135mm F3.5-4.5" },
-        { 0x0319, "smc PENTAX-F 35-105mm F4-5.6" },			//0
-        { 0x0319, "Sigma AF 28-300mm F3.5-5.6 DL IF" },			//1
-        { 0x0319, "Sigma 55-200mm F4-5.6 DC" },				//2
-        { 0x0319, "Sigma AF 28-300mm F3.5-5.6 DL IF" },			//3
-        { 0x0319, "Sigma AF 28-300mm F3.5-6.3 DG IF Macro" },		//4
-        { 0x0319, "Tokina 80-200mm F2.8 ATX-Pro" },			//5
+        { 0x0319, "smc PENTAX-F 35-105mm F4-5.6" },                      //0
+        { 0x0319, "Sigma AF 28-300mm F3.5-5.6 DL IF" },                  //1
+        { 0x0319, "Sigma 55-200mm F4-5.6 DC" },                          //2
+        { 0x0319, "Sigma AF 28-300mm F3.5-5.6 DL IF" },                  //3
+        { 0x0319, "Sigma AF 28-300mm F3.5-6.3 DG IF Macro" },            //4
+        { 0x0319, "Tokina 80-200mm F2.8 ATX-Pro" },                      //5
+        { 0x0319, "Sigma Zoom 70-210mm F4-5.6 UC-II" },                  //6
         { 0x031a, "smc PENTAX-F* 250-600mm F5.6 ED[IF]" },
-        { 0x031b, "smc PENTAX-F 28-80mm F3.5-4.5" },			//0
-        { 0x031b, "Tokina AT-X Pro AF 28-70mm F2.6-2.8" },		//1
-        { 0x031c, "smc PENTAX-F 35-70mm F3.5-4.5" },			//0
-        { 0x031c, "Tokina 19-35mm F3.5-4.5 AF" },			//1
-        { 0x031c, "Tokina AT-X AF 400mm F5.6" },			//2
-        { 0x031d, "PENTAX-F 28-80mm F3.5-4.5" },			//0
-        { 0x031d, "Sigma AF 18-125mm F3.5-5.6 DC" },			//1
-        { 0x031d, "Tokina AT-X PRO 28-70mm F2.6-2.8" },			//2
+        { 0x031b, "smc PENTAX-F 28-80mm F3.5-4.5" },                     //0
+        { 0x031b, "Tokina AT-X Pro AF 28-70mm F2.6-2.8" },               //1
+        { 0x031c, "smc PENTAX-F 35-70mm F3.5-4.5" },                     //0
+        { 0x031c, "Tokina 19-35mm F3.5-4.5 AF" },                        //1
+        { 0x031c, "Tokina AT-X AF 400mm F5.6" },                         //2
+        { 0x031d, "PENTAX-F 28-80mm F3.5-4.5" },                         //0
+        { 0x031d, "Sigma AF 18-125mm F3.5-5.6 DC" },                     //1
+        { 0x031d, "Tokina AT-X PRO 28-70mm F2.6-2.8" },                  //2
         { 0x031e, "PENTAX-F 70-200mm F4-5.6" },
-        { 0x031f, "smc PENTAX-F 70-210mm F4-5.6" },			//0
-        { 0x031f, "Tokina AF 730 75-300mm F4.5-5.6" },			//1
-        { 0x031f, "Takumar-F 70-210mm F4-5.6" },			//2
+        { 0x031f, "smc PENTAX-F 70-210mm F4-5.6" },                      //0
+        { 0x031f, "Tokina AF 730 75-300mm F4.5-5.6" },                   //1
+        { 0x031f, "Takumar-F 70-210mm F4-5.6" },                         //2
         { 0x0320, "smc PENTAX-F 50mm F1.4" },
         { 0x0321, "smc PENTAX-F 50mm F1.7" },
         { 0x0322, "smc PENTAX-F 135mm F2.8 [IF]" },
@@ -728,20 +741,23 @@ namespace Exiv2 {
         { 0x0326, "smc PENTAX-F* 300mm F4.5 ED[IF]" },
         { 0x0327, "smc PENTAX-F* 600mm F4 ED[IF]" },
         { 0x0328, "smc PENTAX-F Macro 100mm F2.8" },
-        { 0x0329, "smc PENTAX-F Macro 50mm F2.8" },			//0
-        { 0x0329, "Sigma 50mm F2.8 Macro" },				//1
-        { 0x032c, "Tamron 35-90mm F4 AF" },				//0
-        { 0x032c, "Sigma AF 10-20mm F4-5.6 EX DC" },			//1
-        { 0x032c, "Sigma 12-24mm F4.5-5.6 EX DG" },			//2
-        { 0x032c, "Sigma 17-70mm F2.8-4.5 DC Macro" },			//3
-        { 0x032c, "Sigma 18-50mm F3.5-5.6 DC" },			//4
-        { 0x032e, "Sigma or Samsung Lens" },				//0
-        { 0x032e, "Sigma APO 70-200mm F2.8 EX" },			//1
-        { 0x032e, "Sigma EX APO 100-300mm F4 IF" },			//2
-        { 0x032e, "Samsung/Schneider D-XENON 50-200mm F4-5.6 ED" },	//3
+        { 0x0329, "smc PENTAX-F Macro 50mm F2.8" },                      //0
+        { 0x0329, "Sigma 50mm F2.8 Macro" },                             //1
+        { 0x032a, "Sigma 300mm F2.8 EX DG APO IF" },
+        { 0x032c, "Tamron 35-90mm F4 AF" },                              //0
+        { 0x032c, "Sigma AF 10-20mm F4-5.6 EX DC" },                     //1
+        { 0x032c, "Sigma 12-24mm F4.5-5.6 EX DG" },                      //2
+        { 0x032c, "Sigma 17-70mm F2.8-4.5 DC Macro" },                   //3
+        { 0x032c, "Sigma 18-50mm F3.5-5.6 DC" },                         //4
+        { 0x032c, "Sigma 17-35mm F2.8-4 EX DG" },                        //5
+        { 0x032c, "Sigma AF 18-35mm F3.5-4.5 Aspherical" },              //6
+        { 0x032e, "Sigma or Samsung Lens" },                             //0
+        { 0x032e, "Sigma APO 70-200mm F2.8 EX" },                        //1
+        { 0x032e, "Sigma EX APO 100-300mm F4 IF" },                      //2
+        { 0x032e, "Samsung/Schneider D-XENON 50-200mm F4-5.6 ED" },      //3
         { 0x0332, "smc PENTAX-FA 28-70mm F4 AL" },
         { 0x0333, "Sigma 28mm F1.8 EX DG Aspherical Macro" },
-        { 0x0334, "smc PENTAX-FA 28-200mm F3.8-5.6 AL[IF]" },		//0
+        { 0x0334, "smc PENTAX-FA 28-200mm F3.8-5.6 AL[IF]" },            //0
         { 0x0334, "Tamron AF LD 28-200mm F3.8-5.6 [IF] Aspherical (171D)" },//1
         { 0x0335, "smc PENTAX-FA 28-80mm F3.5-5.6 AL" },
         { 0x03f7, "smc PENTAX-DA FISH-EYE 10-17mm F3.5-4.5 ED[IF]" },
@@ -751,21 +767,22 @@ namespace Exiv2 {
         { 0x03fc, "smc PENTAX-DA 18-55mm F3.5-5.6 AL" },
         { 0x03fd, "smc PENTAX-DA 14mm F2.8 ED[IF]" },
         { 0x03fe, "smc PENTAX-DA 16-45mm F4 ED AL" },
-        { 0x03ff, "Sigma Lens" },					//0
-        { 0x03ff, "Sigma 18-200mm F3.5-6.3 DC" },			//1
-        { 0x03ff, "Sigma DL-II 35-80mm F4-5.6" },			//2
-        { 0x03ff, "Sigma DL Zoom 75-300mm F4-5.6" },			//3
-        { 0x03ff, "Sigma DF EX Aspherical 28-70mm F2.8" },		//4
-        { 0x03ff, "Sigma AF Tele 400mm F5.6 Multi-coated" },		//5
-        { 0x03ff, "Sigma 24-60mm F2.8 EX DG" },				//6
-        { 0x03ff, "Sigma 70-300mm F4-5.6 Macro" },			//7
-        { 0x03ff, "Sigma 55-200mm F4-5.6 DC" },				//8
-        { 0x03ff, "Sigma 18-50mm F2.8 EX DC" },				//9
-        { 0x03ff, "Sigma 18-50mm F2.8 EX DC Macro" },			//10
+        { 0x03ff, "Sigma Lens" },                                        //0
+        { 0x03ff, "Sigma 18-200mm F3.5-6.3 DC" },                        //1
+        { 0x03ff, "Sigma DL-II 35-80mm F4-5.6" },                        //2
+        { 0x03ff, "Sigma DL Zoom 75-300mm F4-5.6" },                     //3
+        { 0x03ff, "Sigma DF EX Aspherical 28-70mm F2.8" },               //4
+        { 0x03ff, "Sigma AF Tele 400mm F5.6 Multi-coated" },             //5
+        { 0x03ff, "Sigma 24-60mm F2.8 EX DG" },                          //6
+        { 0x03ff, "Sigma 70-300mm F4-5.6 Macro" },                       //7
+        { 0x03ff, "Sigma 55-200mm F4-5.6 DC" },                          //8
+        { 0x03ff, "Sigma 18-50mm F2.8 EX DC" },                          //9
+        { 0x03ff, "Sigma 18-50mm F2.8 EX DC Macro" },                    //10
         { 0x0401, "smc PENTAX-FA SOFT 28mm F2.8" },
         { 0x0402, "smc PENTAX-FA 80-320mm F4.5-5.6" },
         { 0x0403, "smc PENTAX-FA 43mm F1.9 Limited" },
         { 0x0406, "smc PENTAX-FA 35-80mm F4-5.6" },
+        { 0x040a, "Irix 15mm F2.4" },
         { 0x040c, "smc PENTAX-FA 50mm F1.4" },
         { 0x040f, "smc PENTAX-FA 28-105mm F4-5.6 [IF]" },
         { 0x0410, "Tamron AF 80-210mm F4-5.6 (178D)" },
@@ -776,8 +793,8 @@ namespace Exiv2 {
         { 0x0417, "smc PENTAX-FA 20-35mm F4 AL" },
         { 0x0418, "smc PENTAX-FA 77mm F1.8 Limited" },
         { 0x0419, "Tamron SP AF 14mm F2.8" },
-        { 0x041a, "smc PENTAX-FA Macro 100mm F3.5" },			//0
-        { 0x041a, "Cosina 100mm F3.5 Macro" },				//1
+        { 0x041a, "smc PENTAX-FA Macro 100mm F3.5" },                    //0
+        { 0x041a, "Cosina 100mm F3.5 Macro" },                           //1
         { 0x041b, "Tamron AF28-300mm F/3.5-6.3 LD Aspherical[IF] Macro (185D/285D)" },
         { 0x041c, "smc PENTAX-FA 35mm F2 AL" },
         { 0x041d, "Tamron AF 28-200mm F/3.8-5.6 LD Super II Macro (371D)" },
@@ -790,8 +807,8 @@ namespace Exiv2 {
         { 0x0429, "Tamron AF 28-200mm Super Zoom F3.8-5.6 Aspherical XR [IF] Macro (A03)" },
         { 0x042b, "smc PENTAX-FA 28-90mm F3.5-5.6" },
         { 0x042c, "smc PENTAX-FA J 75-300mm F4.5-5.8 AL" },
-        { 0x042d, "Tamron Lens" },					//0
-        { 0x042d, "Tamron 28-300mm F3.5-6.3 Ultra zoom XR" },		//1
+        { 0x042d, "Tamron Lens" },                                       //0
+        { 0x042d, "Tamron 28-300mm F3.5-6.3 Ultra zoom XR" },            //1
         { 0x042d, "Tamron AF 28-300mm F3.5-6.3 XR Di LD Aspherical [IF] Macro" },//2
         { 0x042e, "smc PENTAX-FA J 28-80mm F3.5-5.6 AL" },
         { 0x042f, "smc PENTAX-FA J 18-35mm F4-5.6 AL" },
@@ -907,11 +924,16 @@ namespace Exiv2 {
         { 0x081b, "Sigma 18-200mm F3.5-6.3 II DC HSM" },
         { 0x081c, "Sigma 18-250mm F3.5-6.3 DC Macro HSM" },
         { 0x081d, "Sigma 35mm F1.4 DG HSM" },
-        { 0x081e, "Sigma 17-70mm F2.8-4 DC Macro HSM Contemporary" },
+        { 0x081e, "Sigma 17-70mm F2.8-4 DC Macro HSM | C" },
         { 0x081f, "Sigma 18-35mm F1.8 DC HSM" },
         { 0x0820, "Sigma 30mm F1.4 DC HSM | A" },
+        { 0x0822, "Sigma 18-300mm F3.5-6.3 DC Macro HSM" },
         { 0x083b, "HD PENTAX-D FA 150-450mm F4.5-5.6 ED DC AW" },
         { 0x083c, "HD PENTAX-D FA* 70-200mm F2.8 ED DC AW" },
+        { 0x083d, "HD PENTAX-D FA 28-105mm F3.5-5.6 ED DC WR" },
+        { 0x083e, "HD PENTAX-D FA 24-70mm F2.8 ED SDM WR" },
+        { 0x083f, "HD PENTAX-D FA 15-30mm F2.8 ED SDM WR" },
+        { 0x08c5, "HD PENTAX-DA 55-300mm F4.5-6.3 ED PLM WR RE" },
         { 0x08c6, "smc PENTAX-DA L 18-50mm F4-5.6 DC WR RE" },
         { 0x08c7, "HD PENTAX-DA 18-50mm F4-5.6 DC WR RE" },
         { 0x08c8, "HD PENTAX-DA 16-85mm F3.5-5.6 ED DC WR" },
@@ -926,13 +948,14 @@ namespace Exiv2 {
         { 0x08eb, "smc PENTAX-DA* 200mm F2.8 ED [IF] SDM" },
         { 0x08f1, "smc PENTAX-DA* 50-135mm F2.8 ED [IF] SDM" },
         { 0x08f2, "smc PENTAX-DA* 16-50mm F2.8 ED AL [IF] SDM" },
-        { 0x08ff, "Sigma Lens" },					//0
-        { 0x08ff, "Sigma 70-200mm F2.8 EX DG Macro HSM II" },		//1
-        { 0x08ff, "Sigma 150-500mm F5-6.3 DG APO [OS] HSM" },		//2
-        { 0x08ff, "Sigma 50-150mm F2.8 II APO EX DC HSM" },		//3
-        { 0x08ff, "Sigma 4.5mm F2.8 EX DC HSM Circular Fisheye" },	//4
-        { 0x08ff, "Sigma 50-200mm F4-5.6 DC OS" },			//5
-        { 0x08ff, "Sigma 24-70mm F2.8 EX DG HSM" },			//6
+        { 0x08ff, "Sigma Lens" },                                        //0
+        { 0x08ff, "Sigma 70-200mm F2.8 EX DG Macro HSM II" },            //1
+        { 0x08ff, "Sigma 150-500mm F5-6.3 DG APO [OS] HSM" },            //2
+        { 0x08ff, "Sigma 50-150mm F2.8 II APO EX DC HSM" },              //3
+        { 0x08ff, "Sigma 4.5mm F2.8 EX DC HSM Circular Fisheye" },       //4
+        { 0x08ff, "Sigma 50-200mm F4-5.6 DC OS" },                       //5
+        { 0x08ff, "Sigma 24-70mm F2.8 EX DG HSM" },                      //6
+        { 0x08ff, "Sigma 18-50mm F2.8-4.5 HSM OS" },                     //7
         { 0x0900, "645 Manual Lens" },
         { 0x0a00, "645 A Series Lens" },
         { 0x0b01, "smc PENTAX-FA 645 75mm F2.8" },
@@ -948,7 +971,8 @@ namespace Exiv2 {
         { 0x0b0c, "smc PENTAX-FA 645 300mm F5.6 ED [IF]" },
         { 0x0b0e, "smc PENTAX-FA 645 55-110mm F5.6" },
         { 0x0b10, "smc PENTAX-FA 645 33-55mm F4.5 AL" },
-        { 0x0b11, "smc PENTAX-FA 645 150mm-300mm F5.6 ED [IF]" },
+        { 0x0b11, "smc PENTAX-FA 645 150-300mm F5.6 ED [IF]" },
+        { 0x0b15, "HD PENTAX-D FA 645 35mm F3.5 AL [IF]" },
         { 0x0d12, "smc PENTAX-D FA 645 55mm F2.8 AL [IF] SDM AW" },
         { 0x0d13, "smc PENTAX-D FA 645 25mm F4 AL [IF] SDM AW" },
         { 0x0d14, "HD PENTAX-D FA 645 90mm F2.8 ED AW SR" },
@@ -962,6 +986,7 @@ namespace Exiv2 {
         { 0x1506, "06 Telephoto Zoom 15-45mm F2.8" },
         { 0x1507, "07 Mount Shield 11.5mm F9" },
         { 0x1508, "08 Wide Zoom 3.8-5.9mm F3.7-4" },
+        { 0x15e9, "Adapter Q for K-mount Lens" },
     };
 
     //! ImageTone, tag 0x004f
@@ -993,7 +1018,7 @@ namespace Exiv2 {
         {   4, N_("Custom") },
     };
 
-    std::ostream& PentaxMakerNote::printPentaxVersion(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printVersion(std::ostream& os, const Value& value, const ExifData*)
     {
         std::string val = value.toString();
         size_t i;
@@ -1004,7 +1029,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxResolution(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printResolution(std::ostream& os, const Value& value, const ExifData*)
     {
         std::string val = value.toString();
         size_t i;
@@ -1015,7 +1040,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxDate(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printDate(std::ostream& os, const Value& value, const ExifData*)
     {
         /* I choose same format as is used inside EXIF itself */
         os << ((value.toLong(0) << 8) + value.toLong(1));
@@ -1026,7 +1051,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxTime(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printTime(std::ostream& os, const Value& value, const ExifData*)
     {
         std::ios::fmtflags f( os.flags() );
         os << std::setw(2) << std::setfill('0') << value.toLong(0);
@@ -1038,13 +1063,13 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxExposure(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printExposure(std::ostream& os, const Value& value, const ExifData*)
     {
         os << static_cast<float>(value.toLong()) / 100 << " ms";
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxFValue(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printFValue(std::ostream& os, const Value& value, const ExifData*)
     {
         std::ios::fmtflags f( os.flags() );
         os << "F" << std::setprecision(2)
@@ -1053,7 +1078,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxFocalLength(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printFocalLength(std::ostream& os, const Value& value, const ExifData*)
     {
         std::ios::fmtflags f( os.flags() );
         os << std::fixed << std::setprecision(1)
@@ -1063,7 +1088,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxCompensation(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printCompensation(std::ostream& os, const Value& value, const ExifData*)
     {
         std::ios::fmtflags f( os.flags() );
         os << std::setprecision(2)
@@ -1073,13 +1098,13 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxTemperature(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printTemperature(std::ostream& os, const Value& value, const ExifData*)
     {
         os << value.toLong() << " C";
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxFlashCompensation(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printFlashCompensation(std::ostream& os, const Value& value, const ExifData*)
     {
         std::ios::fmtflags f( os.flags() );
         os << std::setprecision(2)
@@ -1089,7 +1114,7 @@ namespace Exiv2 {
         return os;
     }
 
-    std::ostream& PentaxMakerNote::printPentaxBracketing(std::ostream& os, const Value& value, const ExifData*)
+    std::ostream& PentaxMakerNote::printBracketing(std::ostream& os, const Value& value, const ExifData*)
     {
         long l0 = value.toLong(0);
 
@@ -1140,17 +1165,283 @@ namespace Exiv2 {
         return os;
     }
 
+    std::ostream& PentaxMakerNote::printShutterCount(std::ostream& os, const Value& value, const ExifData* metadata)
+    {
+        ExifData::const_iterator dateIt = metadata->findKey(
+                ExifKey("Exif.PentaxDng.Date"));
+        if (dateIt == metadata->end()) {
+            dateIt = metadata->findKey(ExifKey("Exif.Pentax.Date"));
+        }
+        ExifData::const_iterator timeIt = metadata->findKey(
+                ExifKey("Exif.PentaxDng.Time"));
+        if (timeIt == metadata->end()) {
+            timeIt = metadata->findKey(ExifKey("Exif.Pentax.Time"));
+        }
+        if (    dateIt == metadata->end() || dateIt->size() != 4 ||
+                timeIt == metadata->end() || timeIt->size() != 3 ||
+                value.size() != 4) {
+            os << "undefined";
+            return os;
+        }
+        const uint32_t date =
+            (dateIt->toLong(0) << 24) + (dateIt->toLong(1) << 16) +
+            (dateIt->toLong(2) <<  8) + (dateIt->toLong(3) <<  0);
+        const uint32_t time =
+            (timeIt->toLong(0) << 24) + (timeIt->toLong(1) << 16) +
+            (timeIt->toLong(2) <<  8);
+        const uint32_t countEnc =
+            (value.toLong(0) << 24) + (value.toLong(1) << 16) +
+            (value.toLong(2) <<  8) + (value.toLong(3) <<  0);
+        // The shutter count is encoded using date and time values stored
+        // in Pentax-specific tags.  The prototype for the encoding/decoding
+        // function is taken from Phil Harvey's ExifTool: Pentax.pm file,
+        // CryptShutterCount() routine.
+        const uint32_t count = countEnc ^ date ^ (~time);
+        os << count;
+        return os;
+    }
+
+    // #1144 begin
+    static std::string getKeyString(const std::string& key,const ExifData* metadata)
+    {
+        std::string result;
+        if ( metadata->findKey(ExifKey(key)) != metadata->end() ) {
+            result = metadata->findKey(ExifKey(key))->toString();
+        }
+        return result;
+    }
+
+    static long getKeyLong(const std::string& key,const ExifData* metadata)
+    {
+        long result = -1;
+        if ( metadata->findKey(ExifKey(key)) != metadata->end() ) {
+            result = (long) metadata->findKey(ExifKey(key))->toFloat(0);
+        }
+        return result;
+    }
+
+    //! resolveLens0x32c print lens in human format
+    std::ostream& resolveLens0x32c(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    {
+        try {
+            unsigned long lensID    = 0x32c;
+            unsigned long index     = 0;
+
+            long        focalLength = getKeyLong  ("Exif.Photo.FocalLength",metadata);
+            bool        bFL10_20    = 10 <= focalLength && focalLength <= 20;
+
+            // std::cout << "model,focalLength = " << model << "," << focalLength << std::endl;
+            if ( bFL10_20 ) index = 1;
+
+            if ( index > 0 )  {
+                const TagDetails* td = find(pentaxLensType, lensID);
+                os << exvGettext(td[index].label_);
+                return os;
+            }
+        } catch (...) {}
+        return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+    }
+    // #1144 end
+
+    // #816 begin
+    //! resolveLens0x3ff print lens in human format
+    std::ostream& resolveLens0x3ff(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    // ----------------------------------------------------------------------
+    {
+        try {
+            unsigned long lensID = 0x3ff;
+            unsigned long index  = 0;
+
+            const ExifData::const_iterator lensInfo = metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo")) != metadata->end()
+                                                    ? metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo"))
+                                                    : metadata->findKey(ExifKey("Exif.Pentax.LensInfo"))
+                                                    ;
+            if ( lensInfo == metadata->end() ) return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+            if ( lensInfo->count() < 5       ) return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+
+            if ( value.count() == 2 ) {
+                // http://dev.exiv2.org/attachments/download/326/IMGP4432.PEF
+                // exiv2 -pv --grep Lens ~/Downloads/IMGP4432.PEF
+                // 0x003f Pentax       LensType  Byte        2 3 255
+                // 0x0207 Pentax       LensInfo  Undefined  36 3 255 0 0 40 148 71 152 80 6 241 65 237 153 88 36 1 76 107 251 255 255 255 0 0 80 6 241 0 0 0 0 0 0 0 0
+                unsigned long base   = 1;
+
+                // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Pentax.html#LensData
+                const ExifData::const_iterator lensInfo = metadata->findKey(ExifKey("Exif.Pentax.LensInfo"));
+                unsigned int  autoAperture     = lensInfo->toLong(base+1) & 0x01 ;
+                unsigned int  minAperture      = lensInfo->toLong(base+2) & 0x06 ;
+                unsigned int  minFocusDistance = lensInfo->toLong(base+3) & 0xf8 ;
+
+                if ( autoAperture == 0x0 && minAperture == 0x0 && minFocusDistance == 0x28 && lensInfo->toLong(base+4) == 148) index = 8;
+                if ( autoAperture == 0x0 && minAperture == 0x0 && minFocusDistance == 0x28 && lensInfo->toLong(base+5) == 110) index = 7;
+                if ( autoAperture == 0x0 && minAperture == 0x0 && minFocusDistance == 0x28 && lensInfo->toLong(base+4) == 110) index = 7;
+
+            } else if ( value.count() == 3 ) {
+                // http://dev.exiv2.org/attachments/download/858/_IGP9032.DNG
+                // $ exiv2 -pv --grep Lens ~/Downloads/_IGP9032.DNG
+                // 0x003f PentaxDng    LensType  Byte        3    3 255   0
+                // 0x0207 PentaxDng    LensInfo  Undefined  69  131   0   0 255 0  40 148  68 244 ...
+                //                                                0   1   2   3 4   5   6
+                if ( lensInfo->toLong(4) == 0 && lensInfo->toLong(5) == 40 && lensInfo->toLong(6) == 148 ) index = 8;
+
+            } else if ( value.count() == 4 ) {
+                // http://dev.exiv2.org/attachments/download/868/IMGP2221.JPG
+                // 0x0207 PentaxDng    LensInfo  Undefined 128    0 131 128   0 0 255   1 184   0 0 0 0 0
+                //                                                0   1   2   3 4   5   6
+                if ( lensInfo->count() == 128 && lensInfo->toLong(1) == 131 && lensInfo->toLong(2) == 128 ) index = 8;
+                // #1155
+                if ( lensInfo->toLong(6) == 5 )  index = 7;
+            }
+
+            if ( index > 0 )  {
+                const TagDetails* td = find(pentaxLensType, lensID);
+                os << exvGettext(td[index].label_);
+                return os;
+            }
+        } catch (...) {}
+        return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+    }
+
+    // #1155
+    //! resolveLens0x8ff print lens in human format
+    std::ostream& resolveLens0x8ff(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    // ----------------------------------------------------------------------
+    {
+        try {
+            unsigned long lensID = 0x8ff;
+            unsigned long index  = 0;
+
+            const ExifData::const_iterator lensInfo = metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo")) != metadata->end()
+                                                    ? metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo"))
+                                                    : metadata->findKey(ExifKey("Exif.Pentax.LensInfo"))
+                                                    ;
+            if ( value.count() == 4 ) {
+                std::string model       = getKeyString("Exif.Image.Model"      ,metadata);
+                if ( model.find("PENTAX K-3")==0 && lensInfo->count() == 128 && lensInfo->toLong(1) == 168 && lensInfo->toLong(2) == 144 ) index = 7;
+            }
+
+            if ( index > 0 )  {
+                const TagDetails* td = find(pentaxLensType, lensID);
+                os << exvGettext(td[index].label_);
+                return os;
+            }
+        } catch (...) {}
+        return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+    }
+
+    // #1155
+    //! resolveLens0x319 print lens in human format
+    std::ostream& resolveLens0x319(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    // ----------------------------------------------------------------------
+    {
+        try {
+            unsigned long lensID = 0x319;
+            unsigned long index  = 0;
+
+            const ExifData::const_iterator lensInfo = metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo")) != metadata->end()
+                                                    ? metadata->findKey(ExifKey("Exif.PentaxDng.LensInfo"))
+                                                    : metadata->findKey(ExifKey("Exif.Pentax.LensInfo"))
+                                                    ;
+            if ( value.count() == 4 ) {
+                std::string model       = getKeyString("Exif.Image.Model"      ,metadata);
+                if ( model.find("PENTAX K-3")==0 && lensInfo->count() == 128 && lensInfo->toLong(1) == 131 && lensInfo->toLong(2) == 128 )
+                    index = 6;
+            }
+            if ( value.count() == 2 ) {
+                std::string model       = getKeyString("Exif.Image.Model"      ,metadata);
+                if ( model.find("PENTAX K100D")==0 && lensInfo->count() == 44 )
+                    index = 6;
+                if ( model.find("PENTAX *ist DL")==0 && lensInfo->count() == 36 )
+                    index = 6;
+            }
+
+            if ( index > 0 )  {
+                const TagDetails* td = find(pentaxLensType, lensID);
+                os << exvGettext(td[index].label_);
+                return os;
+            }
+        } catch (...) {}
+        return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+    }
+
+    //! resolveLensType print lens in human format
+    std::ostream& resolveLensType(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    {
+        return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+    }
+
+    struct LensIdFct {
+       long     id_;                           //!< Lens id
+       PrintFct fct_;                          //!< Pretty-print function
+       //! Comparison operator for find template
+       bool operator==(long id) const { return id_ == id; }
+    };
+
+    //! List of lens ids which require special treatment using resolveLensType
+    const LensIdFct lensIdFct[] = {
+       {   0x0317, resolveLensType },
+       {   0x0319, resolveLens0x319},
+       {   0x031b, resolveLensType },
+       {   0x031c, resolveLensType },
+       {   0x031d, resolveLensType },
+       {   0x031f, resolveLensType },
+       {   0x0329, resolveLensType },
+       {   0x032c, resolveLens0x32c},
+       {   0x032e, resolveLensType },
+       {   0x0334, resolveLensType },
+       {   0x03ff, resolveLens0x3ff},
+       {   0x041a, resolveLensType },
+       {   0x042d, resolveLensType },
+       {   0x08ff, resolveLens0x8ff},
+    };
+
+    //! A lens id and a pretty-print function for special treatment of the id.
+    std::ostream& printLensType(std::ostream& os, const Value& value,
+                                                 const ExifData* metadata)
+    {
+        // #1034
+        const std::string  undefined("undefined") ;
+        const std::string  section  ("pentax");
+        if ( Internal::readExiv2Config(section,value.toString(),undefined) != undefined ) {
+            return os << Internal::readExiv2Config(section,value.toString(),undefined);
+        }
+
+        unsigned long index = value.toLong(0)*256+value.toLong(1);
+
+        // std::cout << std::endl << "printLensType value =" << value.toLong() << " index = " << index << std::endl;
+        const LensIdFct* lif = find(lensIdFct, index);
+        if (!lif) {
+           return EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)(os, value, metadata);
+        }
+        if (metadata && lif->fct_) {
+            return lif->fct_(os, value, metadata);
+        }
+
+        if (   value.typeId() != unsignedShort
+                   || value.count() == 0) return os << "(" << value << ")";
+
+        return os << value;
+    }
+
+    // #816 end
+    // ----------------------------------------------------------------------
+
     // Pentax MakerNote Tag Info
     const TagInfo PentaxMakerNote::tagInfo_[] = {
         TagInfo(0x0000, "Version", N_("Version"),
                 N_("Pentax Makernote version"),
-                pentaxId, makerTags, undefined, -1, printPentaxVersion),
+                pentaxId, makerTags, undefined, -1, printVersion),
         TagInfo(0x0001, "Mode", N_("Shooting mode"),
                 N_("Camera shooting mode"),
                 pentaxId, makerTags, unsignedShort, -1, EXV_PRINT_TAG(pentaxShootingMode)),
         TagInfo(0x0002, "PreviewResolution", N_("Resolution of a preview image"),
                 N_("Resolution of a preview image"),
-                pentaxId, makerTags, undefined, -1, printPentaxResolution),
+                pentaxId, makerTags, undefined, -1, printResolution),
         TagInfo(0x0003, "PreviewLength", N_("Length of a preview image"),
                 N_("Size of an IFD containing a preview image"),
                 pentaxId, makerTags, undefined, -1, printValue),
@@ -1162,10 +1453,10 @@ namespace Exiv2 {
                 pentaxId, makerTags, unsignedShort, -1, EXV_PRINT_TAG(pentaxModel)),
         TagInfo(0x0006, "Date", N_("Date"),
                 N_("Date"),
-                pentaxId, makerTags, undefined, -1, printPentaxDate),
+                pentaxId, makerTags, undefined, -1, printDate),
         TagInfo(0x0007, "Time", N_("Time"),
                 N_("Time"),
-                pentaxId, makerTags, undefined, -1, printPentaxTime),
+                pentaxId, makerTags, undefined, -1, printTime),
         TagInfo(0x0008, "Quality", N_("Image quality"),
                 N_("Image quality settings"),
                 pentaxId, makerTags, unsignedShort, -1, EXV_PRINT_TAG(pentaxQuality)),
@@ -1188,24 +1479,24 @@ namespace Exiv2 {
         /* Some missing ! */
         TagInfo(0x0012, "ExposureTime", N_("Exposure time"),
                 N_("Exposure time"),
-                pentaxId, makerTags, unsignedLong, -1, printPentaxExposure),
+                pentaxId, makerTags, unsignedLong, -1, printExposure),
         TagInfo(0x0013, "FNumber", N_("F-Number"),
                 N_("F-Number"),
-                pentaxId, makerTags, unsignedLong, -1, printPentaxFValue),
+                pentaxId, makerTags, unsignedLong, -1, printFValue),
         TagInfo(0x0014, "ISO", N_("ISO sensitivity"),
                 N_("ISO sensitivity settings"),
                 pentaxId, makerTags, unsignedLong, -1, EXV_PRINT_TAG(pentaxISO)),
         /* Some missing ! */
         TagInfo(0x0016, "ExposureCompensation", N_("Exposure compensation"),
                 N_("Exposure compensation"),
-                pentaxId, makerTags, unsignedLong, -1, printPentaxCompensation),
+                pentaxId, makerTags, unsignedLong, -1, printCompensation),
         /* Some missing ! */
         TagInfo(0x0017, "MeteringMode", N_("MeteringMode"),
                 N_("MeteringMode"),
                 pentaxId, makerTags, undefined, -1, EXV_PRINT_TAG(pentaxMeteringMode)),
         TagInfo(0x0018, "AutoBracketing", N_("AutoBracketing"),
                 N_("AutoBracketing"),
-                pentaxId, makerTags, undefined, -1, printPentaxBracketing),
+                pentaxId, makerTags, undefined, -1, printBracketing),
         TagInfo(0x0019, "WhiteBalance", N_("White balance"),
                 N_("White balance"),
                 pentaxId, makerTags, undefined, -1, EXV_PRINT_TAG(pentaxWhiteBalance)),
@@ -1220,7 +1511,7 @@ namespace Exiv2 {
                 pentaxId, makerTags, unsignedLong, -1, printValue),
         TagInfo(0x001d, "FocalLength", N_("FocalLength"),
                 N_("FocalLength"),
-                pentaxId, makerTags, undefined, -1, printPentaxFocalLength),
+                pentaxId, makerTags, undefined, -1, printFocalLength),
         TagInfo(0x001e, "DigitalZoom", N_("Digital zoom"),
                 N_("Digital zoom"),
                 pentaxId, makerTags, unsignedLong, -1, printValue),
@@ -1287,7 +1578,7 @@ namespace Exiv2 {
                 pentaxId, makerTags, unsignedByte, -1, printValue),
         TagInfo(0x003f, "LensType", N_("Lens type"),
                 N_("Lens type"),
-                pentaxId, makerTags, unsignedByte, -1, EXV_PRINT_COMBITAG_MULTI(pentaxLensType, 2, 1, 2)),
+                pentaxId, makerTags, unsignedByte, -1, printLensType), // #816
         TagInfo(0x0040, "SensitivityAdjust", N_("Sensitivity adjust"),
                 N_("Sensitivity adjust"),
                 pentaxId, makerTags, unsignedLong, -1, printValue),
@@ -1297,7 +1588,7 @@ namespace Exiv2 {
         /* Some missing ! */
         TagInfo(0x0047, "Temperature", N_("Temperature"),
                 N_("Camera temperature"),
-                pentaxId, makerTags, signedByte, -1, printPentaxTemperature),
+                pentaxId, makerTags, signedByte, -1, printTemperature),
         TagInfo(0x0048, "AELock", N_("AE lock"),
                 N_("AE lock"),
                 pentaxId, makerTags, unsignedShort, -1, EXV_PRINT_TAG(pentaxOffOn)),
@@ -1307,7 +1598,7 @@ namespace Exiv2 {
         /* Some missing ! */
         TagInfo(0x004d, "FlashExposureCompensation", N_("Flash exposure compensation"),
                 N_("Flash exposure compensation"),
-                pentaxId, makerTags, signedLong, -1, printPentaxFlashCompensation),
+                pentaxId, makerTags, signedLong, -1, printFlashCompensation),
         /* Some missing ! */
         TagInfo(0x004f, "ImageTone", N_("Image tone"),
                 N_("Image tone"),
@@ -1321,7 +1612,7 @@ namespace Exiv2 {
                 pentaxId, makerTags, undefined, -1, printValue),
         TagInfo(0x005d, "ShutterCount", N_("Shutter count"),
                 N_("Shutter count"),
-                pentaxId, makerTags, undefined, -1, printValue), /* TODO: This has some encryption by date (see exiftool) */
+                pentaxId, makerTags, undefined, -1, printShutterCount),
         TagInfo(0x0069, "DynamicRangeExpansion", N_("Dynamic range expansion"),
                 N_("Dynamic range expansion"),
                 pentaxId, makerTags, undefined, -1, EXV_PRINT_COMBITAG(pentaxDynamicRangeExpansion, 4, 0)),

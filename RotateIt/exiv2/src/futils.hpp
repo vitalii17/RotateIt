@@ -1,6 +1,6 @@
 // ********************************************************* -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -151,7 +151,7 @@ namespace Exiv2 {
     /*!
       @brief Get the path of file URL.
 
-      @param  url The file URL in the format file:///<path> or file://<host>/<path>.
+      @param  url The file URL in the format file:///path or file://host/path
       @return the path of file URL.
      */
     EXIV2API std::string pathOfFileUrl(const std::string& url);

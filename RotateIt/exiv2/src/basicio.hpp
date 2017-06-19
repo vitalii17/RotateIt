@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -18,13 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, 5th Floor, Boston, MA 02110-1301 USA.
  */
-/*!
-  @file    basicio.hpp
-  @brief   Simple binary IO abstraction
-  @version $Rev: 3091 $
-  @author  Brad Schick (brad)
-           <a href="mailto:brad@robotbattle.com">brad@robotbattle.com</a>
-  @date    04-Dec-04, brad: created
+/*
+  File:      basicio.hpp
+  Version:   $Rev: 4633 $
  */
 #ifndef BASICIO_HPP_
 #define BASICIO_HPP_
@@ -97,6 +93,7 @@ namespace Exiv2 {
               Nonzero if failure.
          */
         virtual int open() = 0;
+
         /*!
           @brief Close the IO source. After closing a BasicIo instance can not
               be read or written. Closing flushes any unwritten data. It is
@@ -209,6 +206,7 @@ namespace Exiv2 {
                   Nonzero if failure;
          */
         virtual int munmap() =0;
+
         //@}
 
         //! @name Accessors
@@ -224,12 +222,12 @@ namespace Exiv2 {
           @return Size of the IO source in bytes;<BR>
                  -1 if failure;
          */
-        virtual long size() const = 0;
+        virtual size_t size() const = 0;
         //!Returns true if the IO source is open, otherwise false.
         virtual bool isopen() const = 0;
         //!Returns 0 if the IO source is in a valid state, otherwise nonzero.
         virtual int error() const = 0;
-        //!Returns true if the IO position has reach the end, otherwise false.
+        //!Returns true if the IO position has reached the end, otherwise false.
         virtual bool eof() const = 0;
         /*!
           @brief Return the path to the IO resource. Often used to form
@@ -244,20 +242,6 @@ namespace Exiv2 {
          */
         virtual std::wstring wpath() const =0;
 #endif
-        /*!
-          @brief Returns a temporary data storage location. This is often
-              needed to rewrite an IO source.
-
-          For example, data may be read from the original IO source, modified
-          in some way, and then saved to the temporary instance. After the
-          operation is complete, the BasicIo::transfer method can be used to
-          replace the original IO source with the modified version. Subclasses
-          are free to return any class that derives from BasicIo.
-
-          @return An instance of BasicIo on success
-          @throw Error In case of failure
-         */
-        virtual BasicIo::AutoPtr temporary() const = 0;
 
         /*!
           @brief Mark all the bNone blocks to bKnow. This avoids allocating memory
@@ -267,13 +251,19 @@ namespace Exiv2 {
                 are all downloaded from the remote file to memory.
          */
         virtual void populateFakeData() {}
+
+        /*!
+          @brief this is allocated and populated by mmap()
+         */
+        byte* bigBlock_;
+
         //@}
 
     protected:
         //! @name Creators
         //@{
         //! Default Constructor
-        BasicIo() {}
+        BasicIo() : bigBlock_(NULL) {};
         //@}
     }; // class BasicIo
 
@@ -507,12 +497,12 @@ namespace Exiv2 {
           @return Size of the file in bytes;<BR>
                  -1 if failure;
          */
-        virtual long size() const;
+        virtual size_t size() const;
         //! Returns true if the file is open, otherwise false.
         virtual bool isopen() const;
         //! Returns 0 if the file is in a valid state, otherwise nonzero.
         virtual int error() const;
-        //! Returns true if the file position has reach the end, otherwise false.
+        //! Returns true if the file position has reached the end, otherwise false.
         virtual bool eof() const;
         //! Returns the path of the file
         virtual std::string path() const;
@@ -523,16 +513,6 @@ namespace Exiv2 {
          */
         virtual std::wstring wpath() const;
 #endif
-        /*!
-          @brief Returns a temporary data storage location. The actual type
-              returned depends upon the size of the file represented a FileIo
-              object. For small files, a MemIo is returned while for large files
-              a FileIo is returned. Callers should not rely on this behavior,
-              however, since it may change.
-          @return An instance of BasicIo on success
-          @throw Error If opening the temporary file fails
-         */
-        virtual BasicIo::AutoPtr temporary() const;
 
         /*!
           @brief Mark all the bNone blocks to bKnow. This avoids allocating memory
@@ -702,7 +682,6 @@ namespace Exiv2 {
          */
         virtual byte* mmap(bool /*isWriteable*/ =false);
         virtual int munmap();
-        int msync();
         //@}
 
         //! @name Accessors
@@ -717,12 +696,12 @@ namespace Exiv2 {
           @return Size of the in memory data in bytes;<BR>
                  -1 if failure;
          */
-        virtual long size() const;
+        virtual size_t size() const;
         //!Always returns true
         virtual bool isopen() const;
         //!Always returns 0
         virtual int error() const;
-        //!Returns true if the IO position has reach the end, otherwise false.
+        //!Returns true if the IO position has reached the end, otherwise false.
         virtual bool eof() const;
         //! Returns a dummy path, indicating that memory access is used
         virtual std::string path() const;
@@ -733,13 +712,6 @@ namespace Exiv2 {
          */
         virtual std::wstring wpath() const;
 #endif
-        /*!
-          @brief Returns a temporary data storage location. Currently returns
-              an empty MemIo object, but callers should not rely on this
-              behavior since it may change.
-          @return An instance of BasicIo
-         */
-        virtual BasicIo::AutoPtr temporary() const;
 
         /*!
           @brief Mark all the bNone blocks to bKnow. This avoids allocating memory
@@ -941,6 +913,7 @@ namespace Exiv2 {
               Nonzero if failure.
          */
         virtual int open();
+
         /*!
           @brief Reset the IO position to the start. It does not release the data.
           @return 0 if successful;<BR>
@@ -1061,12 +1034,12 @@ namespace Exiv2 {
          @return Size of the in memory data in bytes;<BR>
                 -1 if failure;
         */
-       virtual long size() const;
+       virtual size_t size() const;
        //!Returns true if the memory area is allocated.
        virtual bool isopen() const;
        //!Always returns 0
        virtual int error() const;
-       //!Returns true if the IO position has reach the end, otherwise false.
+       //!Returns true if the IO position has reached the end, otherwise false.
        virtual bool eof() const;
        //!Returns the URL of the file.
        virtual std::string path() const;
@@ -1077,13 +1050,6 @@ namespace Exiv2 {
         */
        virtual std::wstring wpath() const;
 #endif
-       /*!
-         @brief Returns a temporary data storage location. Currently returns
-             an empty MemIo object, but callers should not rely on this
-             behavior since it may change.
-         @return An instance of BasicIo
-        */
-       virtual BasicIo::AutoPtr temporary() const;
 
         /*!
           @brief Mark all the bNone blocks to bKnow. This avoids allocating memory
@@ -1093,6 +1059,7 @@ namespace Exiv2 {
                 are all downloaded from the remote file to memory.
          */
        virtual void populateFakeData();
+
        //@}
 
     protected:
@@ -1104,6 +1071,7 @@ namespace Exiv2 {
 
         // Pimpl idiom
         class Impl;
+        //! Pointer to implementation
         Impl* p_;
     }; // class RemoteIo
 

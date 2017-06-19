@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,12 @@
  */
 /*
   File:      version.cpp
-  Version:   $Rev: 3800 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-  History:   06-Mar-07, ahu: created
-
+  Version:   $Rev$
  */
+
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: version.cpp 3800 2015-05-08 22:26:36Z robinwmills $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 
@@ -47,11 +45,51 @@ EXIV2_RCSID("@(#) $Id: version.cpp 3800 2015-05-08 22:26:36Z robinwmills $")
 
 #if defined(__CYGWIN__) || defined(__MINGW__)
 #include <windows.h>
+# if __LP64__
+#  ifdef  _WIN64
+#   undef _WIN64
+#  endif
+#  define _WIN64 1
+# endif
+#endif
+
+#ifndef EXV_HAVE_XMP_TOOLKIT
+#define EXV_HAVE_XMP_TOOLKIT 0
+#endif
+
+#ifndef EXV_HAVE_STRINGS
+#define EXV_HAVE_STRINGS 0
+#endif
+
+#ifndef  EXV_SYS_TYPES
+#define  EXV_SYS_TYPES 0
+#endif
+
+#ifndef  EXV_HAVE_UNISTD
+#define  EXV_HAVE_UNISTD 0
+#endif
+
+#ifndef  EXV_UNICODE_PATH
+#define  EXV_UNICODE_PATH 0
+#endif
+
+#ifndef  EXV_ENABLE_VIDEO
+#define  EXV_ENABLE_VIDEO 0
+#endif
+
+#ifndef  EXV_ENABLE_WEBREADY
+#define  EXV_ENABLE_WEBREADY 0
 #endif
 
 #include "http.hpp"
 #include "svn_version.h"
 #include "version.hpp"
+#include "makernote_int.hpp"
+
+// Adobe XMP Toolkit
+#if EXV_HAVE_XMP_TOOLKIT
+#include "xmp.hpp"
+#endif
 
 // + standard includes
 #include <iomanip>
@@ -59,6 +97,13 @@ EXIV2_RCSID("@(#) $Id: version.cpp 3800 2015-05-08 22:26:36Z robinwmills $")
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <iostream>
+
+// #1147
+#ifndef WIN32
+#include <unistd.h>
+#include <sys/types.h>
+#endif
 
 namespace Exiv2 {
     int versionNumber()
@@ -91,10 +136,6 @@ namespace Exiv2 {
         return versionNumber() >= EXIV2_MAKE_VERSION(major,minor,patch);
     }
 }                                       // namespace Exiv2
-
-using namespace std;
-typedef vector<string>      string_v;
-typedef string_v::iterator  string_i;
 
 #ifndef lengthof
 #define lengthof(x) sizeof(x)/sizeof(x[0])
@@ -134,21 +175,40 @@ typedef string_v::iterator  string_i;
   };
 #endif
 
-static void output(std::ostream& os,const exv_grep_keys_t& greps,const char* name,const std::string& value)
+static bool shouldOutput(const exv_grep_keys_t& greps,const char* key,const std::string& value)
 {
     bool bPrint = greps.empty();
     for( exv_grep_keys_t::const_iterator g = greps.begin();
-        !bPrint && g != greps.end() ; ++g
+      !bPrint && g != greps.end() ; ++g
     ) {
+        std::string Key(key);
+#if __cplusplus >= CPLUSPLUS11
+        std::smatch m;
+        bPrint = std::regex_search(Key,m,*g) || std::regex_search(value,m,*g);
+#else
 #if EXV_HAVE_REGEX
-        bPrint = (  0 == regexec( &(*g), name         , 0, NULL, 0)
+        bPrint = (  0 == regexec( &(*g), key          , 0, NULL, 0)
                  || 0 == regexec( &(*g), value.c_str(), 0, NULL, 0)
                  );
 #else
-        bPrint = std::string(name).find(*g) != std::string::npos || value.find(*g) != std::string::npos;
+            std::string Pattern(g->pattern_);
+            std::string Value(value);
+            if ( g->bIgnoreCase_ ) {
+                // https://notfaq.wordpress.com/2007/08/04/cc-convert-string-to-upperlower-case/
+                std::transform(Pattern.begin(), Pattern.end(),Pattern.begin(), ::tolower);
+                std::transform(Key.begin()    , Key.end()    ,Key.begin()    , ::tolower);
+                std::transform(Value.begin()  , Value.end()  ,Value.begin()    , ::tolower);
+            }
+            bPrint = Key.find(Pattern) != std::string::npos || Value.find(Pattern) != std::string::npos;
+#endif
 #endif
     }
-    if ( bPrint ) os << name << "=" << value << endl;
+    return bPrint;
+}
+
+static void output(std::ostream& os,const exv_grep_keys_t& greps,const char* name,const std::string& value)
+{
+    if ( shouldOutput(greps,name,value) ) os << name << "=" << value << std::endl;
 }
 
 static void output(std::ostream& os,const exv_grep_keys_t& greps,const char* name,int value)
@@ -160,7 +220,7 @@ static void output(std::ostream& os,const exv_grep_keys_t& greps,const char* nam
 
 void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
 {
-    string_v libs; // libs[0] == executable
+    Exiv2::StringVector libs; // libs[0] == executable
 
     int      bits = 8*sizeof(void*);
 #if defined(_DEBUG) || defined(DEBUG)
@@ -180,8 +240,15 @@ void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
     "MSVC"    ;
 
 #ifndef __VERSION__
-    char version[20];
+    char  version[40];
     sprintf(version,"%d.%02d",(_MSC_VER-600)/100,_MSC_VER%100);
+
+    // add edition in brackets
+    // 7.10 = 2003 8.00 = 2005 etc 12.00 = 2013 13.00 = 2015 (yet the installer labels it as 14.0!)
+    size_t      edition       = (_MSC_VER-600)/100;
+    const char* editions[]    = { "0","1","2","3","4","5","6","2003", "2005", "2008", "2010", "2012","2013","2015"};
+    if  ( edition > lengthof(editions) ) edition = 0 ;
+    if  ( edition ) sprintf(version+::strlen(version)," (%s/%s)",editions[edition],bits==64?"x64":"x86");
 #define __VERSION__ version
 #endif
 
@@ -263,143 +330,143 @@ void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
     int enable_video     =0;
     int enable_webready  =0;
 
-#if EXV_HAVE_DECL_STRERROR_R
+#ifdef EXV_HAVE_DECL_STRERROR_R
     have_strerror_r=1;
 #endif
 
-#if EXV_HAVE_GMTIME_R
+#ifdef EXV_HAVE_GMTIME_R
     have_gmtime_r=1;
 #endif
 
-#if EXV_HAVE_INTTYPES_H
+#ifdef EXV_HAVE_INTTYPES_H
     have_inttypes=1;
 #endif
 
-#if EXV_HAVE_LIBINTL_H
+#ifdef EXV_HAVE_LIBINTL_H
     have_libintl=1;
 #endif
 
-#if EXV_HAVE_LENSDATA
+#ifdef EXV_HAVE_LENSDATA
     have_lensdata=1;
 #endif
 
-#if EXV_HAVE_ICONV
+#ifdef EXV_HAVE_ICONV
     have_iconv=1;
 #endif
 
-#if EXV_HAVE_LIBINTL_H
+#ifdef EXV_HAVE_LIBINTL_H
     have_libintl=1;
 #endif
 
-#if EXV_HAVE_REGEX
+#ifdef EXV_HAVE_REGEX
     have_regex=1;
 #endif
 
-#if EXV_HAVE_MEMORY_H
+#ifdef EXV_HAVE_MEMORY_H
     have_memory=1;
 #endif
 
-#if EXV_HAVE_MEMSET
+#ifdef EXV_HAVE_MEMSET
     have_memset=1;
 #endif
 
-#if EXV_HAVE_LSTAT
+#ifdef EXV_HAVE_LSTAT
     have_lstat=1;
 #endif
 
-#if EXV_HAVE_STDBOOL_H
+#ifdef EXV_HAVE_STDBOOL_H
     have_stdbool=1;
 #endif
 
-#if EXV_HAVE_STDINT_H
+#ifdef EXV_HAVE_STDINT_H
     have_stdint=1;
 #endif
 
-#if EXV_HAVE_STDLIB_H
+#ifdef EXV_HAVE_STDLIB_H
     have_stdlib=1;
 #endif
 
-#if EXV_HAVE_STRCHR
+#ifdef EXV_HAVE_STRCHR
     have_strchr=1;
 #endif
 
-#if EXV_HAVE_STRERROR
+#ifdef EXV_HAVE_STRERROR
     have_strerror=1;
 #endif
 
-#if EXV_HAVE_STRERROR_R
+#ifdef EXV_HAVE_STRERROR_R
     have_strerror_r=1;
 #endif
 
-#if EXV_HAVE_STRINGS_H
+#ifdef EXV_HAVE_STRINGS_H
     have_strings=1;
 #endif
 
-#if EXV_HAVE_STRTOL
+#ifdef EXV_HAVE_STRTOL
     have_strtol=1;
 #endif
 
-#if EXV_HAVE_MMAP
+#ifdef EXV_HAVE_MMAP
     have_mmap=1;
 #endif
 
-#if EXV_HAVE_MUNMAP
+#ifdef EXV_HAVE_MUNMAP
     have_munmap=1;
 #endif
 
-#if EXV_HAVE_SYS_STAT_H
+#ifdef EXV_HAVE_SYS_STAT_H
     have_sys_stat=1;
 #endif
 
-#if EXV_HAVE_SYS_TYPES_H
+#ifdef EXV_HAVE_SYS_TYPES_H
     have_sys_types=1;
 #endif
 
-#if EXV_HAVE_TIMEGM
+#ifdef EXV_HAVE_TIMEGM
     have_timegm=1;
 #endif
 
-#if EXV_HAVE_UNISTD_H
+#ifdef EXV_HAVE_UNISTD_H
     have_unistd=1;
 #endif
 
-#if EXV_HAVE_SYS_MMAN_H
+#ifdef EXV_HAVE_SYS_MMAN_H
     have_sys_mman=1;
 #endif
 
-#if HAVE_LIBZ
+#ifdef EXV_HAVE_LIBZ
     have_libz=1;
 #endif
 
-#if EXV_HAVE_XMP_TOOLKIT
+#ifdef EXV_HAVE_XMP_TOOLKIT
     have_xmptoolkit=1;
 #endif
 
-#if EXV_HAVE__BOOL
+#ifdef EXV_HAVE_BOOL
     have_bool=1;
 #endif
 
-#if  EXV_HAVE_STRINGS
+#ifdef EXV_HAVE_STRINGS
      have_strings=1;
 #endif
 
-#if  EXV_SYS_TYPES
+#ifdef EXV_SYS_TYPES
      have_sys_types=1;
 #endif
 
-#if  EXV_HAVE_UNISTD
+#ifdef EXV_HAVE_UNISTD
      have_unistd=1;
 #endif
 
-#if  EXV_UNICODE_PATH
+#ifdef EXV_UNICODE_PATH
      have_unicode_path=1;
 #endif
 
-#if  EXV_ENABLE_VIDEO
+#ifdef EXV_ENABLE_VIDEO
      enable_video=1;
 #endif
 
-#if  EXV_ENABLE_WEBREADY
+#ifdef EXV_ENABLE_WEBREADY
      enable_webready=1;
 #endif
 
@@ -454,6 +521,8 @@ void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
     output(os,keys,"bits"           , bits       );
     output(os,keys,"dll"            , dll        );
     output(os,keys,"debug"          , debug      );
+    output(os,keys,"cplusplus"      , __cplusplus);
+    output(os,keys,"cplusplus11"    , __cplusplus >= CPLUSPLUS11 );
     output(os,keys,"version"        , __VERSION__);
     output(os,keys,"date"           , __DATE__   );
     output(os,keys,"time"           , __TIME__   );
@@ -470,10 +539,10 @@ void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
 #else
     output(os,keys,"curl"          , EXV_USE_CURL);
 #endif
-    output(os,keys,"id"        , "$Id: version.cpp 3800 2015-05-08 22:26:36Z robinwmills $");
+    output(os,keys,"id"        , "$Id$");
     if ( libs.begin() != libs.end() ) {
         output(os,keys,"executable" ,*libs.begin());
-        for ( string_i lib = libs.begin()+1 ; lib != libs.end() ; lib++ )
+        for ( Exiv2::StringVector_i lib = libs.begin()+1 ; lib != libs.end() ; lib++ )
             output(os,keys,"library",*lib);
     }
 
@@ -511,6 +580,26 @@ void Exiv2::dumpLibraryInfo(std::ostream& os,const exv_grep_keys_t& keys)
     output(os,keys,"have_unicode_path" ,have_unicode_path);
     output(os,keys,"enable_video"      ,enable_video     );
     output(os,keys,"enable_webready"   ,enable_webready  );
+    output(os,keys,"config_path"       ,Exiv2::Internal::getExiv2ConfigPath());
+
+// #1147
+#ifndef WIN32
+    uid_t uid  = getuid()  ; output(os,keys,"uid" ,  uid  );
+    uid_t euid = geteuid() ; output(os,keys,"euid", euid  );
+    uid_t gid  = getgid()  ; output(os,keys,"gid" ,  gid  );
+#endif
+
+#if EXV_HAVE_XMP_TOOLKIT
+    const char* name = "xmlns";
+
+    Exiv2::Dictionary ns;
+    Exiv2::XmpProperties::registeredNamespaces(ns);
+    for ( Exiv2::Dictionary_i it = ns.begin(); it != ns.end() ; it++ ) {
+        std::string xmlns = (*it).first;
+        std::string uri   = (*it).second;
+        output(os,keys,name,xmlns+":"+uri);
+    }
+#endif
 
 #if defined(__linux__)
     dlclose(ph);

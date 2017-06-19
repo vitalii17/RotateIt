@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -15,18 +15,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with this f; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, 5th Floor, Boston, MA 02110-1301 USA.
  */
 /*
   File:      xmp.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   13-July-07, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: xmp.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -94,11 +94,11 @@ namespace {
                    const std::string& propPath,
                    const std::string& propValue,
                    const XMP_OptionBits& opt);
-#endif // EXV_HAVE_XMP_TOOLKIT
 
     //! Make an XMP key from a schema namespace and property path
     Exiv2::XmpKey::AutoPtr makeXmpKey(const std::string& schemaNs,
                                       const std::string& propPath);
+#endif // EXV_HAVE_XMP_TOOLKIT
 
     //! Helper class used to serialize critical sections
     class AutoLock
@@ -394,10 +394,10 @@ namespace Exiv2 {
     XmpParser::XmpLockFct XmpParser::xmpLockFct_ = 0;
     void* XmpParser::pLockData_ = 0;
 
+#ifdef EXV_HAVE_XMP_TOOLKIT
     bool XmpParser::initialize(XmpParser::XmpLockFct xmpLockFct, void* pLockData)
     {
         if (!initialized_) {
-#ifdef EXV_HAVE_XMP_TOOLKIT
             xmpLockFct_ = xmpLockFct;
             pLockData_ = pLockData;
             initialized_ = SXMPMeta::Initialize();
@@ -419,13 +419,75 @@ namespace Exiv2 {
             SXMPMeta::RegisterNamespace("http://www.metadataworkinggroup.com/schemas/regions/", "mwg-rs");
             SXMPMeta::RegisterNamespace("http://www.metadataworkinggroup.com/schemas/keywords/", "mwg-kw");
             SXMPMeta::RegisterNamespace("http://ns.adobe.com/xmp/sType/Area#", "stArea");
-
-#else
-            initialized_ = true;
-#endif
+            SXMPMeta::RegisterNamespace("http://cipa.jp/exif/1.0/", "exifEX");
+		    SXMPMeta::RegisterNamespace("http://ns.adobe.com/camera-raw-saved-settings/1.0/", "crss");
+            SXMPMeta::RegisterNamespace("http://www.audio/", "audio");
+            SXMPMeta::RegisterNamespace("http://www.video/", "video");
         }
         return initialized_;
     }
+#else
+    bool XmpParser::initialize(XmpParser::XmpLockFct, void* )
+    {
+    	initialized_ = true;
+        return initialized_;
+    }
+#endif
+
+#ifdef EXV_HAVE_XMP_TOOLKIT
+    static XMP_Status nsDumper
+    ( void*           refCon
+    , XMP_StringPtr   buffer
+    , XMP_StringLen   bufferSize
+    ) {
+        XMP_Status result = 0 ;
+        std::string out(buffer,bufferSize);
+
+        // remove blanks
+        // http://stackoverflow.com/questions/83439/remove-spaces-from-stdstring-in-c
+        std::string::iterator end_pos = std::remove(out.begin(), out.end(), ' ');
+        out.erase(end_pos, out.end());
+
+        bool bURI = out.find("http://") != std::string::npos   ;
+        bool bNS  = out.find(":") != std::string::npos && !bURI;
+
+        // pop trailing ':' on a namespace
+        if ( bNS ) {
+	    std::size_t length = out.length();
+            if ( out[length-1] == ':' ) out = out.substr(0,length-1);
+        }
+
+        if ( bURI || bNS ) {
+            std::map<std::string,std::string>* p = (std::map<std::string,std::string>*) refCon;
+            std::map<std::string,std::string>& m = (std::map<std::string,std::string>&) *p    ;
+
+            std::string b("");
+            if ( bNS ) {  // store the NS in dict[""]
+                m[b]=out;
+            } else if ( m.find(b) != m.end() ) {  // store dict[uri] = dict[""]
+                m[m[b]]=out;
+                m.erase(b);
+            }
+        }
+        return result;
+    }
+#endif
+
+#ifdef EXV_HAVE_XMP_TOOLKIT
+    void XmpParser::registeredNamespaces(Exiv2::Dictionary& dict)
+    {
+    	bool bInit = !initialized_;
+        try {
+        	if (bInit) initialize();
+        	SXMPMeta::DumpNamespaces(nsDumper,&dict);
+        	if (bInit) terminate();
+        } catch (const XMP_Error& e) {
+            throw Error(40, e.GetID(), e.GetErrMsg());
+        }
+    }
+#else
+    void XmpParser::registeredNamespaces(Exiv2::Dictionary&){}
+#endif
 
     void XmpParser::terminate()
     {
@@ -434,8 +496,6 @@ namespace Exiv2 {
 #ifdef EXV_HAVE_XMP_TOOLKIT
             SXMPMeta::Terminate();
 #endif
-            xmpLockFct_ = 0;
-            pLockData_ = 0;
             initialized_ = false;
         }
     }
@@ -480,6 +540,7 @@ namespace Exiv2 {
                           const std::string& xmpPacket)
     { try {
         xmpData.clear();
+        xmpData.setPacket(xmpPacket);
         if (xmpPacket.empty()) return 0;
 
         if (!initialize()) {
@@ -661,11 +722,11 @@ namespace Exiv2 {
                     ; k != la->value_.end()
                     ; ++k
                 ) {
-                	if ( k->second.size() ) { // remove lang specs with no value
-                    	printNode(ns, i->tagName(), k->second, 0);
-                    	meta.AppendArrayItem(ns.c_str(), i->tagName().c_str(), kXMP_PropArrayIsAlternate, k->second.c_str());
-                    	const std::string item = i->tagName() + "[" + toString(idx++) + "]";
-                    	meta.SetQualifier(ns.c_str(), item.c_str(), kXMP_NS_XML, "lang", k->first.c_str());
+                    if ( k->second.size() ) { // remove lang specs with no value
+                        printNode(ns, i->tagName(), k->second, 0);
+                        meta.AppendArrayItem(ns.c_str(), i->tagName().c_str(), kXMP_PropArrayIsAlternate, k->second.c_str());
+                        const std::string item = i->tagName() + "[" + toString(idx++) + "]";
+                        meta.SetQualifier(ns.c_str(), item.c_str(), kXMP_NS_XML, "lang", k->first.c_str());
                     }
                 }
                 continue;
@@ -857,7 +918,6 @@ namespace {
                    const XMP_OptionBits& )
     {}
 #endif // DEBUG
-#endif // EXV_HAVE_XMP_TOOLKIT
 
     Exiv2::XmpKey::AutoPtr makeXmpKey(const std::string& schemaNs,
                                       const std::string& propPath)
@@ -875,5 +935,6 @@ namespace {
         }
         return Exiv2::XmpKey::AutoPtr(new Exiv2::XmpKey(prefix, property));
     } // makeXmpKey
+#endif // EXV_HAVE_XMP_TOOLKIT
 
 }

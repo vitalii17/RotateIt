@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,18 +20,19 @@
  */
 /*
   File:      makernote.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   11-Apr-06, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: makernote.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
 
 #include "makernote_int.hpp"
+#include "ini.hpp"
 #include "tiffcomposite_int.hpp"
 #include "tiffvisitor_int.hpp"
 #include "tiffimage.hpp"
@@ -40,6 +41,46 @@ EXIV2_RCSID("@(#) $Id: makernote.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
 // + standard includes
 #include <string>
 #include <cstring>
+
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#ifndef __MINGW__
+#define __MINGW__ 1
+#endif
+#endif
+
+#if !defined(_MSC_VER) && !defined(__MINGW__)
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#else
+#include <windows.h>
+#include <shlobj.h>
+  /* older SDKs not have these */
+# ifndef CSIDL_MYMUSIC
+#    define CSIDL_MYMUSIC 13
+# endif
+# ifndef CSIDL_MYVIDEO
+#    define CSIDL_MYVIDEO 14
+# endif
+# ifndef CSIDL_INTERNET_CACHE
+#    define CSIDL_INTERNET_CACHE 32
+# endif
+# ifndef CSIDL_COMMON_APPDATA
+#    define CSIDL_COMMON_APPDATA 35
+# endif
+# ifndef CSIDL_MYPICTURES
+#    define CSIDL_MYPICTURES 0x27
+# endif
+# ifndef CSIDL_COMMON_DOCUMENTS
+#    define CSIDL_COMMON_DOCUMENTS 46
+# endif
+# ifndef CSIDL_PROFILE
+#    define CSIDL_PROFILE 40
+# endif
+# include <process.h>
+
+#endif
+
 
 // *****************************************************************************
 namespace {
@@ -54,6 +95,37 @@ namespace {
 // class member definitions
 namespace Exiv2 {
     namespace Internal {
+
+		std::string getExiv2ConfigPath()
+		{
+    		std::string homedir;
+    		std::string inifile;
+#if defined(_MSC_VER) || defined(__MINGW__)
+			char path[MAX_PATH];
+			if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+  				homedir = std::string(path);
+  				inifile = "exiv2.ini"      ;
+			}
+#else
+	    	struct passwd* pw = getpwuid(getuid());
+			homedir = std::string(pw?pw->pw_dir:"");
+    		inifile = std::string(".exiv2");
+#endif
+	    	return homedir + EXV_SEPARATOR_CHR + inifile;
+		}
+
+
+    	std::string readExiv2Config(const std::string& section,const std::string& value,const std::string& def)
+    	{
+   			std::string result = def;
+	    	Exiv2::INIReader reader(Exiv2::Internal::getExiv2ConfigPath());
+
+			if (reader.ParseError() == 0) {
+				result = reader.Get(section,value,def);
+			}
+			return result;
+		}
+
 
     const TiffMnRegistry TiffMnCreator::registry_[] = {
         { "Canon",          canonId,     newIfdMn,       newIfdMn2       },
@@ -79,7 +151,9 @@ namespace Exiv2 {
         { "-",              olympusId,   0,              newOlympusMn2   },
         { "-",              olympus2Id,  0,              newOlympus2Mn2  },
         { "-",              pentaxId,    0,              newPentaxMn2    },
-        { "-",              pentaxDngId, 0,              newPentaxDngMn2 }
+        { "-",              pentaxDngId, 0,              newPentaxDngMn2 },
+        { "-",              casioId,     0,              newIfdMn2       },
+        { "-",              casio2Id,    0,              newCasio2Mn2    }
     };
 
     bool TiffMnRegistry::operator==(const std::string& key) const

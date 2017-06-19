@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      olympusmn.cpp
-  Version:   $Rev: 3831 $
+  Version:   $Rev$
   Author(s): Will Stokes (wuz) <wstokes@gmail.com>
              Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (gc) <caulier dot gilles at gmail dot com>
@@ -31,7 +31,7 @@
 
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: olympusmn.cpp 3831 2015-05-20 01:27:32Z asp $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -40,6 +40,7 @@ EXIV2_RCSID("@(#) $Id: olympusmn.cpp 3831 2015-05-20 01:27:32Z asp $")
 #include "value.hpp"
 #include "image.hpp"
 #include "tags_int.hpp"
+#include "makernote_int.hpp"
 #include "i18n.h"                // NLS support.
 
 // + standard includes
@@ -613,12 +614,21 @@ namespace Exiv2 {
 
     //! PictureMode, tag 0x0520
     extern const TagDetails olympusPictureMode[] = {
-        {   1, N_("Vivid")    },
-        {   2, N_("Natural")  },
-        {   3, N_("Muted")    },
-        {   4, N_("Portrait") },
-        { 256, N_("Monotone") },
-        { 512, N_("Sepia")    }
+        {   1, N_("Vivid")                },
+        {   2, N_("Natural")              },
+        {   3, N_("Muted")                },
+        {   4, N_("Portrait")             },
+        {   5, N_("i-Enhance")            },
+        {   6, N_("e-Portrait")           },
+        {   7, N_("Color Creator")        },
+        {   9, N_("Color Profile 1")      },
+        {  10, N_("Color Profile 2")      },
+        {  11, N_("Color Profile 3")      },
+        {  12, N_("Monochrome Profile 1") },
+        {  13, N_("Monochrome Profile 2") },
+        {  14, N_("Monochrome Profile 3") },
+        { 256, N_("Monotone")             },
+        { 512, N_("Sepia")                }
     };
 
     //! PictureModeBWFilter, tag 0x0525
@@ -738,7 +748,9 @@ namespace Exiv2 {
         { 5, "FL-36"    },
         { 6, "FL-50R"   },
         { 7, "FL-36R"   },
-        { 7, "FL-36R"   }                       // To silence compiler warning
+        { 9, "FL-14"    },
+        {11, "FL-600R"  },
+        {11, "FL-600R"  }                       // To silence compiler warning
     };
 
     const TagInfo OlympusMakerNote::tagInfoEq_[] = {
@@ -1249,115 +1261,131 @@ namespace Exiv2 {
     //! OlympusEq LensType, tag 0x201
     std::ostream& OlympusMakerNote::print0x0201(std::ostream& os, const Value& value, const ExifData*)
     {
+    	// #1034
+		const std::string undefined("undefined") ;
+		const std::string section  ("olympus");
+		if ( Internal::readExiv2Config(section,value.toString(),undefined) != undefined ) {
+			return os << Internal::readExiv2Config(section,value.toString(),undefined);
+		}
+
         // 6 numbers: 0. Make, 1. Unknown, 2. Model, 3. Sub-model, 4-5. Unknown.
         // Only the Make, Model and Sub-model are used to determine the lens model
         static struct {
             byte val[3];
             const char *label;
         } lensTypes[] = {
-            { { 0,  0,  0 }, N_("None")                                                 },
-            { { 0,  1,  0 }, "Olympus Zuiko Digital ED 50mm F2.0 Macro"             },
-            { { 0,  1,  1 }, "Olympus Zuiko Digital 40-150mm F3.5-4.5"              },
-            { { 0,  1, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6"          },
-            { { 0,  2,  0 }, "Olympus Zuiko Digital ED 150mm F2.0"                  },
-            { { 0,  2, 16 }, "Olympus M.Zuiko Digital 17mm F2.8 Pancake"            },
-            { { 0,  3,  0 }, "Olympus Zuiko Digital ED 300mm F2.8"                  },
-            { { 0,  3, 16 }, "Olympus M.Zuiko Digital ED 14-150mm F4.0-5.6"         },
-            { { 0,  4, 16 }, "Olympus M.Zuiko Digital ED 9-18mm F4.0-5.6"           },
-            { { 0,  5,  0 }, "Olympus Zuiko Digital 14-54mm F2.8-3.5"               },
-            { { 0,  5,  1 }, "Olympus Zuiko Digital Pro ED 90-250mm F2.8"           },
-            { { 0,  5, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6 L"        },
-            { { 0,  6,  0 }, "Olympus Zuiko Digital ED 50-200mm F2.8-3.5"           },
-            { { 0,  6,  1 }, "Olympus Zuiko Digital ED 8mm F3.5 Fisheye"            },
-            { { 0,  6, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F4.0-5.6"         },
-            { { 0,  7,  0 }, "Olympus Zuiko Digital 11-22mm F2.8-3.5"               },
-            { { 0,  7,  1 }, "Olympus Zuiko Digital 18-180mm F3.5-6.3"              },
-            { { 0,  7, 16 }, "Olympus M.Zuiko Digital ED 12mm F2.0"                 },
-            { { 0,  8,  1 }, "Olympus Zuiko Digital 70-300mm F4.0-5.6"              },
-            { { 0,  8, 16 }, "Olympus M.Zuiko Digital ED 75-300mm F4.8-6.7"         },
-            { { 0,  9, 16 }, "Olympus M.Zuiko Digital 14-42mm F3.5-5.6 II"          },
-            { { 0, 16,  1 }, "Kenko Tokina Reflex 300mm F6.3 MF Macro"              },
-            { { 0, 16, 16 }, "Olympus M.Zuiko Digital ED 12-50mm F3.5-6.3 EZ"       },
-            { { 0, 17, 16 }, "Olympus M.Zuiko Digital 45mm F1.8"                    },
-            { { 0, 18, 16 }, "Olympus M.Zuiko Digital ED 60mm F2.8 Macro"           },
-            { { 0, 19, 16 }, "Olympus M.Zuiko Digital 14-42mm F3.5-5.6 II R"        },
-            { { 0, 20, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F4.0-5.6 R"       },
-            { { 0, 21,  0 }, "Olympus Zuiko Digital ED 7-14mm F4.0"                 },
-            { { 0, 21, 16 }, "Olympus M.Zuiko Digital ED 75mm F1.8"                 },
-            { { 0, 22, 16 }, "Olympus M.Zuiko Digital 17mm F1.8"                    },
-            { { 0, 23,  0 }, "Olympus Zuiko Digital Pro ED 35-100mm F2.0"           },
-            { { 0, 24,  0 }, "Olympus Zuiko Digital 14-45mm F3.5-5.6"               },
-            { { 0, 24, 16 }, "Olympus M.Zuiko Digital ED 75-300mm F4.8-6.7 II"      },
-            { { 0, 25, 16 }, "Olympus M.Zuiko Digital ED 12-40mm F2.8 Pro"          },
-            { { 0, 32,  0 }, "Olympus Zuiko Digital 35mm F3.5 Macro"                },
-            { { 0, 32, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F2.8 Pro"         },
-            { { 0, 33, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6 EZ"       },
-            { { 0, 34,  0 }, "Olympus Zuiko Digital 17.5-45mm F3.5-5.6"             },
-            { { 0, 34, 16 }, "Olympus M.Zuiko Digital 25mm F1.8"                    },
-            { { 0, 35,  0 }, "Olympus Zuiko Digital ED 14-42mm F3.5-5.6"            },
-            { { 0, 35, 16 }, "Olympus M.Zuiko Digital ED 7-14mm F2.8 Pro"           },
-            { { 0, 36,  0 }, "Olympus Zuiko Digital ED 40-150mm F4.0-5.6"           },
-            { { 0, 37, 16 }, "Olympus M.Zuiko Digital ED 8mm F1.8 Fisheye Pro"      },
-            { { 0, 48,  0 }, "Olympus Zuiko Digital ED 50-200mm F2.8-3.5 SWD"       },
-            { { 0, 49,  0 }, "Olympus Zuiko Digital ED 12-60mm F2.8-4.0 SWD"        },
-            { { 0, 50,  0 }, "Olympus Zuiko Digital ED 14-35mm F2.0 SWD"            },
-            { { 0, 51,  0 }, "Olympus Zuiko Digital 25mm F2.8"                      },
-            { { 0, 52,  0 }, "Olympus Zuiko Digital ED 9-18mm F4.0-5.6"             },
-            { { 0, 53,  0 }, "Olympus Zuiko Digital 14-54mm F2.8-3.5 II"            },
-            { { 1,  1,  0 }, "Sigma 18-50mm F3.5-5.6 DC"                            },
-            { { 1,  1, 16 }, "Sigma 30mm F2.8 EX DN"                                },
-            { { 1,  2,  0 }, "Sigma 55-200mm F4.0-5.6 DC"                           },
-            { { 1,  2, 16 }, "Sigma 19mm F2.8 EX DN"                                },
-            { { 1,  3,  0 }, "Sigma 18-125mm F3.5-5.6 DC"                           },
-            { { 1,  3, 16 }, "Sigma 30mm F2.8 DN | A"                               },
-            { { 1,  4,  0 }, "Sigma 18-125mm F3.5-5.6"                              },
-            { { 1,  4, 16 }, "Sigma 19mm F2.8 DN | A"                               },
-            { { 1,  5,  0 }, "Sigma 30mm F1.4"                                      },
-            { { 1,  5, 16 }, "Sigma 60mm F2.8 DN | A"                               },
-            { { 1,  6,  0 }, "Sigma 50-500mm F4.0-6.3 EX DG APO HSM RF"             },
-            { { 1,  7,  0 }, "Sigma 105mm F2.8 DG"                                  },
-            { { 1,  8,  0 }, "Sigma 150mm F2.8 DG HSM"                              },
-            { { 1,  9,  0 }, "Sigma 18-50mm F2.8 EX DC Macro"                       },
-            { { 1, 16,  0 }, "Sigma 24mm F1.8 EX DG Aspherical Macro"               },
-            { { 1, 17,  0 }, "Sigma 135-400mm F4.5-5.6 DG ASP APO RF"               },
-            { { 1, 18,  0 }, "Sigma 300-800mm F5.6 EX DG APO"                       },
-            { { 1, 19,  0 }, "Sigma 30mm F1.4 EX DC HSM"                            },
-            { { 1, 20,  0 }, "Sigma 50-500mm F4.0-6.3 EX DG APO HSM RF"             },
-            { { 1, 21,  0 }, "Sigma 10-20mm F4.0-5.6 EX DC HSM"                     },
-            { { 1, 22,  0 }, "Sigma 70-200mm F2.8 EX DG Macro HSM II"               },
-            { { 1, 23,  0 }, "Sigma 50mm F1.4 EX DG HSM"                            },
-            { { 2,  1,  0 }, "Leica D Vario Elmarit 14-50mm F2.8-3.5 Asph."         },
-            { { 2,  1, 16 }, "Lumix G Vario 14-45mm F3.5-5.6 Asph. Mega OIS"        },
-            { { 2,  2,  0 }, "Leica D Summilux 25mm F1.4 Asph."                     },
-            { { 2,  2, 16 }, "Lumix G Vario 45-200mm F4.0-5.6 Mega OIS"             },
-            { { 2,  3,  0 }, "Leica D Vario Elmar 14-50mm F3.8-5.6 Asph. Mega OIS"  },
-            { { 2,  3,  1 }, "Leica D Vario Elmar 14-50mm F3.8-5.6 Asph."           },
-            { { 2,  3, 16 }, "Lumix G Vario HD 14-140mm F4.0-5.8 Asph. Mega OIS"    },
-            { { 2,  4,  0 }, "Leica D Vario Elmar 14-150mm F3.5-5.6"                },
-            { { 2,  4, 16 }, "Lumix G Vario 7-14mm F4.0 Asph."                      },
-            { { 2,  5, 16 }, "Lumix G 20mm F1.7 Asph."                              },
-            { { 2,  6, 16 }, "Leica DG Macro-Elmarit 45mm F2.8 Asph. Mega OIS"      },
-            { { 2,  7, 16 }, "Lumix G Vario 14-42mm F3.5-5.6 Asph. Mega OIS"        },
-            { { 2,  8, 16 }, "Lumix G Fisheye 8mm F3.5"                             },
-            { { 2,  9, 16 }, "Lumix G Vario 100-300mm F4.0-5.6 Mega OIS"            },
-            { { 2, 16, 16 }, "Lumix G 14mm F2.5 Asph."                              },
-            { { 2, 17, 16 }, "Lumix G 3D 12.5mm F12"                                },
-            { { 2, 18, 16 }, "Leica DG Summilux 25mm F1.4 Asph."                    },
-            { { 2, 19, 16 }, "Lumix G X Vario PZ 45-175mm F4.0-5.6 Asph. Power OIS" },
-            { { 2, 20, 16 }, "Lumix G X Vario PZ 14-42mm F3.5-5.6 Asph. Power OIS"  },
-            { { 2, 21, 16 }, "Lumix G X Vario 12-35mm F2.8 Asph. Power OIS"         },
-            { { 2, 22, 16 }, "Lumix G Vario 45-150mm F4.0-5.6 Asph. Mega OIS"       },
-            { { 2, 23, 16 }, "Lumix G X Vario 35-100mm F2.8 Power OIS"              },
-            { { 2, 24, 16 }, "Lumix G Vario 14-42mm F3.5-5.6 II Asph. Mega OIS"     },
-            { { 2, 25, 16 }, "Lumix G Vario 14-140mm F3.5-5.6 Asph. Power OIS"      },
-            { { 2, 32, 16 }, "Lumix G Vario 12-32mm F3.5-5.6 Asph. Mega OIS"        },
-            { { 2, 33, 16 }, "Leica DG Nocticron 42.5mm F1.2 Asph. Power OIS"       },
-            { { 2, 34, 16 }, "Leica DG Summilux 15mm F1.7 Asph."                    },
-            { { 2, 36, 16 }, "Lumix G Macro 30mm F2.8 Asph. Mega OIS"               },
-            { { 2, 37, 16 }, "Lumix G 42.5mm F1.7 Asph. Power OIS"                  },
-            { { 3,  1,  0 }, "Leica D Vario Elmarit 14-50mm F2.8-3.5 Asph."         },
-            { { 3,  2,  0 }, "Leica D Summilux 25mm F1.4 Asph."                     },
-            { { 5,  1, 16 }, "Tamron 14-150mm F3.5-5.8 Di III"                      },
+            { { 0,  0,  0 }, N_("None")                                                },
+            { { 0,  1,  0 }, "Olympus Zuiko Digital ED 50mm F2.0 Macro"                },
+            { { 0,  1,  1 }, "Olympus Zuiko Digital 40-150mm F3.5-4.5"                 },
+            { { 0,  1, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6"             },
+            { { 0,  2,  0 }, "Olympus Zuiko Digital ED 150mm F2.0"                     },
+            { { 0,  2, 16 }, "Olympus M.Zuiko Digital 17mm F2.8 Pancake"               },
+            { { 0,  3,  0 }, "Olympus Zuiko Digital ED 300mm F2.8"                     },
+            { { 0,  3, 16 }, "Olympus M.Zuiko Digital ED 14-150mm F4.0-5.6"            },
+            { { 0,  4, 16 }, "Olympus M.Zuiko Digital ED 9-18mm F4.0-5.6"              },
+            { { 0,  5,  0 }, "Olympus Zuiko Digital 14-54mm F2.8-3.5"                  },
+            { { 0,  5,  1 }, "Olympus Zuiko Digital Pro ED 90-250mm F2.8"              },
+            { { 0,  5, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6 L"           },
+            { { 0,  6,  0 }, "Olympus Zuiko Digital ED 50-200mm F2.8-3.5"              },
+            { { 0,  6,  1 }, "Olympus Zuiko Digital ED 8mm F3.5 Fisheye"               },
+            { { 0,  6, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F4.0-5.6"            },
+            { { 0,  7,  0 }, "Olympus Zuiko Digital 11-22mm F2.8-3.5"                  },
+            { { 0,  7,  1 }, "Olympus Zuiko Digital 18-180mm F3.5-6.3"                 },
+            { { 0,  7, 16 }, "Olympus M.Zuiko Digital ED 12mm F2.0"                    },
+            { { 0,  8,  1 }, "Olympus Zuiko Digital 70-300mm F4.0-5.6"                 },
+            { { 0,  8, 16 }, "Olympus M.Zuiko Digital ED 75-300mm F4.8-6.7"            },
+            { { 0,  9, 16 }, "Olympus M.Zuiko Digital 14-42mm F3.5-5.6 II"             },
+            { { 0, 16,  1 }, "Kenko Tokina Reflex 300mm F6.3 MF Macro"                 },
+            { { 0, 16, 16 }, "Olympus M.Zuiko Digital ED 12-50mm F3.5-6.3 EZ"          },
+            { { 0, 17, 16 }, "Olympus M.Zuiko Digital 45mm F1.8"                       },
+            { { 0, 18, 16 }, "Olympus M.Zuiko Digital ED 60mm F2.8 Macro"              },
+            { { 0, 19, 16 }, "Olympus M.Zuiko Digital 14-42mm F3.5-5.6 II R"           },
+            { { 0, 20, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F4.0-5.6 R"          },
+            { { 0, 21,  0 }, "Olympus Zuiko Digital ED 7-14mm F4.0"                    },
+            { { 0, 21, 16 }, "Olympus M.Zuiko Digital ED 75mm F1.8"                    },
+            { { 0, 22, 16 }, "Olympus M.Zuiko Digital 17mm F1.8"                       },
+            { { 0, 23,  0 }, "Olympus Zuiko Digital Pro ED 35-100mm F2.0"              },
+            { { 0, 24,  0 }, "Olympus Zuiko Digital 14-45mm F3.5-5.6"                  },
+            { { 0, 24, 16 }, "Olympus M.Zuiko Digital ED 75-300mm F4.8-6.7 II"         },
+            { { 0, 25, 16 }, "Olympus M.Zuiko Digital ED 12-40mm F2.8 Pro"             },
+            { { 0, 32,  0 }, "Olympus Zuiko Digital 35mm F3.5 Macro"                   },
+            { { 0, 32, 16 }, "Olympus M.Zuiko Digital ED 40-150mm F2.8 Pro"            },
+            { { 0, 33, 16 }, "Olympus M.Zuiko Digital ED 14-42mm F3.5-5.6 EZ"          },
+            { { 0, 34,  0 }, "Olympus Zuiko Digital 17.5-45mm F3.5-5.6"                },
+            { { 0, 34, 16 }, "Olympus M.Zuiko Digital 25mm F1.8"                       },
+            { { 0, 35,  0 }, "Olympus Zuiko Digital ED 14-42mm F3.5-5.6"               },
+            { { 0, 35, 16 }, "Olympus M.Zuiko Digital ED 7-14mm F2.8 Pro"              },
+            { { 0, 36,  0 }, "Olympus Zuiko Digital ED 40-150mm F4.0-5.6"              },
+            { { 0, 36, 16 }, "Olympus M.Zuiko Digital ED 300mm F4.0 IS Pro"            },
+            { { 0, 37, 16 }, "Olympus M.Zuiko Digital ED 8mm F1.8 Fisheye Pro"         },
+            { { 0, 38, 16 }, "Olympus M.Zuiko Digital ED 12-100mm F4.0 IS Pro"         },
+            { { 0, 39, 16 }, "Olympus M.Zuiko Digital ED 30mm F3.5 Macro"              },
+            { { 0, 40, 16 }, "Olympus M.Zuiko Digital ED 25mm F1.2 Pro"                },
+            { { 0, 48,  0 }, "Olympus Zuiko Digital ED 50-200mm F2.8-3.5 SWD"          },
+            { { 0, 49,  0 }, "Olympus Zuiko Digital ED 12-60mm F2.8-4.0 SWD"           },
+            { { 0, 50,  0 }, "Olympus Zuiko Digital ED 14-35mm F2.0 SWD"               },
+            { { 0, 51,  0 }, "Olympus Zuiko Digital 25mm F2.8"                         },
+            { { 0, 52,  0 }, "Olympus Zuiko Digital ED 9-18mm F4.0-5.6"                },
+            { { 0, 53,  0 }, "Olympus Zuiko Digital 14-54mm F2.8-3.5 II"               },
+            { { 1,  1,  0 }, "Sigma 18-50mm F3.5-5.6 DC"                               },
+            { { 1,  1, 16 }, "Sigma 30mm F2.8 EX DN"                                   },
+            { { 1,  2,  0 }, "Sigma 55-200mm F4.0-5.6 DC"                              },
+            { { 1,  2, 16 }, "Sigma 19mm F2.8 EX DN"                                   },
+            { { 1,  3,  0 }, "Sigma 18-125mm F3.5-5.6 DC"                              },
+            { { 1,  3, 16 }, "Sigma 30mm F2.8 DN | A"                                  },
+            { { 1,  4,  0 }, "Sigma 18-125mm F3.5-5.6"                                 },
+            { { 1,  4, 16 }, "Sigma 19mm F2.8 DN | A"                                  },
+            { { 1,  5,  0 }, "Sigma 30mm F1.4"                                         },
+            { { 1,  5, 16 }, "Sigma 60mm F2.8 DN | A"                                  },
+            { { 1,  6,  0 }, "Sigma 50-500mm F4.0-6.3 EX DG APO HSM RF"                },
+            { { 1,  6, 16 }, "Sigma 30mm F1.4 DC DN | C"                               },
+            { { 1,  7,  0 }, "Sigma 105mm F2.8 DG"                                     },
+            { { 1,  8,  0 }, "Sigma 150mm F2.8 DG HSM"                                 },
+            { { 1,  9,  0 }, "Sigma 18-50mm F2.8 EX DC Macro"                          },
+            { { 1, 16,  0 }, "Sigma 24mm F1.8 EX DG Aspherical Macro"                  },
+            { { 1, 17,  0 }, "Sigma 135-400mm F4.5-5.6 DG ASP APO RF"                  },
+            { { 1, 18,  0 }, "Sigma 300-800mm F5.6 EX DG APO"                          },
+            { { 1, 19,  0 }, "Sigma 30mm F1.4 EX DC HSM"                               },
+            { { 1, 20,  0 }, "Sigma 50-500mm F4.0-6.3 EX DG APO HSM RF"                },
+            { { 1, 21,  0 }, "Sigma 10-20mm F4.0-5.6 EX DC HSM"                        },
+            { { 1, 22,  0 }, "Sigma 70-200mm F2.8 EX DG Macro HSM II"                  },
+            { { 1, 23,  0 }, "Sigma 50mm F1.4 EX DG HSM"                               },
+            { { 2,  1,  0 }, "Leica D Vario Elmarit 14-50mm F2.8-3.5 Asph."            },
+            { { 2,  1, 16 }, "Lumix G Vario 14-45mm F3.5-5.6 Asph. Mega OIS"           },
+            { { 2,  2,  0 }, "Leica D Summilux 25mm F1.4 Asph."                        },
+            { { 2,  2, 16 }, "Lumix G Vario 45-200mm F4.0-5.6 Mega OIS"                },
+            { { 2,  3,  0 }, "Leica D Vario Elmar 14-50mm F3.8-5.6 Asph. Mega OIS"     },
+            { { 2,  3,  1 }, "Leica D Vario Elmar 14-50mm F3.8-5.6 Asph."              },
+            { { 2,  3, 16 }, "Lumix G Vario HD 14-140mm F4.0-5.8 Asph. Mega OIS"       },
+            { { 2,  4,  0 }, "Leica D Vario Elmar 14-150mm F3.5-5.6"                   },
+            { { 2,  4, 16 }, "Lumix G Vario 7-14mm F4.0 Asph."                         },
+            { { 2,  5, 16 }, "Lumix G 20mm F1.7 Asph."                                 },
+            { { 2,  6, 16 }, "Leica DG Macro-Elmarit 45mm F2.8 Asph. Mega OIS"         },
+            { { 2,  7, 16 }, "Lumix G Vario 14-42mm F3.5-5.6 Asph. Mega OIS"           },
+            { { 2,  8, 16 }, "Lumix G Fisheye 8mm F3.5"                                },
+            { { 2,  9, 16 }, "Lumix G Vario 100-300mm F4.0-5.6 Mega OIS"               },
+            { { 2, 16, 16 }, "Lumix G 14mm F2.5 Asph."                                 },
+            { { 2, 17, 16 }, "Lumix G 3D 12.5mm F12"                                   },
+            { { 2, 18, 16 }, "Leica DG Summilux 25mm F1.4 Asph."                       },
+            { { 2, 19, 16 }, "Lumix G X Vario PZ 45-175mm F4.0-5.6 Asph. Power OIS"    },
+            { { 2, 20, 16 }, "Lumix G X Vario PZ 14-42mm F3.5-5.6 Asph. Power OIS"     },
+            { { 2, 21, 16 }, "Lumix G X Vario 12-35mm F2.8 Asph. Power OIS"            },
+            { { 2, 22, 16 }, "Lumix G Vario 45-150mm F4.0-5.6 Asph. Mega OIS"          },
+            { { 2, 23, 16 }, "Lumix G X Vario 35-100mm F2.8 Power OIS"                 },
+            { { 2, 24, 16 }, "Lumix G Vario 14-42mm F3.5-5.6 II Asph. Mega OIS"        },
+            { { 2, 25, 16 }, "Lumix G Vario 14-140mm F3.5-5.6 Asph. Power OIS"         },
+            { { 2, 32, 16 }, "Lumix G Vario 12-32mm F3.5-5.6 Asph. Mega OIS"           },
+            { { 2, 33, 16 }, "Leica DG Nocticron 42.5mm F1.2 Asph. Power OIS"          },
+            { { 2, 34, 16 }, "Leica DG Summilux 15mm F1.7 Asph."                       },
+            { { 2, 35, 16 }, "Lumix G Vario 35-100mm F4.0-5.6 Asph. Mega OIS"          },
+            { { 2, 36, 16 }, "Lumix G Macro 30mm F2.8 Asph. Mega OIS"                  },
+            { { 2, 37, 16 }, "Lumix G 42.5mm F1.7 Asph. Power OIS"                     },
+            { { 2, 38, 16 }, "Lumix G 25mm F1.7 Asph."                                 },
+            { { 2, 39, 16 }, "Leica DG Vario-Elmar 100-400mm F4.0-6.3 Asph. Power OIS" },
+            { { 2, 40, 16 }, "Lumix G Vario 12-60mm F3.5-5.6 Asph. Power OIS"          },
+            { { 3,  1,  0 }, "Leica D Vario Elmarit 14-50mm F2.8-3.5 Asph."            },
+            { { 3,  2,  0 }, "Leica D Summilux 25mm F1.4 Asph."                        },
+            { { 5,  1, 16 }, "Tamron 14-150mm F3.5-5.8 Di III"                         },
             // End of list marker
             { { 0xff,  0,  0 }, "" }
         };
@@ -1581,7 +1609,7 @@ namespace Exiv2 {
             os.flags(f);
             return os << value;
         }
-        
+
         Rational distance = value.toRational();
         if(static_cast<uint32_t>(distance.first) == 0xffffffff) {
             os << _("Infinity");
@@ -1591,12 +1619,12 @@ namespace Exiv2 {
             oss.copyfmt(os);
             os << std::fixed << std::setprecision(2);
             os << (float)distance.first/1000 << " m";
-            os.copyfmt(oss); 
+            os.copyfmt(oss);
         }
         os.flags(f);
         return os;
     }
-    
+
     // Olympus FocusInfo tag 0x0308 AFPoint
     std::ostream& OlympusMakerNote::print0x0308(std::ostream& os, const Value&
 value, const ExifData* metadata)

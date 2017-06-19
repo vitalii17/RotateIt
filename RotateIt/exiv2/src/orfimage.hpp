@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -32,6 +32,7 @@
 // *****************************************************************************
 // included header files
 #include "image.hpp"
+#include "tiffimage.hpp"
 #include "basicio.hpp"
 #include "types.hpp"
 
@@ -54,7 +55,7 @@ namespace Exiv2 {
       @brief Class to access raw Olympus ORF images. Exif metadata is supported
              directly, IPTC is read from the Exif data, if present.
      */
-    class EXIV2API OrfImage : public Image {
+    class EXIV2API OrfImage : public TiffImage {
     public:
         //! @name Creators
         //@{
@@ -78,6 +79,7 @@ namespace Exiv2 {
 
         //! @name Manipulators
         //@{
+        void printStructure(std::ostream& out, PrintStructureOption option,int depth);
         void readMetadata();
         void writeMetadata();
         /*!

@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      tiffcomposite.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   11-Apr-06, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffcomposite.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -172,8 +172,12 @@ namespace Exiv2 {
     }
 
     TiffBinaryElement::TiffBinaryElement(uint16_t tag, IfdId group)
-        : TiffEntryBase(tag, group)
+        : TiffEntryBase(tag, group),
+        elByteOrder_(invalidByteOrder)
     {
+        elDef_.idx_ = 0;
+        elDef_.tiffType_ = ttUndefined;
+        elDef_.count_ = 0;
     }
 
     TiffComponent::~TiffComponent()
@@ -1843,10 +1847,10 @@ namespace Exiv2 {
         }
         // http://dev.exiv2.org/boards/3/topics/1337 change unsignedByte to signedByte
         // Exif.NikonAFT.AFFineTuneAdj || Exif.Pentax.Temperature
-		if ( ti == Exiv2::unsignedByte ) {
-		    if ( (tag == 0x0002 && group == nikonAFTId ) || (tag == 0x0047 && group == pentaxId) ) {
-				ti = Exiv2::signedByte;
-			}
+        if ( ti == Exiv2::unsignedByte ) {
+            if ( (tag == 0x0002 && group == nikonAFTId ) || (tag == 0x0047 && group == pentaxId) ) {
+                ti = Exiv2::signedByte;
+            }
         }
         return ti;
     }

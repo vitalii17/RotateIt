@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -23,7 +23,7 @@
   @brief   Canon makernote tags.<BR>References:<BR>
            [1] <a href="http://www.burren.cx/david/canon.html">EXIF MakerNote of Canon</a> by David Burren<br>
            [2] <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Canon.html">Canon makernote tags</a> by Phil Harvey
-  @version $Rev: 3777 $
+  @version $Rev$
   @author  <a href="mailto:ahuggel@gmx.net">Andreas Huggel (ahu)</a><br>
            <a href="mailto:david@edeca.net">David Cannings (dc)</a>
            <a href="mailto:andi.clemens@gmx.net">Andi Clemens (ac)</a>
@@ -69,6 +69,8 @@ namespace Exiv2 {
         static const TagInfo* tagListCf();
         //! Return read-only list of built-in Canon Picture Info tags
         static const TagInfo* tagListPi();
+        //! Return read-only list of built-in Canon Time Info tags
+        static const TagInfo* tagListTi();
         //! Return read-only list of built-in Canon File Info tags
         static const TagInfo* tagListFi();
         //! Return read-only list of built-in Canon Processing Info tags
@@ -119,6 +121,7 @@ namespace Exiv2 {
         static const TagInfo tagInfoSi_[];
         static const TagInfo tagInfoCf_[];
         static const TagInfo tagInfoPi_[];
+        static const TagInfo tagInfoTi_[];
         static const TagInfo tagInfoFi_[];
         static const TagInfo tagInfoPa_[];
         static const TagInfo tagInfoPr_[];

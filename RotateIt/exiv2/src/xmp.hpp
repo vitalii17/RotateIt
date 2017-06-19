@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -35,6 +35,8 @@
 #include "properties.hpp"
 #include "value.hpp"
 #include "types.hpp"
+#include "datasets.hpp"
+#include "properties.hpp"
 
 // + standard includes
 #include <string>
@@ -243,11 +245,24 @@ namespace Exiv2 {
         bool empty() const;
         //! Get the number of metadata entries
         long count() const;
+
+        //! are we to use the packet?
+        bool usePacket() const { return usePacket_; } ;
+
+        //! set usePacket_
+        bool usePacket(bool b) { bool r = usePacket_; usePacket_=b ; return r; };
+        //! setPacket
+        void setPacket(const std::string& xmpPacket) { xmpPacket_ = xmpPacket ; usePacket(false); };
+        // ! getPacket
+        const std::string& xmpPacket() const { return xmpPacket_ ; };
+
         //@}
 
     private:
         // DATA
         XmpMetadata xmpMetadata_;
+        std::string xmpPacket_  ;
+        bool        usePacket_  ;
     }; // class XmpData
 
     /*!
@@ -357,7 +372,7 @@ namespace Exiv2 {
               // Note however that this call itself is still not thread-safe.
               Exiv2::XmpParser::initialize(XmpLock::LockUnlock, &xmpLock);
 
-              // Program continues here, subsequent registrations of XMP 
+              // Program continues here, subsequent registrations of XMP
               // namespaces are serialized using xmpLock.
 
           }
@@ -387,10 +402,17 @@ namespace Exiv2 {
         */
         static void unregisterNs(const std::string& ns);
 
+        /*!
+          @brief Get namespaces registered with XMPsdk
+         */
+        static void registeredNamespaces(Exiv2::Dictionary&);
+
         // DATA
         static bool initialized_; //! Indicates if the XMP Toolkit has been initialized
         static XmpLockFct xmpLockFct_;
         static void* pLockData_;
+
+    friend class XmpProperties; // permit XmpProperties -> registerNs() and registeredNamespaces()
 
     }; // class XmpParser
 

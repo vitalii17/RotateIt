@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      asfvideo.cpp
-  Version:   $Rev: 3845 $
+  Version:   $Rev$
   Author(s): Abhinav Badola for GSoC 2012 (AB) <mail.abu.to@gmail.com>
   History:   08-Aug-12, AB: created
   Credits:   See header file
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: asfvideo.cpp 3845 2015-06-07 16:29:06Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -234,7 +234,7 @@ namespace Exiv2 {
     }
 
     /*!
-      @brief Function used to calulate GUID, Tags comprises of 16 bytes.
+      @brief Function used to calculate GUID, Tags comprises of 16 bytes.
           The Buffer contains the Tag in Binary Form. The information is then
           parsed into a character array GUID.
      */

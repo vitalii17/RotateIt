@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -36,6 +36,12 @@
 // + standard includes
 #include <string>
 
+#if (defined(__GNUG__) || defined(__GNUC__)) && ! defined(__clang__)
+#define ATTRIBUTE_FORMAT_PRINTF __attribute__((format(printf, 1, 0)))
+#else
+#define ATTRIBUTE_FORMAT_PRINTF
+#endif
+
 // *****************************************************************************
 // namespace extensions
 namespace Exiv2 {
@@ -47,12 +53,27 @@ namespace Exiv2 {
     /*!
       @brief format a string in the pattern of \em sprintf \em .
      */
-    std::string stringFormat(const char* format, ...);
+    std::string stringFormat(const char* format, ...) ATTRIBUTE_FORMAT_PRINTF;
 
     /*!
       @brief format binary for display in \em printStructure() \em .
      */
     std::string binaryToString(DataBuf& buf, size_t size, size_t start =0);
+
+    /*!
+      @brief format binary for display in \em printStructure() \em .
+     */
+    std::string binaryToString(const byte* buff, size_t size, size_t start /*=0*/);
+
+    /*!
+      @brief format binary for display of raw data .
+     */
+    std::string binaryToHex(const byte *data, size_t size);
+
+    /*!
+      @brief indent output for kpsRecursive in \em printStructure() \em .
+     */
+    std::string indent(int32_t depth);
 
 }}                                      // namespace Internal, Exiv2
 

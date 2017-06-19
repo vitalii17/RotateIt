@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,24 +20,30 @@
  */
 /*
   File:      jpgimage.cpp
-  Version:   $Rev: 3815 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-             Brad Schick (brad) <brad@robotbattle.com>
-             Volker Grabsch (vog) <vog@notjusthosting.com>
-             Michael Ulbrich (mul) <mul@rentapacs.de>
-  History:   15-Jan-05, brad: split out from image.cpp
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: jpgimage.cpp 3815 2015-05-10 09:37:34Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
 
 #include "jpgimage.hpp"
+#include "tiffimage.hpp"
 #include "image_int.hpp"
 #include "error.hpp"
 #include "futils.hpp"
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#define BYTE   char
+#define USHORT uint16_t
+#define ULONG  uint32_t
+#endif
+
+#include "fff.h"
 
 // + standard includes
 #include <cstdio>                               // for EOF
@@ -56,6 +62,7 @@ namespace Exiv2 {
     const byte     JpegBase::eoi_      = 0xd9;
     const byte     JpegBase::app0_     = 0xe0;
     const byte     JpegBase::app1_     = 0xe1;
+    const byte     JpegBase::app2_     = 0xe2;
     const byte     JpegBase::app13_    = 0xed;
     const byte     JpegBase::com_      = 0xfe;
 
@@ -83,12 +90,23 @@ namespace Exiv2 {
     const char     JpegBase::exifId_[] = "Exif\0\0";
     const char     JpegBase::jfifId_[] = "JFIF\0";
     const char     JpegBase::xmpId_[]  = "http://ns.adobe.com/xap/1.0/\0";
+    const char     JpegBase::iccId_[]  = "ICC_PROFILE\0";
 
     const char     Photoshop::ps3Id_[] = "Photoshop 3.0\0";
     const char*    Photoshop::irbId_[] = {"8BIM", "AgHg", "DCSR", "PHUT"};
     const char     Photoshop::bimId_[] = "8BIM"; // deprecated
     const uint16_t Photoshop::iptc_    = 0x0404;
     const uint16_t Photoshop::preview_ = 0x040c;
+
+    static inline bool inRange(int lo,int value, int hi)
+    {
+        return lo<=value && value <= hi;
+    }
+
+    static inline bool inRange2(int value,int lo1,int hi1, int lo2,int hi2)
+    {
+        return inRange(lo1,value,hi1) || inRange(lo2,value,hi2);
+    }
 
     bool Photoshop::isIrb(const byte* pPsData,
                           long        sizePsData)
@@ -332,7 +350,7 @@ namespace Exiv2 {
             throw Error(15);
         }
         clearMetadata();
-        int search = 5;
+        int search = 6 ; // Exif, ICC, XMP, Comment, IPTC, SOF
         const long bufMinSize = 36;
         long bufRead = 0;
         DataBuf buf(bufMinSize);
@@ -340,6 +358,7 @@ namespace Exiv2 {
         bool foundCompletePsData = false;
         bool foundExifData = false;
         bool foundXmpData = false;
+        bool foundIccData = false;
 
         // Read section marker
         int marker = advanceToMarker();
@@ -438,12 +457,45 @@ namespace Exiv2 {
                 }
                 --search;
             }
-            else if (   pixelHeight_ == 0
-                     && (   marker == sof0_  || marker == sof1_  || marker == sof2_
-                         || marker == sof3_  || marker == sof5_  || marker == sof6_
-                         || marker == sof7_  || marker == sof9_  || marker == sof10_
-                         || marker == sof11_ || marker == sof13_ || marker == sof14_
-                         || marker == sof15_)) {
+            else if ( marker == app2_ && memcmp(buf.pData_ + 2, iccId_,11)==0) {
+                // ICC profile
+                if ( ! foundIccData  ) {
+                    foundIccData = true ;
+                    --search ;
+                }
+                int chunk  = (int)    buf.pData_[2+12];
+                int chunks = (int)    buf.pData_[2+13];
+                // ICC1v43_2010-12.pdf header is 14 bytes
+                // header = "ICC_PROFILE\0" (12 bytes)
+                // chunk/chunks are a single byte
+                // Spec 7.2 Profile bytes 0-3 size
+                uint32_t s = getULong(buf.pData_ + (2+14) , bigEndian);
+#ifdef DEBUG
+                std::cerr << "Found ICC Profile chunk " << chunk
+                          << " of "    << chunks
+                          << (chunk==1 ? " size: " : "" ) << (chunk==1 ? s : 0)
+                          << std::endl  ;
+#endif
+                io_->seek(-bufRead, BasicIo::cur); // back up to start of buffer (after marker)
+                io_->seek(    14+2, BasicIo::cur); // step header
+                // read in profile
+                // #1286 profile can be padded
+                DataBuf    icc((chunk==1&&chunks==1)?s:size-2-14);
+                if ( icc.size_ > size-2-14) throw Error(53);
+                io_->read( icc.pData_,icc.size_);
+
+                if ( !iccProfileDefined() ) { // first block of profile
+                    setIccProfile(icc,chunk==chunks);
+                } else {                       // extend existing profile
+                    DataBuf profile(iccProfile_.size_+icc.size_);
+                    if ( iccProfile_.size_ ) {
+                        ::memcpy(profile.pData_,iccProfile_.pData_,iccProfile_.size_);
+                    }
+                    ::memcpy(profile.pData_+iccProfile_.size_,icc.pData_,icc.size_);
+                    setIccProfile(profile,chunk==chunks);
+                }
+            }
+            else if (  pixelHeight_ == 0 && inRange2(marker,sof0_,sof3_,sof5_,sof15_) ) {
                 // We hit a SOFn (start-of-frame) marker
                 if (size < 8) {
                     rc = 7;
@@ -508,17 +560,11 @@ namespace Exiv2 {
         }
     } // JpegBase::readMetadata
 
-    bool isBlank(std::string& s)
-    {
-        for ( std::size_t i = 0 ; i < s.length() ; i++ )
-            if ( s[i] != ' ' )
-                return false ;
-        return true ;
-    }
+#define REPORT_MARKER if ( (option == kpsBasic||option == kpsRecursive) ) \
+     out << Internal::stringFormat("%8ld | 0xff%02x %-5s", \
+                             io_->tell()-2,marker,nm[marker].c_str())
 
-#define REPORT_MARKER if ( option == kpsBasic ) out << Internal::stringFormat("%8ld | %#02x %-5s",io_->tell(), marker,nm[marker].c_str())
-
-    void JpegBase::printStructure(std::ostream& out, PrintStructureOption option)
+    void JpegBase::printStructure(std::ostream& out, PrintStructureOption option,int depth)
     {
         if (io_->open() != 0) throw Error(9, io_->path(), strError());
         // Ensure that this is the correct image type
@@ -527,7 +573,10 @@ namespace Exiv2 {
             throw Error(15);
         }
 
-        if ( option == kpsBasic || option == kpsXMP ) {
+        bool bPrint = option==kpsBasic || option==kpsRecursive;
+        Exiv2::Uint32Vector iptcDataSegs;
+
+        if ( bPrint || option == kpsXMP || option == kpsIccProfile || option == kpsIptcErase ) {
 
             // nmonic for markers
             std::string nm[256] ;
@@ -551,6 +600,15 @@ namespace Exiv2 {
                 }
             }
 
+            // which markers have a length field?
+            bool mHasLength[256];
+            for ( int i = 0 ; i < 256 ; i ++ )
+                mHasLength[i]
+                  =   ( i >= sof0_ && i <= sof15_)
+                  ||  ( i >= app0_ && i <= (app0_ | 0x0F))
+                  ||  ( i == dht_  || i == dqt_ || i == dri_ || i == com_ || i == sos_ )
+                  ;
+
             // Container for the signature
             bool        bExtXMP    = false;
             long        bufRead    =  0;
@@ -565,40 +623,36 @@ namespace Exiv2 {
             bool    first= true;
             while (!done) {
                 // print marker bytes
-                if ( first && option == kpsBasic ) {
+                if ( first && bPrint ) {
                     out << "STRUCTURE OF JPEG FILE: " << io_->path() << std::endl;
-                    out << " address | marker     | length  | data" << std::endl ;
+                    out << " address | marker       |  length | data" << std::endl ;
                     REPORT_MARKER;
                 }
-                first = false;
+                first    = false;
+                bool bLF = bPrint;
 
                 // Read size and signature
                 std::memset(buf.pData_, 0x0, buf.size_);
                 bufRead = io_->read(buf.pData_, bufMinSize);
                 if (io_->error()) throw Error(14);
                 if (bufRead < 2) throw Error(15);
-                uint16_t size = 0;
+                uint16_t size = mHasLength[marker] ? getUShort(buf.pData_, bigEndian) : 0 ;
+                if ( bPrint &&  mHasLength[marker] ) out << Internal::stringFormat(" | %7d ", size);
 
-                // not all markers have size field.
-                if( ( marker >= sof0_ && marker <= sof15_)
-                ||  ( marker >= app0_ && marker <= (app0_ | 0x0F))
-                ||    marker == dht_
-                ||    marker == dqt_
-                ||    marker == dri_
-                ||    marker == com_
-                ||    marker == sos_
-                ){
-                    size = getUShort(buf.pData_, bigEndian);
-                }
-                if ( option == kpsBasic ) out << Internal::stringFormat(" | %7d ", size);
-
-                // only print the signature for appn
+                // print signature for APPn
                 if (marker >= app0_ && marker <= (app0_ | 0x0F)) {
-                    char http[5];
-                    http[4]=0;
-                    memcpy(http,buf.pData_+2,4);
-                    if ( option == kpsXMP && std::strcmp(http,"http") == 0 ) {
-                        // http://ns.adobe.com/xap/1.0/
+                    // http://www.adobe.com/content/dam/Adobe/en/devnet/xmp/pdfs/XMPSpecificationPart3.pdf p75
+                    const char* signature = (const char*) buf.pData_+2;
+
+                    // 728 rmills@rmillsmbp:~/gnu/exiv2/ttt $ exiv2 -pS test/data/exiv2-bug922.jpg
+                    // STRUCTURE OF JPEG FILE: test/data/exiv2-bug922.jpg
+                    // address | marker     | length  | data
+                    //       0 | 0xd8 SOI   |       0
+                    //       2 | 0xe1 APP1  |     911 | Exif..MM.*.......%.........#....
+                    //     915 | 0xe1 APP1  |     870 | http://ns.adobe.com/xap/1.0/.<x:
+                    //    1787 | 0xe1 APP1  |   65460 | http://ns.adobe.com/xmp/extensio
+                    if ( option == kpsXMP && std::string(signature).find("http://ns.adobe.com/x")== 0 ) {
+                        // extract XMP
                         if ( size > 0 ) {
                             io_->seek(-bufRead , BasicIo::cur);
                             byte* xmp  = new byte[size+1];
@@ -608,9 +662,13 @@ namespace Exiv2 {
                             // http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/xmp/pdfs/XMPSpecificationPart3.pdf
                             // if we find HasExtendedXMP, set the flag and ignore this block
                             // the first extended block is a copy of the Standard block.
-                            // a robust implementation enables extended blocks to be out of sequence
+                            // a robust implementation allows extended blocks to be out of sequence
+                            // we could implement out of sequence with a dictionary of sequence/offset
+                            // and dumping the XMP in a post read operation similar to kpsIptcErase
+                            // for the moment, dumping 'on the fly' is working fine
                             if ( ! bExtXMP ) {
-                                while (xmp[start]) start++; start++;
+                                while (xmp[start]) start++;
+                                start++;
                                 if ( ::strstr((char*)xmp+start,"HasExtendedXMP") ) {
                                     start  = size ; // ignore this packet, we'll get on the next time around
                                     bExtXMP = true;
@@ -618,37 +676,182 @@ namespace Exiv2 {
                             } else {
                                 start = 2+35+32+4+4; // Adobe Spec, p19
                             }
-                            xmp[size]=0;
 
-                            out << xmp + start; // this is all we need to output without the blank line dance.
+                            out.write((const char*)(xmp+start),size-start);
                             delete [] xmp;
                             bufRead = size;
+                            done = !bExtXMP;
                         }
-                    } else if ( option == kpsBasic ) {
-                        out << "| " << Internal::binaryToString(buf,32,size>0?2:0);
+                    } else if ( option == kpsIccProfile && std::strcmp(signature,iccId_) == 0 ) {
+                        // extract ICCProfile
+                        if ( size > 0 ) {
+                            io_->seek(-bufRead, BasicIo::cur); // back to buffer (after marker)
+                            io_->seek(    14+2, BasicIo::cur); // step over header
+                            DataBuf   icc(size-(14+2));
+                            io_->read(             icc.pData_,icc.size_);
+                            out.write((const char*)icc.pData_,icc.size_);
+#ifdef DEBUG
+                            std::cout << "iccProfile size = " << icc.size_ << std::endl;
+#endif
+                            bufRead = size;
+                        }
+                    } else if ( option == kpsIptcErase && std::strcmp(signature,"Photoshop 3.0") == 0 ) {
+                        // delete IPTC data segment from JPEG
+                        if ( size > 0 ) {
+                            io_->seek(-bufRead , BasicIo::cur);
+                            iptcDataSegs.push_back(io_->tell());
+                            iptcDataSegs.push_back(size);
+                        }
+                    } else if ( bPrint ) {
+                        out << "| " << Internal::binaryToString(buf,size>32?32:size,size>0?2:0);
+                        if ( std::strcmp(signature,iccId_) == 0 ) {
+                            int chunk  = (int) signature[12];
+                            int chunks = (int) signature[13];
+                            out << Internal::stringFormat(" chunk %d/%d",chunk,chunks);
+                        }
                     }
+
+                    // for MPF: http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/MPF.html
+                    // for FLIR: http://owl.phy.queensu.ca/~phil/exiftool/TagNames/FLIR.html
+                    bool bFlir = option == kpsRecursive && marker == (app0_+1) && std::strcmp(signature,"FLIR")==0;
+                    bool bExif = option == kpsRecursive && marker == (app0_+1) && std::strcmp(signature,"Exif")==0;
+                    bool bMPF  = option == kpsRecursive && marker == (app0_+2) && std::strcmp(signature,"MPF")==0;
+                    bool bPS   = option == kpsRecursive                        && std::strcmp(signature,"Photoshop 3.0")==0;
+                    if( bFlir || bExif || bMPF || bPS ) {
+                        // extract Exif data block which is tiff formatted
+                        if ( size > 0 ) {
+                            out << std::endl;
+
+                            // allocate storage and current file position
+                            byte*    exif      = new byte[size];
+                            uint32_t restore   = io_->tell();
+
+                            // copy the data to memory
+                            io_->seek(-bufRead , BasicIo::cur);
+                            io_->read(exif,size);
+                            uint32_t start     = std::strcmp(signature,"Exif")==0 ? 8 : 6;
+                            uint32_t max       = (uint32_t) size -1;
+
+                            // is this an fff block?
+                            if ( bFlir ) {
+                                start = 0 ;
+                                bFlir = false;
+                                while ( start < max ) {
+                                    if ( std::strcmp((const char*)(exif+start),"FFF")==0 ) {
+                                        bFlir = true ;
+                                        break;
+                                    }
+                                    start++;
+                                }
+                            }
+
+                            // there is a header in FLIR, followed by a tiff block
+                            // Hunt down the tiff using brute force
+                            if ( bFlir ) {
+                                // FLIRFILEHEAD* pFFF = (FLIRFILEHEAD*) (exif+start) ;
+                                while ( start < max ) {
+                                    if ( exif[start] == 'I' && exif[start+1] == 'I' ) break;
+                                    if ( exif[start] == 'M' && exif[start+1] == 'M' ) break;
+                                    start++;
+                                }
+                                if ( start < max ) std::cout << "  FFF start = " << start << std::endl ;
+                                // << " index = " << pFFF->dwIndexOff << std::endl;
+                            }
+
+                            if ( bPS ) {
+                                IptcData::printStructure(out,exif,size,depth);
+                            } else {
+                                // create a copy on write memio object with the data, then print the structure
+                                BasicIo::AutoPtr p = BasicIo::AutoPtr(new MemIo(exif+start,size-start));
+                                if ( start < max ) printTiffStructure(*p,out,option,depth);
+                            }
+
+                            // restore and clean up
+                            io_->seek(restore,Exiv2::BasicIo::beg);
+                            delete [] exif;
+                            bLF    = false;
+                        }
+                    }
+                }
+
+                // print COM marker
+                if ( bPrint && marker == com_ ) {
+                    int n = (size-2)>32?32:size-2; // size includes 2 for the two bytes for size!
+                    out << "| " << Internal::binaryToString(buf,n,2); // start after the two bytes
                 }
 
                 // Skip the segment if the size is known
                 if (io_->seek(size - bufRead, BasicIo::cur)) throw Error(14);
 
-                if ( option == kpsBasic ) out << std::endl;
+                if ( bLF ) out << std::endl;
 
-                if (marker == sos_)
-                    // sos_ is immediately followed by entropy-coded data & eoi_
-                    done = true;
-                else {
+                if (marker != sos_) {
                     // Read the beginning of the next segment
                     marker = advanceToMarker();
                     REPORT_MARKER;
-                    if ( marker == eoi_ ) {
-                        if ( option == kpsBasic ) out << std::endl;
-                        done = true;
-                    }
                 }
+                done |= marker == eoi_ || marker == sos_;
+                if ( done && bPrint ) out << std::endl;
             }
         }
-    }
+        if ( option == kpsIptcErase && iptcDataSegs.size() ) {
+#ifdef DEBUG
+            std::cout << "iptc data blocks: " << iptcDataSegs.size() << std::endl;
+            uint32_t toggle = 0 ;
+            for ( Uint32Vector_i i = iptcDataSegs.begin(); i != iptcDataSegs.end() ; i++ ) {
+                std::cout << *i ;
+                if ( toggle++ % 2 ) std::cout << std::endl; else std::cout << ' ' ;
+            }
+#endif
+            uint32_t count  = (uint32_t) iptcDataSegs.size();
+
+            // figure out which blocks to copy
+            uint64_t* pos = new uint64_t[count+2];
+            pos[0]        = 0 ;
+            // copy the data that is not iptc
+            Uint32Vector_i it = iptcDataSegs.begin();
+            for ( uint64_t  i = 0 ; i < count ; i++ ) {
+                bool  bOdd  = (i%2)!=0;
+                bool  bEven = !bOdd;
+                pos[i+1]    = bEven ? *it : pos[i] + *it;
+                it++;
+            }
+            pos[count+1] = io_->size() - pos[count];
+#ifdef DEBUG
+            for ( uint64_t i = 0 ; i < count+2 ; i++ ) std::cout << pos[i] << " " ;
+            std::cout << std::endl;
+#endif
+            // $ dd bs=1 skip=$((0)) count=$((13164)) if=ETH0138028.jpg of=E1.jpg
+            // $ dd bs=1 skip=$((49304)) count=2000000  if=ETH0138028.jpg of=E2.jpg
+            // cat E1.jpg E2.jpg > E.jpg
+            // exiv2 -pS E.jpg
+
+            // binary copy io_ to a temporary file
+            BasicIo::AutoPtr tempIo(new MemIo);
+
+            assert (tempIo.get() != 0);
+            for ( uint64_t i = 0 ; i < (count/2)+1 ; i++ ) {
+                uint64_t start  = pos[2*i]+2 ; // step JPG 2 byte marker
+                if ( start == 2 ) start = 0  ; // read the file 2 byte SOI
+                long length = (long) (pos[2*i+1] - start) ;
+                if ( length ) {
+#ifdef DEBUG
+                    std::cout << start <<":"<< length << std::endl;
+#endif
+                    io_->seek(start,BasicIo::beg);
+                    DataBuf buf(length);
+                    io_->read(buf.pData_,buf.size_);
+                    tempIo->write(buf.pData_,buf.size_);
+                }
+            }
+            delete [] pos;
+
+            io_->seek(0, BasicIo::beg);
+            io_->transfer(*tempIo); // may throw
+            io_->seek(0, BasicIo::beg);
+            readMetadata();
+        }
+    } // JpegBase::printStructure
 
     void JpegBase::writeMetadata()
     {
@@ -656,7 +859,7 @@ namespace Exiv2 {
             throw Error(9, io_->path(), strError());
         }
         IoCloser closer(*io_);
-        BasicIo::AutoPtr tempIo(io_->temporary()); // may throw
+        BasicIo::AutoPtr tempIo(new MemIo);
         assert (tempIo.get() != 0);
 
         doWriteMetadata(*tempIo); // may throw
@@ -686,10 +889,13 @@ namespace Exiv2 {
         int skipApp1Exif = -1;
         int skipApp1Xmp = -1;
         bool foundCompletePsData = false;
+        bool foundIccData        = false;
         std::vector<int> skipApp13Ps3;
+        std::vector<int> skipApp2Icc;
         int skipCom = -1;
         Blob psBlob;
         DataBuf rawExif;
+        xmpData().usePacket(writeXmpFromPacket());
 
         // Write image header
         if (writeHeader(outIo)) throw Error(21);
@@ -701,7 +907,7 @@ namespace Exiv2 {
         // First find segments of interest. Normally app0 is first and we want
         // to insert after it. But if app0 comes after com, app1 and app13 then
         // don't bother.
-        while (marker != sos_ && marker != eoi_ && search < 5) {
+        while (marker != sos_ && marker != eoi_ && search < 6) {
             // Read size and signature (ok if this hits EOF)
             bufRead = io_->read(buf.pData_, bufMinSize);
             if (io_->error()) throw Error(20);
@@ -728,6 +934,15 @@ namespace Exiv2 {
                 if (size < 31) throw Error(22);
                 skipApp1Xmp = count;
                 ++search;
+                if (io_->seek(size-bufRead, BasicIo::cur)) throw Error(22);
+            }
+            else if ( marker == app2_ && memcmp(buf.pData_ + 2, iccId_, 11)== 0 ) {
+                if (size < 31) throw Error(22);
+                skipApp2Icc.push_back(count);
+                if ( !foundIccData ) {
+                    ++search;
+                    foundIccData = true ;
+                }
                 if (io_->seek(size-bufRead, BasicIo::cur)) throw Error(22);
             }
             else if (   !foundCompletePsData
@@ -766,20 +981,7 @@ namespace Exiv2 {
             // This (a) causes the new comment to appear after, rather than before,
             // existing comments; and (b) ensures that comments come after any JFIF
             // or JFXX markers, as required by the JFIF specification.
-            if (   comPos == 0
-                && (   marker == sof0_
-                    || marker == sof1_
-                    || marker == sof2_
-                    || marker == sof3_
-                    || marker == sof5_
-                    || marker == sof6_
-                    || marker == sof7_
-                    || marker == sof9_
-                    || marker == sof10_
-                    || marker == sof11_
-                    || marker == sof13_
-                    || marker == sof14_
-                    || marker == sof15_)) {
+            if (   comPos == 0 && inRange2(marker,sof0_,sof3_,sof5_,sof15_) ) {
                 comPos = count;
                 ++search;
             }
@@ -789,7 +991,7 @@ namespace Exiv2 {
         }
 
         if (!foundCompletePsData && psBlob.size() > 0) throw Error(22);
-        search += (int) skipApp13Ps3.size();
+        search += (int) skipApp13Ps3.size() + (int) skipApp2Icc.size();
 
         if (comPos == 0) {
             if (marker == eoi_) comPos = count;
@@ -881,6 +1083,40 @@ namespace Exiv2 {
                     if (outIo.error()) throw Error(21);
                     --search;
                 }
+
+                if (iccProfileDefined()) {
+                    // Write APP2 marker, size of APP2 field, and IccProfile
+                    // See comments in readMetadata() about the ICC embedding specification
+                    tmpBuf[0] = 0xff;
+                    tmpBuf[1] = app2_;
+
+                    int       chunk_size = 256*256-40 ; // leave bytes for marker, header and padding
+                    int       size       = (int) iccProfile_.size_   ;
+                    int       chunks     = 1 + (size-1) / chunk_size ;
+                    if (iccProfile_.size_ > 256*chunk_size) throw Error(37, "IccProfile");
+                    for ( int chunk = 0 ; chunk < chunks ; chunk ++ ) {
+                        int bytes   = size > chunk_size ? chunk_size : size  ; // bytes to write
+                        size       -= bytes ;
+
+                        // write JPEG marker (2 bytes)
+                        if (outIo.write(tmpBuf, 2) != 2) throw Error(21); // JPEG Marker
+                        // write length (2 bytes).  length includes the 2 bytes for the length
+                        us2Data(tmpBuf + 2, 2+14+bytes, bigEndian);
+                        if (outIo.write(tmpBuf+2, 2) != 2) throw Error(21); // JPEG Length
+
+                        // write the ICC_PROFILE header (14 bytes)
+                        char pad[2];
+                        pad[0] = chunk+1;
+                        pad[1] = chunks;
+                        outIo.write((const byte *) iccId_,12);
+                        outIo.write((const byte *)    pad, 2);
+                        if (outIo.write(iccProfile_.pData_+ (chunk*chunk_size), bytes) != bytes)
+                            throw Error(21);
+                        if (outIo.error()) throw Error(21);
+                    }
+                    --search;
+                }
+
                 if (foundCompletePsData || iptcData_.count() > 0) {
                     // Set the new IPTC IRB, keeps existing IRBs but removes the
                     // IPTC block if there is no new IPTC data to write
@@ -946,6 +1182,7 @@ namespace Exiv2 {
             else if (   skipApp1Exif == count
                      || skipApp1Xmp  == count
                      || std::find(skipApp13Ps3.begin(), skipApp13Ps3.end(), count) != skipApp13Ps3.end()
+                     || std::find(skipApp2Icc.begin() , skipApp2Icc.end(),  count) != skipApp2Icc.end()
                      || skipCom      == count) {
                 --search;
                 io_->seek(size-bufRead, BasicIo::cur);

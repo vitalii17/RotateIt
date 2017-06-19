@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      preview.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Vladimir Nadvornik (vn) <nadvornik@suse.cz>
   History:   18-Sep-08, vn: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: preview.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -47,6 +47,7 @@ EXIV2_RCSID("@(#) $Id: preview.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
 namespace {
 
     using namespace Exiv2;
+    using Exiv2::byte;
 
     /*!
       @brief Compare two preview images by number of pixels, if width and height
@@ -470,7 +471,7 @@ namespace {
         }
         IoCloser closer(io);
         const byte* data = io.mmap();
-        if (io.size() < nativePreview_.position_ + static_cast<long>(nativePreview_.size_)) {
+        if ((long)io.size() < nativePreview_.position_ + static_cast<long>(nativePreview_.size_)) {
 #ifndef SUPPRESS_WARNINGS
             EXV_WARNING << "Invalid native preview position or size.\n";
 #endif

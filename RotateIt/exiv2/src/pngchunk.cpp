@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,11 @@
  */
 /*
   File:    pngchunk.cpp
-  Version: $Rev: 3777 $
-  Author(s): Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
-  History: 12-Jun-06, gc: submitted
-  Credits: See header file
+  Version: $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pngchunk.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -83,11 +80,6 @@ namespace Exiv2 {
                                   TxtChunkType   type)
     {
         DataBuf key = keyTXTChunk(data);
-
-#ifdef DEBUG
-        std::cout << "Exiv2::PngChunk::decodeTXTChunk: TXT chunk key: "
-                  << std::string((const char*)key.pData_, key.size_) << "\n";
-#endif
         DataBuf arr = parseTXTChunk(data, key.size_, type);
 
 #ifdef DEBUG
@@ -95,6 +87,19 @@ namespace Exiv2 {
                   << std::string((const char*)arr.pData_, arr.size_) << "\n";
 #endif
         parseChunkContent(pImage, key.pData_, key.size_, arr);
+
+    } // PngChunk::decodeTXTChunk
+
+    DataBuf PngChunk::decodeTXTChunk(const DataBuf& data,
+                                     TxtChunkType   type)
+    {
+        DataBuf key = keyTXTChunk(data);
+
+#ifdef DEBUG
+        std::cout << "Exiv2::PngChunk::decodeTXTChunk: TXT chunk key: "
+                  << std::string((const char*)key.pData_, key.size_) << "\n";
+#endif
+        return parseTXTChunk(data, key.size_, type);
 
     } // PngChunk::decodeTXTChunk
 
@@ -225,12 +230,12 @@ namespace Exiv2 {
     {
         // We look if an ImageMagick EXIF raw profile exist.
 
-        if (   keySize >= 21 
+        if (   keySize >= 21
             && (   memcmp("Raw profile type exif", key, 21) == 0
                 || memcmp("Raw profile type APP1", key, 21) == 0)
             && pImage->exifData().empty())
         {
-            DataBuf exifData = readRawProfile(arr);
+            DataBuf exifData = readRawProfile(arr,false);
             long length      = exifData.size_;
 
             if (length > 0)
@@ -279,7 +284,7 @@ namespace Exiv2 {
         if (   keySize >= 21
             && memcmp("Raw profile type iptc", key, 21) == 0
             && pImage->iptcData().empty()) {
-            DataBuf psData = readRawProfile(arr);
+            DataBuf psData = readRawProfile(arr,false);
             if (psData.size_ > 0) {
                 Blob iptcBlob;
                 const byte *record = 0;
@@ -329,9 +334,9 @@ namespace Exiv2 {
 
         if (   keySize >= 20
             && memcmp("Raw profile type xmp", key, 20) == 0
-            && pImage->xmpData().empty()) 
+            && pImage->xmpData().empty())
         {
-            DataBuf xmpBuf = readRawProfile(arr);
+            DataBuf xmpBuf = readRawProfile(arr,false);
             long length    = xmpBuf.size_;
 
             if (length > 0)
@@ -417,9 +422,11 @@ namespace Exiv2 {
         case mdXmp:
             chunk = makeUtf8TxtChunk("XML:com.adobe.xmp", metadata, false);
             break;
+        case mdIccProfile:
+            break;
         case mdNone:
             assert(false);
-	}
+    }
 
         return chunk;
 
@@ -576,7 +583,7 @@ namespace Exiv2 {
 
     } // PngChunk::makeUtf8TxtChunk
 
-    DataBuf PngChunk::readRawProfile(const DataBuf& text)
+    DataBuf PngChunk::readRawProfile(const DataBuf& text,bool iTXt)
     {
         DataBuf                 info;
         register long           i;
@@ -593,6 +600,13 @@ namespace Exiv2 {
         if (text.size_ == 0) {
             return DataBuf();
         }
+
+        if ( iTXt ) {
+            info.alloc(text.size_);
+            ::memcpy(info.pData_,text.pData_,text.size_);
+            return  info;
+        }
+
 
         sp = (char*)text.pData_+1;
 
@@ -618,7 +632,6 @@ namespace Exiv2 {
 #ifdef DEBUG
             std::cerr << "Exiv2::PngChunk::readRawProfile: Unable To Copy Raw Profile: invalid profile length\n";
 #endif
-            return DataBuf();
         }
 
         info.alloc(length);

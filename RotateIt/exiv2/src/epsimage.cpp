@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -51,6 +51,7 @@ EXIV2_RCSID("@(#) $Id: epsimage.cpp $")
 namespace {
 
     using namespace Exiv2;
+    using Exiv2::byte;
 
     // signature of DOS EPS
     const std::string dosEpsSignature = "\xC5\xD0\xD3\xC6";
@@ -808,7 +809,7 @@ namespace {
             }
 
             // create temporary output file
-            BasicIo::AutoPtr tempIo(io.temporary());
+            BasicIo::AutoPtr tempIo(new MemIo);
             assert (tempIo.get() != 0);
             if (!tempIo->isopen()) {
                 #ifndef SUPPRESS_WARNINGS

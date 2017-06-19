@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      crwimage.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   28-Aug-05, ahu: created
 
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: crwimage.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -131,6 +131,16 @@ namespace Exiv2 {
             throw Error(33);
         }
         clearMetadata();
+        // read all metadata into memory
+        // we should put this into clearMetadata(), however it breaks the test suite!
+        try {
+            std::ofstream devnull;
+            printStructure(devnull,kpsRecursive,0);
+        } catch (Exiv2::Error& /* e */) {
+            DataBuf file(io().size());
+            io_->read(file.pData_,file.size_);
+        }
+
         CrwParser::decode(this, io_->mmap(), io_->size());
 
     } // CrwImage::readMetadata
@@ -159,7 +169,7 @@ namespace Exiv2 {
         CrwParser::encode(blob, buf.pData_, buf.size_, this);
 
         // Write new buffer to file
-        BasicIo::AutoPtr tempIo(io_->temporary()); // may throw
+        MemIo::AutoPtr tempIo(new MemIo);
         assert(tempIo.get() != 0);
         tempIo->write((blob.size() > 0 ? &blob[0] : 0), static_cast<long>(blob.size()));
         io_->close();
@@ -367,10 +377,10 @@ namespace Exiv2 {
     {
         if (size < 14) throw Error(33);
 
-        if (pData[0] == 0x49 && pData[1] == 0x49) {
+        if (pData[0] == 'I' && pData[0] == pData[1]) {
             byteOrder_ = littleEndian;
         }
-        else if (pData[0] == 0x4d && pData[1] == 0x4d) {
+        else if (pData[0] == 'M' && pData[0] == pData[1]) {
             byteOrder_ = bigEndian;
         }
         else {
@@ -414,6 +424,7 @@ namespace Exiv2 {
             size_   = getULong(pData + start + 2, byteOrder);
             offset_ = getULong(pData + start + 6, byteOrder);
         }
+        if ( size_ > size || offset_ > size ) throw Error(26); // #889
         if (dl == directoryData) {
             size_ = 8;
             offset_ = start + 2;
@@ -448,7 +459,7 @@ namespace Exiv2 {
                                       ByteOrder   byteOrder)
     {
         uint32_t o = getULong(pData + size - 4, byteOrder);
-        if (o + 2 > size) throw Error(33);
+        if (size < 2 || o > size-2) throw Error(33);
         uint16_t count = getUShort(pData + o, byteOrder);
 #ifdef DEBUG
         std::cout << "Directory at offset " << std::dec << o
@@ -500,12 +511,12 @@ namespace Exiv2 {
         assert(   byteOrder_ == littleEndian
                || byteOrder_ == bigEndian);
         if (byteOrder_ == littleEndian) {
-            blob.push_back(0x49);
-            blob.push_back(0x49);
+            blob.push_back('I');
+            blob.push_back('I');
         }
         else {
-            blob.push_back(0x4d);
-            blob.push_back(0x4d);
+            blob.push_back('M');
+            blob.push_back('M');
         }
         uint32_t o = 2;
         byte buf[4];
@@ -790,7 +801,10 @@ namespace Exiv2 {
         assert(rootDirectory == 0x0000);
         crwDirs.pop();
         if (!pRootDir_) pRootDir_ = new CiffDirectory;
-        if ( pRootDir_) pRootDir_->add(crwDirs, crwTagId)->setValue(buf);
+        if ( pRootDir_) {
+            CiffComponent* child = pRootDir_->add(crwDirs, crwTagId);
+            if ( child )   child->setValue(buf);
+        }
     } // CiffHeader::add
 
     CiffComponent* CiffComponent::add(CrwDirs& crwDirs, uint16_t crwTagId)

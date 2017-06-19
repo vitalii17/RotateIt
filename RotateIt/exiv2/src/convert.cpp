@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      convert.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Vladimir Nadvornik (vn) <nadvornik@suse.cz>
   History:   17-Mar-08, ahu: created basic converter framework
@@ -28,7 +28,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: convert.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -66,6 +66,10 @@ EXIV2_RCSID("@(#) $Id: convert.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
 # include <XMPSDK.hpp>
 # include <MD5.h>
 #endif // EXV_HAVE_XMP_TOOLKIT
+
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
 
 // *****************************************************************************
 // local declarations
@@ -415,7 +419,6 @@ namespace Exiv2 {
         { mdExif, "Exif.GPSInfo.GPSAreaInformation",      "Xmp.exif.GPSAreaInformation",        &Converter::cnvExifValue, &Converter::cnvXmpValue }, // FIXME ?
         { mdExif, "Exif.GPSInfo.GPSDifferential",         "Xmp.exif.GPSDifferential",           &Converter::cnvExifValue, &Converter::cnvXmpValue },
 
-        { mdIptc, "Iptc.Application2.RecordVersion",      "Xmp.xmp.Rating",                     &Converter::cnvIptcValue, &Converter::cnvXmpValueToIptc },
         { mdIptc, "Iptc.Application2.ObjectName",         "Xmp.dc.title",                       &Converter::cnvIptcValue, &Converter::cnvXmpValueToIptc },
         { mdIptc, "Iptc.Application2.Urgency",            "Xmp.photoshop.Urgency",              &Converter::cnvIptcValue, &Converter::cnvXmpValueToIptc },
         { mdIptc, "Iptc.Application2.Category",           "Xmp.photoshop.Category",             &Converter::cnvIptcValue, &Converter::cnvXmpValueToIptc },
@@ -1172,9 +1175,9 @@ namespace Exiv2 {
         if (erase_) xmpData_->erase(pos);
     }
 
+#ifdef EXV_HAVE_XMP_TOOLKIT
     std::string Converter::computeExifDigest(bool tiff)
     {
-#ifdef EXV_HAVE_XMP_TOOLKIT
         std::ostringstream res;
         MD5_CTX    context;
         unsigned char digest[16];
@@ -1203,10 +1206,14 @@ namespace Exiv2 {
             res << static_cast<int>(digest[i]);
         }
         return res.str();
-#else
-        return std::string("");
-#endif
     }
+#else
+    std::string Converter::computeExifDigest(bool)
+    {
+        return std::string("");
+    }
+#endif
+
 
     void Converter::writeExifDigest()
     {
@@ -1356,6 +1363,7 @@ namespace Exiv2 {
 # endif
 #endif
         return ret;
+        UNUSED(str);
     }
 }                                       // namespace Exiv2
 
@@ -1483,7 +1491,7 @@ namespace {
     }
 
     typedef bool (*ConvFct)(std::string& str);
-    
+
     struct ConvFctList {
         bool operator==(std::pair<const char*, const char*> fromTo) const
             { return 0 == strcmp(from_, fromTo.first) && 0 == strcmp(to_, fromTo.second); }

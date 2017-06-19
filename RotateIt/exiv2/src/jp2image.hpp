@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -18,17 +18,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, 5th Floor, Boston, MA 02110-1301 USA.
  */
-/*!
-  @file    jp2image.hpp
-  @brief   JPEG-2000 image, implemented using the following references:
-           <a href="http://jpeg.org/public/fcd15444-6.pdf">ISO/IEC JTC 1/SC 29/WG1 N2401: JPEG 2000 Part 6 FCD 15444-6</a><br>
-  @version $Rev: 3091 $
-  @author  Gilles Caulier (cgilles)
-           <a href="mailto:caulier dot gilles at gmail dot com">caulier dot gilles at gmail dot com</a>
-  @author  Marco Piovanelli, Ovolab (marco)
-           <a href="mailto:marco.piovanelli@pobox.com">marco.piovanelli@pobox.com</a>
-  @date    12-Mar-2007, marco: created
- */
+
+/*
+  File:      jp2image.cpp
+  Version:   $Rev: 4629 $
+*/
+
 #ifndef JP2IMAGE_HPP_
 #define JP2IMAGE_HPP_
 
@@ -84,6 +79,15 @@ namespace Exiv2
         //@{
         void readMetadata();
         void writeMetadata();
+
+        /*!
+          @brief Print out the structure of image file.
+          @throw Error if reading of the file fails or the image data is
+                not valid (does not look like data of the specific image type).
+          @warning This function is not thread safe and intended for exiv2 -pS for debugging.
+         */
+        void printStructure(std::ostream& out, PrintStructureOption option,int depth);
+
         /*!
           @brief Todo: Not supported yet(?). Calling this function will throw
               an instance of Error(32).
@@ -111,6 +115,13 @@ namespace Exiv2
           @return 4 if opening or writing to the associated BasicIo fails
          */
         EXV_DLLLOCAL void doWriteMetadata(BasicIo& oIo);
+
+        /*!
+         @brief reformats the Jp2Header to store iccProfile
+         @param oldData DataBufRef to data in the file.
+         @param newData DataBufRef with updated data
+         */
+        void encodeJp2Header(const DataBuf& oldData,DataBuf& newData);
         //@}
 
     }; // class Jp2Image

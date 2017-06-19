@@ -5,12 +5,17 @@
 #include <map>
 #include <algorithm>
 
+#include "datasets.hpp"
+
 namespace Exiv2 {
-    typedef std::map<std::string,std::string> dict_t;
-    typedef dict_t::iterator                  dict_i;
-
-    EXIV2API int http(dict_t& request,dict_t& response,std::string& errors);
-
+    /*!
+     @brief execute an HTTP request
+     @param request -  a Dictionary of headers to send to server
+     @param response - a Dictionary of response headers (dictionary is filled by the response)
+     @param errors   - a String with an error
+     @return Server response 200 = OK, 404 = Not Found etc...
+    */
+    EXIV2API int http(Exiv2::Dictionary& request,Exiv2::Dictionary& response,std::string& errors);
 }
 
 #ifndef EXV_USE_CURL

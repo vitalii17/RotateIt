@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      xmpsidecar.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   07-Mar-08, ahu: created
   Credits:   See header file
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: xmpsidecar.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -108,6 +108,16 @@ namespace Exiv2 {
             EXV_WARNING << "Failed to decode XMP metadata.\n";
 #endif
         }
+
+        // #1112 - store dates to deal with loss of TZ information during conversions
+        for (Exiv2::XmpData::const_iterator it = xmpData_.begin(); it != xmpData_.end(); ++it) {
+            std::string  key(it->key());
+            if ( key.find("Date") != std::string::npos ) {
+            	std::string value(it->value().toString());
+            	dates_[key] = value;
+            }
+        }
+
         copyXmpToIptc(xmpData_, iptcData_);
         copyXmpToExif(xmpData_, exifData_);
     } // XmpSidecar::readMetadata
@@ -119,9 +129,25 @@ namespace Exiv2 {
         }
         IoCloser closer(*io_);
 
+
         if (writeXmpFromPacket() == false) {
             copyExifToXmp(exifData_, xmpData_);
             copyIptcToXmp(iptcData_, xmpData_);
+
+            // #1112 - restore dates if they lost their TZ info
+            for ( Exiv2::Dictionary_i it = dates_.begin() ; it != dates_.end() ; it++) {
+            	std::string   sKey = it->first;
+            	Exiv2::XmpKey key(sKey);
+            	if ( xmpData_.findKey(key) != xmpData_.end() ) {
+            		std::string value_orig(it->second);
+            		std::string value_now(xmpData_[sKey].value().toString());
+	            	// std::cout << key << " -> " << value_now << " => " << value_orig << std::endl;
+					if ( value_orig.find(value_now.substr(0,10)) != std::string::npos ) {
+						xmpData_[sKey] = value_orig ;
+					}
+            	}
+            }
+
             if (XmpParser::encode(xmpPacket_, xmpData_,
                                   XmpParser::omitPacketWrapper|XmpParser::useCompactFormat) > 1) {
 #ifndef SUPPRESS_WARNINGS
@@ -133,7 +159,7 @@ namespace Exiv2 {
             if (xmpPacket_.substr(0, 5)  != "<?xml") {
                 xmpPacket_ = xmlHeader + xmpPacket_ + xmlFooter;
             }
-            BasicIo::AutoPtr tempIo(io_->temporary()); // may throw
+            BasicIo::AutoPtr tempIo(new MemIo);
             assert(tempIo.get() != 0);
             // Write XMP packet
             if (   tempIo->write(reinterpret_cast<const byte*>(xmpPacket_.data()),

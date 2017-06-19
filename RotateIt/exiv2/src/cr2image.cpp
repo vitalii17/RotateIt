@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,19 +20,17 @@
  */
 /*
   File:      cr2image.cpp
-  Version:   $Rev: 3846 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-  History:   22-Apr-06, ahu: created
-
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: cr2image.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
 
 #include "cr2image.hpp"
+#include "tiffimage.hpp"
 #include "cr2image_int.hpp"
 #include "tiffcomposite_int.hpp"
 #include "tiffimage_int.hpp"
@@ -81,6 +79,13 @@ namespace Exiv2 {
         return 0;
     }
 
+    void Cr2Image::printStructure(std::ostream& out, Exiv2::PrintStructureOption option,int depth)
+    {
+        if (io_->open() != 0) throw Error(9, io_->path(), strError());
+        io_->seek(0,BasicIo::beg);
+        printTiffStructure(io(),out,option,depth-1);
+    }
+
     void Cr2Image::setComment(const std::string& /*comment*/)
     {
         // not supported
@@ -102,6 +107,8 @@ namespace Exiv2 {
             throw Error(3, "CR2");
         }
         clearMetadata();
+        std::ofstream devnull;
+        printStructure(devnull, kpsRecursive, 0);
         ByteOrder bo = Cr2Parser::decode(exifData_,
                                          iptcData_,
                                          xmpData_,
@@ -246,10 +253,10 @@ namespace Exiv2 {
     {
         if (size < 16) return false;
 
-        if (pData[0] == 0x49 && pData[1] == 0x49) {
+        if (pData[0] == 'I' && pData[0] == pData[1]) {
             setByteOrder(littleEndian);
         }
-        else if (pData[0] == 0x4d && pData[1] == 0x4d) {
+        else if (pData[0] == 'M' && pData[0] == pData[1]) {
             setByteOrder(bigEndian);
         }
         else {
@@ -268,17 +275,17 @@ namespace Exiv2 {
         DataBuf buf(16);
         switch (byteOrder()) {
         case littleEndian:
-            buf.pData_[0] = 0x49;
-            buf.pData_[1] = 0x49;
+            buf.pData_[0] = 'I';
             break;
         case bigEndian:
-            buf.pData_[0] = 0x4d;
-            buf.pData_[1] = 0x4d;
+            buf.pData_[0] = 'M';
             break;
         case invalidByteOrder:
             assert(false);
             break;
         }
+        buf.pData_[1] = buf.pData_[0];
+
         us2Data(buf.pData_ + 2, tag(), byteOrder());
         ul2Data(buf.pData_ + 4, 0x00000010, byteOrder());
         memcpy(buf.pData_ + 8, cr2sig_, 4);

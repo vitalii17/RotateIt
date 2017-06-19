@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -78,6 +78,7 @@ namespace Exiv2 {
 
         //! @name Manipulators
         //@{
+        void printStructure(std::ostream& out, PrintStructureOption option,int depth);
         void readMetadata();
         /*!
           @brief Todo: Write metadata back to the image. This method is not

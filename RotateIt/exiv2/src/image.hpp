@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,16 +20,7 @@
  */
 /*!
   @file    image.hpp
-  @brief   Class Image, defining the interface for all Image subclasses.
   @version $Rev: 3091 $
-  @author  Andreas Huggel (ahu)
-           <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
-  @author  Brad Schick (brad)
-           <a href="mailto:brad@robotbattle.com">brad@robotbattle.com</a>
-  @date    09-Jan-04, ahu: created<BR>
-           11-Feb-04, ahu: isolated as a component<BR>
-           19-Jul-04, brad: revamped to be more flexible and support IPTC<BR>
-           15-Jan-05, brad: inside-out design changes
  */
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
@@ -74,7 +65,9 @@ namespace Exiv2 {
     /*!
       @brief Options for printStructure
      */
-    typedef enum { kpsNone, kpsBasic, kpsXMP } PrintStructureOption;
+    typedef enum { kpsNone, kpsBasic, kpsXMP, kpsRecursive
+                 , kpsIccProfile    , kpsIptcErase
+                 } PrintStructureOption;
 
     /*!
       @brief Abstract base class defining the interface for an image. This is
@@ -111,9 +104,10 @@ namespace Exiv2 {
           @brief Print out the structure of image file.
           @throw Error if reading of the file fails or the image data is
                 not valid (does not look like data of the specific image type).
-          @caution This function is not thread safe and intended for exiv2 -pS for debugging.
+          @warning This function is not thread safe and intended for exiv2 -pS for debugging.
+          @warning You may need to put the stream into binary mode (see src/actions.cpp)
          */
-        virtual void printStructure(std::ostream& out, PrintStructureOption option =kpsNone);
+        virtual void printStructure(std::ostream& out, PrintStructureOption option =kpsNone, int depth=0);
         /*!
           @brief Read all metadata supported by a specific image format from the
               image. Before this method is called, the image metadata will be
@@ -227,6 +221,28 @@ namespace Exiv2 {
          */
         virtual void clearComment();
         /*!
+          @brief Set the image iccProfile. The new profile is not written
+              to the image until the writeMetadata() method is called.
+          @param iccProfile DataBuf containing profile (binary)
+          @param bTestValid - tests that iccProfile contains credible data
+         */
+        virtual void setIccProfile(DataBuf& iccProfile,bool bTestValid=true);
+        /*!
+          @brief Erase iccProfile. the profile is not removed from
+              the actual image until the writeMetadata() method is called.
+         */
+        virtual void clearIccProfile();
+        /*!
+          @brief Erase iccProfile. the profile is not removed from
+              the actual image until the writeMetadata() method is called.
+         */
+        virtual bool iccProfileDefined() { return iccProfile_.size_?true:false;}
+
+        /*!
+          @brief return iccProfile
+         */
+        virtual DataBuf* iccProfile() { return &iccProfile_; }
+        /*!
           @brief Copy all existing metadata from source Image. The data is
               copied into internal buffers and is not written to the image
               until the writeMetadata() method is called.
@@ -303,6 +319,44 @@ namespace Exiv2 {
           little-endian byte order (II) is used by default.
          */
         void setByteOrder(ByteOrder byteOrder);
+
+        /*!
+          @brief Print out the structure of image file.
+          @throw Error if reading of the file fails or the image data is
+                not valid (does not look like data of the specific image type).
+         */
+        void printTiffStructure(BasicIo& io,std::ostream& out, PrintStructureOption option,int depth,size_t offset=0);
+
+        /*!
+          @brief Print out the structure of a TIFF IFD
+         */
+        void printIFDStructure(BasicIo& io, std::ostream& out, Exiv2::PrintStructureOption option,uint32_t start,bool bSwap,char c,int depth);
+
+        /*!
+          @brief is the host platform bigEndian
+         */
+        bool isBigEndianPlatform();
+
+        /*!
+          @brief is the host platform littleEndian
+         */
+        bool isLittleEndianPlatform();
+
+        bool isStringType(uint16_t type);
+        bool isShortType(uint16_t type);
+        bool isLongType(uint16_t type);
+        bool isRationalType(uint16_t type);
+        bool is2ByteType(uint16_t type);
+        bool is4ByteType(uint16_t type);
+        bool is8ByteType(uint16_t type);
+        bool isPrintXMP(uint16_t type, Exiv2::PrintStructureOption option);
+        bool isPrintICC(uint16_t type, Exiv2::PrintStructureOption option);
+
+        uint32_t byteSwap(uint32_t value,bool bSwap);
+        uint16_t byteSwap(uint16_t value,bool bSwap);
+        uint16_t byteSwap2(DataBuf& buf,size_t offset,bool bSwap);
+        uint32_t byteSwap4(DataBuf& buf,size_t offset,bool bSwap);
+
         //@}
 
         //! @name Accessors
@@ -414,12 +468,25 @@ namespace Exiv2 {
         const NativePreviewList& nativePreviews() const;
         //@}
 
+        //! set type support for this image format
+        void setTypeSupported(
+            int              imageType,
+            uint16_t         supportedMetadata
+        ) {
+            imageType_         = imageType;
+            supportedMetadata_ = supportedMetadata;
+        }
+
+        //! set type support for this image format
+        int imageType() const { return imageType_; }
+
     protected:
         // DATA
         BasicIo::AutoPtr  io_;                //!< Image data IO pointer
         ExifData          exifData_;          //!< Exif data container
         IptcData          iptcData_;          //!< IPTC data container
         XmpData           xmpData_;           //!< XMP data container
+        DataBuf           iccProfile_;        //!< ICC buffer (binary data)
         std::string       comment_;           //!< User comment
         std::string       xmpPacket_;         //!< XMP packet
         int               pixelWidth_;        //!< image pixel width
@@ -436,8 +503,8 @@ namespace Exiv2 {
         //@}
 
         // DATA
-        const int         imageType_;         //!< Image type
-        const uint16_t    supportedMetadata_; //!< Bitmap with all supported metadata types
+        int               imageType_;         //!< Image type
+        uint16_t          supportedMetadata_; //!< Bitmap with all supported metadata types
         bool              writeXmpFromPacket_;//!< Determines the source when writing XMP
         ByteOrder         byteOrder_;         //!< Byte order
 

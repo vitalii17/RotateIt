@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -157,9 +157,9 @@ namespace Exiv2 {
           @brief Print out the structure of image file.
           @throw Error if reading of the file fails or the image data is
                 not valid (does not look like data of the specific image type).
-          @caution This function is not thread safe and intended for exiv2 -pS for debugging.
+          @warning This function is not thread safe and intended for exiv2 -pS for debugging.
          */
-        void printStructure(std::ostream& out, PrintStructureOption option);
+        void printStructure(std::ostream& out, PrintStructureOption option,int depth);
         //@}
 
     protected:
@@ -233,6 +233,7 @@ namespace Exiv2 {
         static const byte eoi_;                 //!< JPEG EOI marker
         static const byte app0_;                //!< JPEG APP0 marker
         static const byte app1_;                //!< JPEG APP1 marker
+        static const byte app2_;                //!< JPEG APP2 marker
         static const byte app13_;               //!< JPEG APP13 marker
         static const byte com_;                 //!< JPEG Comment marker
         static const byte sof0_;                //!< JPEG Start-Of-Frame marker
@@ -251,6 +252,7 @@ namespace Exiv2 {
         static const char exifId_[];            //!< Exif identifier
         static const char jfifId_[];            //!< JFIF identifier
         static const char xmpId_[];             //!< XMP packet identifier
+        static const char iccId_[];             //!< ICC profile identifier
 
     private:
         //! @name NOT implemented

@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -38,6 +38,9 @@
 #include <utility>                              // for std::pair
 #include <iosfwd>
 #include <memory>
+#include <set>
+#include <vector>
+#include <map>
 
 // *****************************************************************************
 // namespace extensions
@@ -359,6 +362,59 @@ namespace Exiv2 {
         std::string key_;              //!< Key
 
     }; // class IptcKey
+
+    /*!
+      @brief typedef for string:string map
+     */
+    typedef std::map<std::string,std::string>                 Dictionary;
+    /*!
+      @brief typedef for Dictionary*
+     */
+    typedef Dictionary*                                       Dictionary_p;
+    /*!
+      @brief typedef for Dictionary iterator
+     */
+    typedef Dictionary::const_iterator                        Dictionary_i;
+
+    /*!
+      @brief typedef for string set (unique strings)
+     */
+    typedef std::set<std::string>                             StringSet;
+    /*!
+      @brief typedef for StringSet*
+     */
+    typedef StringSet*                                        StringSet_p;
+    /*!
+      @brief Class to provide a StringSet iterator
+     */
+    typedef std::set<std::string>::const_iterator             StringSet_i;
+
+    /*!
+      @brief typedef for string vector
+     */
+    typedef std::vector<std::string>                          StringVector;
+    /*!
+      @brief typedef for StringVector pointer
+     */
+    typedef StringVector*                                     StringVector_p;
+    /*!
+      @brief Class to provide a StringVector iterator
+     */
+    typedef StringVector::const_iterator                      StringVector_i;
+
+    /*!
+      @brief typedef for uint32_t vector
+     */
+    typedef std::vector<uint32_t>                             Uint32Vector  ;
+    /*!
+      @brief typedef for Uint32Vector pointer
+     */
+    typedef Uint32Vector*                                     Uint32Vector_p;
+    /*!
+      @brief typedef for Uint32Vector iterator
+     */
+    typedef Uint32Vector::const_iterator                      Uint32Vector_i;
+
 
 // *****************************************************************************
 // free functions

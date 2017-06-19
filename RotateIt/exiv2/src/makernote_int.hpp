@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -24,7 +24,7 @@
            vendor specific makernote implementations.<BR>References:<BR>
   [1] <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">ExifTool</a> by Phil Harvey<BR>
   [2] <a href="http://www.cybercom.net/~dcoffin/dcraw/">Decoding raw digital photos in Linux</a> by Dave Coffin
-  @version $Rev: 3777 $
+  @version $Rev$
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    11-Apr-06, ahu: created
@@ -36,6 +36,7 @@
 // included header files
 #include "tifffwd_int.hpp"
 #include "tags_int.hpp"
+#include "ini.hpp"
 #include "types.hpp"
 
 // + standard includes
@@ -45,6 +46,18 @@
 // namespace extensions
 namespace Exiv2 {
     namespace Internal {
+// *****************************************************************************
+// function prototypes
+        /*!
+          @brief Determine the path to the Exiv2 configuration file
+         */
+		std::string getExiv2ConfigPath();
+
+        /*!
+          @brief Read value from Exiv2 configuration file
+         */
+    	std::string readExiv2Config(const std::string& section,const std::string& value,const std::string& def);
+
 
 // *****************************************************************************
 // class definitions

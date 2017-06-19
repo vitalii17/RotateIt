@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -18,25 +18,43 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, 5th Floor, Boston, MA 02110-1301 USA.
  */
-/*!
-  @file    utilsvideo.hpp
-  @brief   An Image subclass to support RIFF video files
-  @version $Rev$
-           Mahesh Hegde 2014
-           <b href="mailto:maheshmhegade@gmail.com">maheshmhegade@gmail.com</b>
-  @date    16-Aug-14, AB: created
- */
+
 #include "tags_int.hpp"
 
 namespace Exiv2
 {
 
-class UtilsVideo
-{
-public:
-    static bool compareTagValue(Exiv2::DataBuf &buf, const char *str);
-    static bool compareTagValue(Exiv2::DataBuf& buf,const char arr[][5],int32_t arraysize);
-    static bool simpleBytesComparison(Exiv2::DataBuf& buf ,const char* str,int32_t size);
-}; // class UtilsVideo
+    /*!
+      @brief Class of utility functions used by the video code.
+     */
+	class UtilsVideo
+	{
+	public:
+		/*!
+		 @brief compare a buffer and string
+		 @param buf - binary buffer
+		 @param str - nul terminated C string
+		 @return true if match
+		 */
+		static bool compareTagValue(Exiv2::DataBuf &buf, const char *str);
+
+		/*!
+		 @brief compare a buffer and an array of strings
+		 @param buf - binary buffer
+		 @param arr - array of C strings C
+		 @param arraysize - length of arr
+		 @return true if match
+		 */
+		static bool compareTagValue(Exiv2::DataBuf& buf,const char arr[][5],int32_t arraysize);
+
+		/*!
+		 @brief compare a buffer and string
+		 @param buf - binary buffer
+		 @param str - C string (not guaranteed nul terminated)
+		 @param size - number of bytes to compare
+		 @return true if match
+		 */
+		static bool simpleBytesComparison(Exiv2::DataBuf& buf ,const char* str,int32_t size);
+	}; // class UtilsVideo
 
 } // namespace Exiv2

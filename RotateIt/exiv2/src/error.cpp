@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,11 @@
  */
 /*
   File:      error.cpp
-  Version:   $Rev: 3777 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-  History:   02-Apr-05, ahu: created
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: error.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -105,7 +103,9 @@ namespace {
         { 49, N_("TIFF directory %1 has too many entries") }, // %1=TIFF directory name
         { 50, N_("Multiple TIFF array element tags %1 in one directory") }, // %1=tag number
         { 51, N_("TIFF array element tag %1 has wrong type") }, // %1=tag number
-        { 52, N_("%1 has invalid XMP value type `%2'") } // %1=key, %2=value type
+        { 52, N_("%1 has invalid XMP value type `%2'") }, // %1=key, %2=value type
+        { 53, N_("Not a valid ICC Profile") },
+        { 54, N_("Not valid XMP") },
     };
 
 }

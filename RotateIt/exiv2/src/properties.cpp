@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      properties.cpp
-  Version:   $Rev: 3831 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
   History:   13-July-07, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: properties.cpp 3831 2015-05-20 01:27:32Z asp $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -84,8 +84,10 @@ namespace Exiv2 {
     extern const XmpPropertyInfo xmpPdfInfo[];
     extern const XmpPropertyInfo xmpPhotoshopInfo[];
     extern const XmpPropertyInfo xmpCrsInfo[];
+    extern const XmpPropertyInfo xmpCrssInfo[];
     extern const XmpPropertyInfo xmpTiffInfo[];
     extern const XmpPropertyInfo xmpExifInfo[];
+    extern const XmpPropertyInfo xmpExifEXInfo[];
     extern const XmpPropertyInfo xmpAuxInfo[];
     extern const XmpPropertyInfo xmpIptcInfo[];
     extern const XmpPropertyInfo xmpIptcExtInfo[];
@@ -103,7 +105,7 @@ namespace Exiv2 {
     extern const XmpPropertyInfo xmpDctermsInfo[];
     extern const XmpPropertyInfo xmpLrInfo[];
     extern const XmpPropertyInfo xmpAcdseeInfo[];
-    extern const XmpPropertyInfo xmpGPanoInfo[];    
+    extern const XmpPropertyInfo xmpGPanoInfo[];
 
     extern const XmpNsInfo xmpNsInfo[] = {
         // Schemas   -   NOTE: Schemas which the XMP-SDK doesn't know must be registered in XmpParser::initialize - Todo: Automate this
@@ -121,8 +123,10 @@ namespace Exiv2 {
         { "http://ns.adobe.com/pdf/1.3/",                 "pdf",            xmpPdfInfo,       N_("Adobe PDF schema")                          },
         { "http://ns.adobe.com/photoshop/1.0/",           "photoshop",      xmpPhotoshopInfo, N_("Adobe photoshop schema")                    },
         { "http://ns.adobe.com/camera-raw-settings/1.0/", "crs",            xmpCrsInfo,       N_("Camera Raw schema")                         },
+        { "http://ns.adobe.com/camera-raw-saved-settings/1.0/", "crss",     xmpCrssInfo,      N_("Camera Raw Saved Settings")                         },
         { "http://ns.adobe.com/tiff/1.0/",                "tiff",           xmpTiffInfo,      N_("Exif Schema for TIFF Properties")           },
         { "http://ns.adobe.com/exif/1.0/",                "exif",           xmpExifInfo,      N_("Exif schema for Exif-specific Properties")  },
+        { "http://cipa.jp/exif/1.0/",                     "exifEX",         xmpExifEXInfo,    N_("Exif 2.3 metadata for XMP")  },
         { "http://ns.adobe.com/exif/1.0/aux/",            "aux",            xmpAuxInfo,       N_("Exif schema for Additional Exif Properties")},
         { "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",  "iptc",           xmpIptcInfo,      N_("IPTC Core schema")                          }, // NOTE: 'Iptc4xmpCore' is just too long, so make 'iptc'
         { "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",  "Iptc4xmpCore",   xmpIptcInfo,      N_("IPTC Core schema")                          }, // the default prefix. But provide the official one too.
@@ -136,8 +140,8 @@ namespace Exiv2 {
         { "http://ns.microsoft.com/photo/1.2/t/Region#",     "MPReg",       xmpMicrosoftPhotoRegionInfo,     N_("Microsoft Photo Region schema")     },
         { "http://www.metadataworkinggroup.com/schemas/regions/", "mwg-rs", xmpMWGRegionsInfo, N_("Metadata Working Group Regions schema")      },
         { "http://www.metadataworkinggroup.com/schemas/keywords/","mwg-kw", xmpMWGKeywordInfo, N_("Metadata Working Group Keywords schema")     },
-        { "http://www.video",                             "video",          xmpVideoInfo,     N_("XMP Extended Video schema")                   },
-        { "http://www.audio",                             "audio",          xmpAudioInfo,     N_("XMP Extended Audio schema")                   },
+        { "http://www.video/",                             "video",          xmpVideoInfo,     N_("XMP Extended Video schema")                   },
+        { "http://www.audio/",                             "audio",          xmpAudioInfo,     N_("XMP Extended Audio schema")                   },
         { "http://rs.tdwg.org/dwc/index.htm",             "dwc",            xmpDwCInfo,       N_("XMP Darwin Core schema")     		            },
         { "http://purl.org/dc/terms/",                    "dcterms",        xmpDctermsInfo,   N_("Qualified Dublin Core schema")                }, // Note: used as properties under dwc:record
         { "http://ns.acdsee.com/iptc/1.0/",               "acdsee",         xmpAcdseeInfo,    N_("ACDSee XMP schema")                           },
@@ -145,10 +149,10 @@ namespace Exiv2 {
 
 
         // Structures
-        { "http://ns.adobe.com/xap/1.0/g/",                   "xapG",    0, N_("Colorant structure")           },
+        { "http://ns.adobe.com/xap/1.0/g/",                   "xmpG",    0, N_("Colorant structure")           },
+        { "http://ns.adobe.com/xap/1.0/g/img/",               "xmpGImg", 0, N_("Thumbnail structure")          },
         { "http://ns.adobe.com/xap/1.0/sType/Dimensions#",    "stDim",   0, N_("Dimensions structure")         },
         { "http://ns.adobe.com/xap/1.0/sType/Font#",          "stFnt",   0, N_("Font structure")               },
-        { "http://ns.adobe.com/xap/1.0/g/img/",               "xmpGImg", 0, N_("Thumbnail structure")          },
         { "http://ns.adobe.com/xap/1.0/sType/ResourceEvent#", "stEvt",   0, N_("Resource Event structure")     },
         { "http://ns.adobe.com/xap/1.0/sType/ResourceRef#",   "stRef",   0, N_("ResourceRef structure")        },
         { "http://ns.adobe.com/xap/1.0/sType/Version#",       "stVer",   0, N_("Version structure")            },
@@ -221,7 +225,7 @@ namespace Exiv2 {
                                                                                                              "This property provides a standard way for embedded relative URLs to be interpreted "
                                                                                                              "by tools. Web authoring tools should set the value based on their notion of where "
                                                                                                              "URLs will be interpreted.") },
-        { "CreateDate",       N_("Create Date"),      "Date",                     xmpText,   xmpInternal, N_("The date and time the resource was originally created.") },
+        { "CreateDate",       N_("Create Date"),      "Date",                     xmpText,   xmpExternal, N_("The date and time the resource was originally created.") },
         { "CreatorTool",      N_("Creator Tool"),     "AgentName",                xmpText,   xmpInternal, N_("The name of the first known tool used to create the resource. If history is "
                                                                                                              "present in the metadata, this value should be equivalent to that of "
                                                                                                              "xmpMM:History's softwareAgent property.") },
@@ -265,10 +269,11 @@ namespace Exiv2 {
                                                                                                         "rendition class of the original.") },
         { "DocumentID",       N_("Document ID"),       "URI",               xmpText,    xmpInternal, N_("The common identifier for all versions and renditions of a document. It should be "
                                                                                                         "based on a UUID; see Document and Instance IDs below.") },
-        { "History",          N_("History"),           "seq ResourceEvent", xmpText,    xmpInternal, N_("An ordered array of high-level user actions that resulted in this resource. It is "
+        { "History",          N_("History"),           "seq ResourceEvent", xmpSeq,     xmpInternal, N_("An ordered array of high-level user actions that resulted in this resource. It is "
                                                                                                         "intended to give human readers a general indication of the steps taken to make the "
                                                                                                         "changes from the previous version to this one. The list should be at an abstract "
                                                                                                         "level; it is not intended to be an exhaustive keystroke or other detailed history.") },
+        { "Ingredients",      N_("Ingredients"),       "bag ResourceRef",   xmpBag,     xmpInternal, N_("References to resources that were incorporated, byinclusion or reference, into this resource.") },
         { "InstanceID",       N_("Instance ID"),       "URI",               xmpText,    xmpInternal, N_("An identifier for a specific incarnation of a document, updated each time a file "
                                                                                                         "is saved. It should be based on a UUID; see Document and Instance IDs below.") },
         { "ManagedFrom",      N_("Managed From"),      "ResourceRef",       xmpText,    xmpInternal, N_("A reference to the document as it was prior to becoming managed. It is set when a "
@@ -284,8 +289,20 @@ namespace Exiv2 {
                                                                                                         "web browser. It might require a custom browser plug-in.") },
         { "ManagerVariant",   N_("Manager Variant"),   "Text",              xmpText,    xmpInternal, N_("Specifies a particular variant of the asset management system. The format of this "
                                                                                                         "property is private to the specific asset management system.") },
+        { "OriginalDocumentID", N_("Original Document ID"), "URI",          xmpText,    xmpInternal, N_("Refer to Part 1, Data Model, Serialization, and Core "
+                                                                                                        "Properties, for definition.") },
+        { "Pantry",           N_("Pantry"),            "bag struct",        xmpText,    xmpInternal, N_("Each array item has a structure value with a potentially "
+																										"unique set of fields, containing extracted XMP from a "
+																										"component. Each field is a property from the XMP of a "
+																										"contained resource component, with all substructure "
+																										"preserved. "
+																										"Each pantry entry shall contain an xmpMM:InstanceID. "
+																										"Only one copy of the pantry entry for any given "
+																										"xmpMM:InstanceID shall be retained in the pantry. "
+																										"Nested pantry items shall be removed from the individual "
+																										"pantry item and promoted to the top level of the pantry.") },
         { "RenditionClass",   N_("Rendition Class"),   "RenditionClass",    xmpText,    xmpInternal, N_("The rendition class name for this resource. This property should be absent or set "
-                                                                                                        "to default for a document version that is not a derived rendition.") },
+		                                                                                                "to default for a document version that is not a derived rendition.") },
         { "RenditionParams",  N_("Rendition Params"),  "Text",              xmpText,    xmpInternal, N_("Can be used to provide additional rendition parameters that are too complex or "
                                                                                                         "verbose to encode in xmpMM: RenditionClass.") },
         { "VersionID",        N_("Version ID"),        "Text",              xmpText,    xmpInternal, N_("The document version identifier for this resource. Each version of a document gets "
@@ -326,71 +343,91 @@ namespace Exiv2 {
     };
 
     extern const XmpPropertyInfo xmpXmpDMInfo[] = {
+        { "absPeakAudioFilePath",         N_("Absolute Peak Audio File Path"),    "URI",                   xmpText, xmpInternal, N_("The absolute path to the file's peak audio file. If empty, no peak file exists.") },
+        { "album",                        N_("Album"),                            "Text",                  xmpText, xmpExternal, N_("The name of the album.") },
+        { "altTapeName",                  N_("Alternative Tape Name"),            "Text",                  xmpText, xmpExternal, N_("An alternative tape name, set via the project window or timecode dialog in Premiere. "
+                                                                                                                                    "If an alternative name has been set and has not been reverted, that name is displayed.") },
+        { "altTimecode",                  N_("Alternative Time code"),            "Timecode",              xmpText, xmpExternal, N_("A timecode set by the user. When specified, it is used instead of the startTimecode.") },
+        { "artist",                       N_("Artist"),                   		  "Text",                  xmpText, xmpExternal, N_("The name of the artist or artists.") },
+        { "audioModDate",                 N_("Audio Modified Date"),              "Date",                  xmpText, xmpInternal, N_("(deprecated) The date and time when the audio was last modified.") },
+		{ "audioChannelType",             N_("Audio Channel Type"),               "closed Choice of Text", xmpText, xmpInternal, N_("The audio channel type. One of: Mono, Stereo, 5.1, 7.1, 16 Channel, Other.") },
+		{ "audioCompressor",              N_("Audio Compressor"),                 "Text",                  xmpText, xmpInternal, N_("The audio compression used. For example, MP3.") },
+		{ "audioSampleRate",              N_("Audio Sample Rate"),                "Integer",               xmpText, xmpInternal, N_("The audio sample rate. Can be any value, but commonly 32000, 44100, or 48000.") },
+		{ "audioSampleType",              N_("Audio Sample Type"),                "closed Choice of Text", xmpText, xmpInternal, N_("The audio sample type. One of: 8Int, 16Int, 24Int, 32Int, 32Float, Compressed, Packed, Other.") },
+        { "beatSpliceParams",             N_("Beat Splice Parameters"),           "beatSpliceStretch",     xmpText, xmpInternal, N_("Additional parameters for Beat Splice stretch mode.") },
+        { "cameraAngle",                  N_("Camera Angle"),                     "open Choice of Text",   xmpText, xmpExternal, N_("The orientation of the camera to the subject in a static shot, from a fixed set of industry standard terminology. Predefined values include:Low Angle, Eye Level, High Angle, Overhead Shot, Birds Eye Shot, Dutch Angle, POV, Over the Shoulder, Reaction Shot.") },
+        { "cameraLabel",                  N_("Camera Label"),                     "Text",                  xmpText, xmpExternal, N_("A description of the camera used for a shoot. Can be any string, but is usually simply a number, for example \"1\", \"2\", or more explicitly \"Camera 1\".") },
+        { "cameraModel",                  N_("Camera Model"),                     "Text",                  xmpText, xmpExternal, N_("The make and model of the camera used for a shoot.") },
+        { "cameraMove",                   N_("Camera Move"),                      "open Choice of Text",   xmpText, xmpExternal, N_("The movement of the camera during the shot, from a fixed set of industry standard terminology. Predefined values include: Aerial, Boom Up, Boom Down, Crane Up, Crane Down, Dolly In, Dolly Out, Pan Left, Pan Right, Pedestal Up, Pedestal Down, Tilt Up, Tilt Down, Tracking, Truck Left, Truck Right, Zoom In, Zoom Out.") },
+        { "client",                       N_("Client"),                           "Text",                  xmpText, xmpExternal, N_("The client for the job of which this shot or take is a part.") },
+        { "comment",                      N_("Comment"),                          "Text",                  xmpText, xmpExternal, N_("A user's comments.") },
+        { "composer",                     N_("Composer"),                         "Text",                  xmpText, xmpExternal, N_("The composer's name.") },
+        { "contributedMedia",             N_("Contributed Media"),                "bag Media",             xmpBag,  xmpInternal, N_("An unordered list of all media used to create this media.") },
+        { "copyright",                    N_("Copyright"),                        "Text",                  xmpText, xmpExternal, N_("(Deprecated in favour of dc:rights.) The copyright information.") },
+        { "director",                     N_("Director"),                         "Text",                  xmpText, xmpExternal, N_("The director of the scene.") },
+        { "directorPhotography",          N_("Director Photography"),             "Text",                  xmpText, xmpExternal, N_("The director of photography for the scene.") },
+        { "duration",                     N_("Duration"),                         "Time",                  xmpText, xmpInternal, N_("The duration of the media file.") },
+        { "engineer",                     N_("Engineer"),                         "Text",                  xmpText, xmpExternal, N_("The engineer's name.") },
+        { "fileDataRate",                 N_("File Data Rate"),                   "Rational",              xmpText, xmpInternal, N_("The file data rate in megabytes per second. For example: \"36/10\" = 3.6 MB/sec") },
+        { "genre",                        N_("Genre"),                            "Text",                  xmpText, xmpExternal, N_("The name of the genre.") },
+        { "good",                         N_("Good"),                             "Boolean",               xmpText, xmpExternal, N_("A checkbox for tracking whether a shot is a keeper.") },
+        { "instrument",                   N_("Instrument"),                       "Text",                  xmpText, xmpExternal, N_("The musical instrument.") },
+        { "introTime",                    N_("Intro Time"),                       "Time",                  xmpText, xmpInternal, N_("The duration of lead time for queuing music.") },
+        { "key",                          N_("Key"),                              "closed Choice of Text", xmpText, xmpInternal, N_("The audio's musical key. One of: C, C#, D, D#, E, F, F#, G, G#, A, A#, B.") },
+        { "logComment",                   N_("Log Comment"),                      "Text",                  xmpText, xmpExternal, N_("User's log comments.") },
+        { "loop",                         N_("Loop"),                             "Boolean",               xmpText, xmpInternal, N_("When true, the clip can be looped seamlessly.") },
+        { "numberOfBeats",                N_("Number Of Beats"),                  "Real",                  xmpText, xmpInternal, N_("The number of beats.") },
+        { "markers",                      N_("Markers"),                          "seq Marker",            xmpSeq,  xmpInternal, N_("An ordered list of markers") },
+        { "metadataModDate",              N_("Metadata Modified Date"),           "Date",                  xmpText, xmpInternal, N_("(deprecated) The date and time when the metadata was last modified.") },
+        { "outCue",                       N_("Out Cue"),                          "Time",                  xmpText, xmpInternal, N_("The time at which to fade out.") },
+        { "projectName",                  N_("Project Name"),                     "Text",                  xmpText, xmpExternal, N_("The name of the project of which this file is a part.") },
         { "projectRef",                   N_("Project Reference"),                "ProjectLink",           xmpText, xmpInternal, N_("A reference to the project that created this file.") },
-        { "videoFrameRate",               N_("Video Frame Rate"),                 "open Choice of Text",   xmpText, xmpInternal, N_("The video frame rate. One of: 24, NTSC, PAL.") },
-        { "videoFrameSize",               N_("Video Frame Size"),                 "Dimensions",            xmpText, xmpInternal, N_("The frame size. For example: w:720, h: 480, unit:pixels") },
-        { "videoPixelAspectRatio",        N_("Video Pixel Aspect Ratio"),         "Rational",              xmpText, xmpInternal, N_("The aspect ratio, expressed as ht/wd. For example: \"648/720\" = 0.9") },
-        { "videoPixelDepth",              N_("Video Pixel Depth"),                "closed Choice of Text", xmpText, xmpInternal, N_("The size in bits of each color component of a pixel. Standard Windows 32-bit "
-                                                                                                                                    "pixels have 8 bits per component. One of: 8Int, 16Int, 32Int, 32Float.") },
-        { "videoColorSpace",              N_("Video Color Space"),                "closed Choice of Text", xmpText, xmpInternal, N_("The color space. One of: sRGB (used by Photoshop), CCIR-601 (used for NTSC), "
-                                                                                                                                    "CCIR-709 (used for HD).") },
+        { "pullDown",                     N_("Pull Down"),                        "closed Choice of Text", xmpText, xmpInternal, N_("The sampling phase of film to be converted to video (pull-down). One of: "
+                                                                                                                                    "WSSWW, SSWWW, SWWWS, WWWSS, WWSSW, WSSWW_24p, SSWWW_24p, SWWWS_24p, WWWSS_24p, WWSSW_24p.") },
+        { "relativePeakAudioFilePath",    N_("Relative Peak Audio File Path"),    "URI",                   xmpText, xmpInternal, N_("The relative path to the file's peak audio file. If empty, no peak file exists.") },
+        { "relativeTimestamp",            N_("Relative Timestamp"),               "Time",                  xmpText, xmpInternal, N_("The start time of the media inside the audio project.") },
+        { "releaseDate",                  N_("Release Date"),                     "Date",                  xmpText, xmpExternal, N_("The date the title was released.") },
+        { "resampleParams",               N_("Resample Parameters"),              "resampleStretch",       xmpText, xmpInternal, N_("Additional parameters for Resample stretch mode.") },
+        { "scaleType",                    N_("Scale Type"),                       "closed Choice of Text", xmpText, xmpInternal, N_("The musical scale used in the music. One of: Major, Minor, Both, Neither.") },
+        { "scene",                        N_("Scene"),                            "Text",                  xmpText, xmpExternal, N_("The name of the scene.") },
+        { "shotDate",                     N_("Shot Date"),                        "Date",                  xmpText, xmpExternal, N_("The date and time when the video was shot.") },
+        { "shotDay",                      N_("Shot Day"),                         "Text",                  xmpText, xmpExternal, N_("The day in a multiday shoot. For example: \"Day 2\", \"Friday\".") },
+        { "shotLocation",                 N_("Shot Location"),                    "Text",                  xmpText, xmpExternal, N_("The name of the location where the video was shot. For example: \"Oktoberfest, Munich Germany\" "
+                                                                                                                                    "For more accurate positioning, use the EXIF GPS values.") },
+        { "shotName",                     N_("Shot Name"),                        "Text",                  xmpText, xmpExternal, N_("The name of the shot or take.") },
+        { "shotNumber",                   N_("Shot Number"),                      "Text",                  xmpText, xmpExternal, N_("The position of the shot in a script or production, relative to other shots. For example: 1, 2, 1a, 1b, 1.1, 1.2.") },
+        { "shotSize",                     N_("Shot Size"),                        "open Choice of Text",   xmpText, xmpExternal, N_("The size or scale of the shot framing, from a fixed set of industry standard terminology. Predefined values include: "
+																																	"ECU --extreme close-up, MCU -- medium close-up. CU -- close-up, MS -- medium shot, "
+																																	"WS -- wide shot, MWS -- medium wide shot, EWS -- extreme wide shot.") },
+        { "speakerPlacement",             N_("Speaker Placement"),                "Text",                  xmpText, xmpExternal, N_("A description of the speaker angles from center front in degrees. For example: "
+                                                                                                                                    "\"Left = -30, Right = 30, Center = 0, LFE = 45, Left Surround = -110, Right Surround = 110\"") },
+        { "startTimecode",                N_("Start Time Code"),                  "Timecode",              xmpText, xmpInternal, N_("The timecode of the first frame of video in the file, as obtained from the device control.") },
+        { "stretchMode",                  N_("Stretch Mode"),                     "closed Choice of Text", xmpText, xmpInternal, N_("The audio stretch mode. One of: Fixed length, Time-Scale, Resample, Beat Splice, Hybrid.") },
+        { "takeNumber",                   N_("Take Number"),                      "Integer",               xmpText, xmpExternal, N_("A numeric value indicating the absolute number of a take.") },
+        { "tapeName",                     N_("Tape Name"),                        "Text",                  xmpText, xmpExternal, N_("The name of the tape from which the clip was captured, as set during the capture process.") },
+        { "tempo",                        N_("Tempo"),                            "Real",                  xmpText, xmpInternal, N_("The audio's tempo.") },
+        { "timeScaleParams",              N_("Time Scale Parameters"),            "timeScaleStretch",      xmpText, xmpInternal, N_("Additional parameters for Time-Scale stretch mode.") },
+        { "timeSignature",                N_("Time Signature"),                   "closed Choice of Text", xmpText, xmpInternal, N_("The time signature of the music. One of: 2/4, 3/4, 4/4, 5/4, 7/4, 6/8, 9/8, 12/8, other.") },
+        { "trackNumber",                  N_("Track Number"),                     "Integer",               xmpText, xmpExternal, N_("A numeric value indicating the order of the audio file within its original recording.") },
+        { "tracks",                       N_("Tracks"),                           "bag Track",             xmpBag,  xmpInternal, N_("An unordered list of tracks. A track is a named set of markers, which can specify a frame rate for all markers in the set. See also xmpDM:markers.") },
         { "videoAlphaMode",               N_("Video Alpha Mode"),                 "closed Choice of Text", xmpText, xmpExternal, N_("The alpha mode. One of: straight, pre-multiplied.") },
         { "videoAlphaPremultipleColor",   N_("Video Alpha Premultiple Color"),    "Colorant",              xmpText, xmpExternal, N_("A color in CMYK or RGB to be used as the pre-multiple color when "
                                                                                                                                     "alpha mode is pre-multiplied.") },
         { "videoAlphaUnityIsTransparent", N_("Video Alpha Unity Is Transparent"), "Boolean",               xmpText, xmpInternal, N_("When true, unity is clear, when false, it is opaque.") },
+        { "videoColorSpace",              N_("Video Color Space"),                "closed Choice of Text", xmpText, xmpInternal, N_("The color space. One of: sRGB (used by Photoshop), CCIR-601 (used for NTSC), "
+                                                                                                                                    "CCIR-709 (used for HD).") },
         { "videoCompressor",              N_("Video Compressor"),                 "Text",                  xmpText, xmpInternal, N_("Video compression used. For example, jpeg.") },
         { "videoFieldOrder",              N_("Video Field Order"),                "closed Choice of Text", xmpText, xmpInternal, N_("The field order for video. One of: Upper, Lower, Progressive.") },
-        { "pullDown",                     N_("Pull Down"),                        "closed Choice of Text", xmpText, xmpInternal, N_("The sampling phase of film to be converted to video (pull-down). One of: "
-                                                                                                                                    "WSSWW, SSWWW, SWWWS, WWWSS, WWSSW, WSSWW_24p, SSWWW_24p, SWWWS_24p, WWWSS_24p, WWSSW_24p.") },
-        { "audioSampleRate",              N_("Audio Sample Rate"),                "Integer",               xmpText, xmpInternal, N_("The audio sample rate. Can be any value, but commonly 32000, 41100, or 48000.") },
-        { "audioSampleType",              N_("Audio Sample Type"),                "closed Choice of Text", xmpText, xmpInternal, N_("The audio sample type. One of: 8Int, 16Int, 32Int, 32Float.") },
-        { "audioChannelType",             N_("Audio Channel Type"),               "closed Choice of Text", xmpText, xmpInternal, N_("The audio channel type. One of: Mono, Stereo, 5.1, 7.1.") },
-        { "audioCompressor",              N_("Audio Compressor"),                 "Text",                  xmpText, xmpInternal, N_("The audio compression used. For example, MP3.") },
-        { "speakerPlacement",             N_("Speaker Placement"),                "Text",                  xmpText, xmpExternal, N_("A description of the speaker angles from center front in degrees. For example: "
-                                                                                                                                    "\"Left = -30, Right = 30, Center = 0, LFE = 45, Left Surround = -110, Right Surround = 110\"") },
-        { "fileDataRate",                 N_("File Data Rate"),                   "Rational",              xmpText, xmpInternal, N_("The file data rate in megabytes per second. For example: \"36/10\" = 3.6 MB/sec") },
-        { "tapeName",                     N_("Tape Name"),                        "Text",                  xmpText, xmpExternal, N_("The name of the tape from which the clip was captured, as set during the capture process.") },
-        { "altTapeName",                  N_("Alternative Tape Name"),            "Text",                  xmpText, xmpExternal, N_("An alternative tape name, set via the project window or timecode dialog in Premiere. "
-                                                                                                                                    "If an alternative name has been set and has not been reverted, that name is displayed.") },
-        { "startTimecode",                N_("Start Time Code"),                  "Timecode",              xmpText, xmpInternal, N_("The timecode of the first frame of video in the file, as obtained from the device control.") },
-        { "altTimecode",                  N_("Alternative Time code"),            "Timecode",              xmpText, xmpExternal, N_("A timecode set by the user. When specified, it is used instead of the startTimecode.") },
-        { "duration",                     N_("Duration"),                         "Time",                  xmpText, xmpInternal, N_("The duration of the media file.") },
-        { "scene",                        N_("Scene"),                            "Text",                  xmpText, xmpExternal, N_("The name of the scene.") },
-        { "shotName",                     N_("Shot Name"),                        "Text",                  xmpText, xmpExternal, N_("The name of the shot or take.") },
-        { "shotDate",                     N_("Shot Date"),                        "Date",                  xmpText, xmpExternal, N_("The date and time when the video was shot.") },
-        { "shotLocation",                 N_("Shot Location"),                    "Text",                  xmpText, xmpExternal, N_("The name of the location where the video was shot. For example: \"Oktoberfest, Munich Germany\" "
-                                                                                                                                    "For more accurate positioning, use the EXIF GPS values.") },
-        { "logComment",                   N_("Log Comment"),                      "Text",                  xmpText, xmpExternal, N_("User's log comments.") },
-        { "markers",                      N_("Markers"),                          "seq Marker",            xmpText, xmpInternal, N_("An ordered list of markers") },
-        { "contributedMedia",             N_("Contributed Media"),                "bag Media",             xmpText, xmpInternal, N_("An unordered list of all media used to create this media.") },
-        { "absPeakAudioFilePath",         N_("Absolute Peak Audio File Path"),    "URI",                   xmpText, xmpInternal, N_("The absolute path to the file's peak audio file. If empty, no peak file exists.") },
-        { "relativePeakAudioFilePath",    N_("Relative Peak Audio File Path"),    "URI",                   xmpText, xmpInternal, N_("The relative path to the file's peak audio file. If empty, no peak file exists.") },
-        { "videoModDate",                 N_("Video Modified Date"),              "Date",                  xmpText, xmpInternal, N_("The date and time when the video was last modified.") },
-        { "audioModDate",                 N_("Audio Modified Date"),              "Date",                  xmpText, xmpInternal, N_("The date and time when the audio was last modified.") },
-        { "metadataModDate",              N_("Metadata Modified Date"),           "Date",                  xmpText, xmpInternal, N_("The date and time when the metadata was last modified.") },
-        { "artist",                       N_("Artist"),                           "Text",                  xmpText, xmpExternal, N_("The name of the artist or artists.") },
-        { "album",                        N_("Album"),                            "Text",                  xmpText, xmpExternal, N_("The name of the album.") },
-        { "trackNumber",                  N_("Track Number"),                     "Integer",               xmpText, xmpExternal, N_("A numeric value indicating the order of the audio file within its original recording.") },
-        { "genre",                        N_("Genre"),                            "Text",                  xmpText, xmpExternal, N_("The name of the genre.") },
-        { "copyright",                    N_("Copyright"),                        "Text",                  xmpText, xmpExternal, N_("The copyright information.") },
-        { "releaseDate",                  N_("Release Date"),                     "Date",                  xmpText, xmpExternal, N_("The date the title was released.") },
-        { "composer",                     N_("Composer"),                         "Text",                  xmpText, xmpExternal, N_("The composer's name.") },
-        { "engineer",                     N_("Engineer"),                         "Text",                  xmpText, xmpExternal, N_("The engineer's name.") },
-        { "tempo",                        N_("Tempo"),                            "Real",                  xmpText, xmpInternal, N_("The audio's tempo.") },
-        { "instrument",                   N_("Instrument"),                       "Text",                  xmpText, xmpExternal, N_("The musical instrument.") },
-        { "introTime",                    N_("Intro Time"),                       "Time",                  xmpText, xmpInternal, N_("The duration of lead time for queuing music.") },
-        { "outCue",                       N_("Out Cue"),                          "Time",                  xmpText, xmpInternal, N_("The time at which to fade out.") },
-        { "relativeTimestamp",            N_("Relative Timestamp"),               "Time",                  xmpText, xmpInternal, N_("The start time of the media inside the audio project.") },
-        { "loop",                         N_("Loop"),                             "Boolean",               xmpText, xmpInternal, N_("When true, the clip can be looped seamlessly.") },
-        { "numberOfBeats",                N_("Number Of Beats"),                  "Real",                  xmpText, xmpInternal, N_("The number of beats.") },
-        { "key",                          N_("Key"),                              "closed Choice of Text", xmpText, xmpInternal, N_("The audio's musical key. One of: C, C#, D, D#, E, F, F#, G, G#, A, A#, B.") },
-        { "stretchMode",                  N_("Stretch Mode"),                     "closed Choice of Text", xmpText, xmpInternal, N_("The audio stretch mode. One of: Fixed length, Time-Scale, Resample, Beat Splice, Hybrid.") },
-        { "timeScaleParams",              N_("Time Scale Parameters"),            "timeScaleStretch",      xmpText, xmpInternal, N_("Additional parameters for Time-Scale stretch mode.") },
-        { "resampleParams",               N_("Resample Parameters"),              "resampleStretch",       xmpText, xmpInternal, N_("Additional parameters for Resample stretch mode.") },
-        { "beatSpliceParams",             N_("Beat Splice Parameters"),           "beatSpliceStretch",     xmpText, xmpInternal, N_("Additional parameters for Beat Splice stretch mode.") },
-        { "timeSignature",                N_("Time Signature"),                   "closed Choice of Text", xmpText, xmpInternal, N_("The time signature of the music. One of: 2/4, 3/4, 4/4, 5/4, 7/4, 6/8, 9/8, 12/8, other.") },
-        { "scaleType",                    N_("Scale Type"),                       "closed Choice of Text", xmpText, xmpInternal, N_("The musical scale used in the music. One of: Major, Minor, Both, Neither. "
-                                                                                                                                    "Neither is most often used for instruments with no associated scale, such as drums.") },
+        { "videoFrameRate",               N_("Video Frame Rate"),                 "open Choice of Text",   xmpText, xmpInternal, N_("The video frame rate. One of: 24, NTSC, PAL.") },
+        { "videoFrameSize",               N_("Video Frame Size"),                 "Dimensions",            xmpText, xmpInternal, N_("The frame size. For example: w:720, h: 480, unit:pixels") },
+        { "videoModDate",                 N_("Video Modified Date"),              "Date",                  xmpText, xmpInternal, N_("(deprecated)The date and time when the video was last modified.") },
+        { "videoPixelDepth",              N_("Video Pixel Depth"),                "closed Choice of Text", xmpText, xmpInternal, N_("The size in bits of each color component of a pixel. Standard Windows 32-bit "
+                                                                                                                                    "pixels have 8 bits per component. One of: 8Int, 16Int, 32Int, 32Float.") },
+        { "videoPixelAspectRatio",        N_("Video Pixel Aspect Ratio"),         "Rational",              xmpText, xmpInternal, N_("The aspect ratio, expressed as ht/wd. For example: \"648/720\" = 0.9") },
+        { "partOfCompilation",            N_("Part Of Compilation"),              "Boolean",               xmpText, xmpExternal, N_("Part of compilation.") },
+        { "lyrics",                       N_("Lyrics"),                           "Text",                  xmpText, xmpExternal, N_("Lyrics text. No association with timecode.") },
+        { "discNumber",                   N_("Disc Number"),                      "Text",                  xmpText, xmpExternal, N_("If in a multi-disc set, might contain total number of discs. For example: 2/3.") },
+
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
@@ -415,33 +452,46 @@ namespace Exiv2 {
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
-        
+
     extern const XmpPropertyInfo xmpPdfInfo[] = {
         { "Keywords",   N_("Keywords"),    "Text",      xmpText, xmpExternal, N_("Keywords.") },
         { "PDFVersion", N_("PDF Version"), "Text",      xmpText, xmpInternal, N_("The PDF file version (for example: 1.0, 1.3, and so on).") },
         { "Producer",   N_("Producer"),    "AgentName", xmpText, xmpInternal, N_("The name of the tool that created the PDF document.") },
+        { "Trapped",    N_("Trapped"),     "Boolean",   xmpText, xmpExternal, N_("True when the document has been trapped.") },
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
 
     extern const XmpPropertyInfo xmpPhotoshopInfo[] = {
-        { "AuthorsPosition",        N_("Authors Position"),        "Text",       xmpText, xmpExternal, N_("By-line title.") },
-        { "CaptionWriter",          N_("Caption Writer"),          "ProperName", xmpText, xmpExternal, N_("Writer/editor.") },
-        { "Category",               N_("Category"),                "Text",       xmpText, xmpExternal, N_("Category. Limited to 3 7-bit ASCII characters.") },
-        { "City",                   N_("City"),                    "Text",       xmpText, xmpExternal, N_("City.") },
-        { "Country",                N_("Country"),                 "Text",       xmpText, xmpExternal, N_("Country/primary location.") },
-        { "Credit",                 N_("Credit"),                  "Text",       xmpText, xmpExternal, N_("Credit.") },
         { "DateCreated",            N_("Date Created"),            "Date",       xmpText, xmpExternal, N_("The date the intellectual content of the document was created (rather than the creation "
                                                                                                           "date of the physical representation), following IIM conventions. For example, a photo "
                                                                                                           "taken during the American Civil War would have a creation date during that epoch "
                                                                                                           "(1861-1865) rather than the date the photo was digitized for archiving.") },
         { "Headline",               N_("Headline"),                "Text",       xmpText, xmpExternal, N_("Headline.") },
+        { "Country",                N_("Country"),                 "Text",       xmpText, xmpExternal, N_("Country/primary location.") },
+        { "State",                  N_("State"),                   "Text",       xmpText, xmpExternal, N_("Province/state.") },
+        { "City",                   N_("City"),                    "Text",       xmpText, xmpExternal, N_("City.") },
+        { "Credit",                 N_("Credit"),                  "Text",       xmpText, xmpExternal, N_("Credit.") },
+        { "AuthorsPosition",        N_("Authors Position"),        "Text",       xmpText, xmpExternal, N_("By-line title.") },
+        { "CaptionWriter",          N_("Caption Writer"),          "ProperName", xmpText, xmpExternal, N_("Writer/editor.") },
+        { "Category",               N_("Category"),                "Text",       xmpText, xmpExternal, N_("Category. Limited to 3 7-bit ASCII characters.") },
         { "Instructions",           N_("Instructions"),            "Text",       xmpText, xmpExternal, N_("Special instructions.") },
         { "Source",                 N_("Source"),                  "Text",       xmpText, xmpExternal, N_("Source.") },
-        { "State",                  N_("State"),                   "Text",       xmpText, xmpExternal, N_("Province/state.") },
         { "SupplementalCategories", N_("Supplemental Categories"), "bag Text",   xmpBag,  xmpExternal, N_("Supplemental category.") },
         { "TransmissionReference",  N_("Transmission Reference"),  "Text",       xmpText, xmpExternal, N_("Original transmission reference.") },
         { "Urgency",                N_("Urgency"),                 "Integer",    xmpText, xmpExternal, N_("Urgency. Valid range is 1-8.") },
+        { "ICCProfile",             N_("ICC Profile"),             "Text",       xmpText, xmpInternal, N_("The colour profile, such as AppleRGB, AdobeRGB1998.") },
+        { "ColorMode",              N_("Color Mode"),              "Closed Choice of Integer", xmpText, xmpInternal, N_("The colour mode. One of: 0 = Bitmap, 1 = Grayscale, 2 = Indexed, 3 = RGB, 4 = CMYK, 7 = Multichannel, 8 = Duotone, 9 = Lab.") },
+        { "AncestorID",             N_("Ancestor ID"),             "URI",        xmpText, xmpExternal, N_("The unique identifier of a document.") },
+        { "DocumentAncestors", 		N_("Document Ancestors"), 	   "bag Ancestor", xmpBag, xmpExternal, N_("If the source document for a copy-and-paste or place operation has a document ID, that ID is added to this list in the destination document's XMP.") },
+		{ "History",                N_("History"),                 "Text",       xmpText, xmpExternal, N_("The history that appears in the FileInfo panel, if activated in the application preferences.") },
+        { "TextLayers", 			N_("Text Layers"), 			   "seq Layer",  xmpSeq,  xmpExternal, N_("If a document has text layers, this property caches the text for each layer.") },
+        { "LayerName",       		N_("Layer Name"),      		   "Text",       xmpText, xmpExternal, N_("The identifying name of the text layer.") },
+        { "LayerText",       		N_("Layer Text"),      		   "Text",       xmpText, xmpExternal, N_("The text content of the text layer.") },
+        { "EmbeddedXMPDigest",      N_("Embedded XMP Digest"),     "Text",       xmpText, xmpExternal, N_("Embedded XMP Digest.") },
+        { "LegacyIPTCDigest",       N_("Legacy IPTC Digest"),      "Text",       xmpText, xmpExternal, N_("Legacy IPTC Digest.") },
+        { "SidecarForExtension",    N_("Sidecar F or Extension"),  "Text",       xmpText, xmpExternal, N_("Filename extension of associated image file.") },
+
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
@@ -453,50 +503,251 @@ namespace Exiv2 {
         { 2, N_("cm")     }
     };
 
+    extern const XmpPropertyInfo xmpCrssInfo[] = {
+        { "SavedSettings", 	N_("Saved Settings"), 	"SavedSettings", 	xmpText, 	xmpInternal, N_("*Main structure* Camera Raw Saved Settings.") },
+        { "Name",  			N_("Name"),   			"Text",            	xmpText,    xmpExternal, N_("Camera Raw Saved Settings Name.")              },
+        { "Type",  			N_("Type"),   			"Text",            	xmpText,    xmpExternal, N_("Camera Raw Saved Settings Type.")              },
+        { "Parameters", 	N_("Parameters"), 		"Parameters", 		xmpText, 	xmpInternal, N_("*Main structure* Camera Raw Saved Settings Parameters.") },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
     extern const XmpPropertyInfo xmpCrsInfo[] = {
-        { "AutoBrightness",       N_("Auto Brightness"),           "Boolean",                          xmpText, xmpExternal, N_("When true, \"Brightness\" is automatically adjusted.") },
-        { "AutoContrast",         N_("Auto Contrast"),             "Boolean",                          xmpText, xmpExternal, N_("When true, \"Contrast\" is automatically adjusted.") },
-        { "AutoExposure",         N_("Auto Exposure"),             "Boolean",                          xmpText, xmpExternal, N_("When true, \"Exposure\" is automatically adjusted.") },
-        { "AutoShadows",          N_("Auto Shadows"),              "Boolean",                          xmpText, xmpExternal, N_("When true,\"Shadows\" is automatically adjusted.") },
-        { "BlueHue",              N_("Blue Hue"),                  "Integer",                          xmpText, xmpExternal, N_("\"Blue Hue\" setting. Range -100 to 100.") },
-        { "BlueSaturation",       N_("Blue Saturation"),           "Integer",                          xmpText, xmpExternal, N_("\"Blue Saturation\" setting. Range -100 to +100.") },
-        { "Brightness",           N_("Brightness"),                "Integer",                          xmpText, xmpExternal, N_("\"Brightness\" setting. Range 0 to +150.") },
-        { "CameraProfile",        N_("Camera Profile"),            "Text",                             xmpText, xmpExternal, N_("\"Camera Profile\" setting.") },
-        { "ChromaticAberrationB", N_("Chromatic Aberration Blue"), "Integer",                          xmpText, xmpExternal, N_("\"Chromatic Aberration, Fix Blue/Yellow Fringe\" setting. Range -100 to +100.") },
-        { "ChromaticAberrationR", N_("Chromatic Aberration Red"),  "Integer",                          xmpText, xmpExternal, N_("\"Chromatic Aberration, Fix Red/Cyan Fringe\" setting. Range -100 to +100.") },
-        { "ColorNoiseReduction",  N_("Color Noise Reduction"),     "Integer",                          xmpText, xmpExternal, N_("\"Color Noise Reduction\" setting. Range 0 to +100.") },
-        { "Contrast",             N_("Contrast"),                  "Integer",                          xmpText, xmpExternal, N_("\"Contrast\" setting. Range -50 to +100.") },
-        { "CropTop",              N_("Crop Top"),                  "Real",                             xmpText, xmpExternal, N_("When \"Has Crop\" is true, top of crop rectangle") },
-        { "CropLeft",             N_("Crop Left"),                 "Real",                             xmpText, xmpExternal, N_("When \"Has Crop\" is true, left of crop rectangle.") },
-        { "CropBottom",           N_("Crop Bottom"),               "Real",                             xmpText, xmpExternal, N_("When \"Has Crop\" is true, bottom of crop rectangle.") },
-        { "CropRight",            N_("Crop Right"),                "Real",                             xmpText, xmpExternal, N_("When \"Has Crop\" is true, right of crop rectangle.") },
-        { "CropAngle",            N_("Crop Angle"),                "Real",                             xmpText, xmpExternal, N_("When \"Has Crop\" is true, angle of crop rectangle.") },
-        { "CropWidth",            N_("Crop Width"),                "Real",                             xmpText, xmpExternal, N_("Width of resulting cropped image in CropUnits units.") },
-        { "CropHeight",           N_("Crop Height"),               "Real",                             xmpText, xmpExternal, N_("Height of resulting cropped image in CropUnits units.") },
-        { "CropUnits",            N_("Crop Units"),                "Integer",                          xmpText, xmpExternal, N_("Units for CropWidth and CropHeight. 0=pixels, 1=inches, 2=cm") },
-        { "Exposure",             N_("Exposure"),                  "Real",                             xmpText, xmpExternal, N_("\"Exposure\" setting. Range -4.0 to +4.0.") },
-        { "GreenHue",             N_("Green Hue"),                 "Integer",                          xmpText, xmpExternal, N_("\"Green Hue\" setting. Range -100 to +100.") },
-        { "GreenSaturation",      N_("Green Saturation"),          "Integer",                          xmpText, xmpExternal, N_("\"Green Saturation\" setting. Range -100 to +100.") },
-        { "HasCrop",              N_("Has Crop"),                  "Boolean",                          xmpText, xmpExternal, N_("When true, image has a cropping rectangle.") },
-        { "HasSettings",          N_("Has Settings"),              "Boolean",                          xmpText, xmpExternal, N_("When true, non-default camera raw settings.") },
-        { "LuminanceSmoothing",   N_("Luminance Smoothing"),       "Integer",                          xmpText, xmpExternal, N_("\"Luminance Smoothing\" setting. Range 0 to +100.") },
+        { "AutoBrightness",       N_("Auto Brightness"),           "Boolean",                          xmpText, xmpInternal, N_("When true, \"Brightness\" is automatically adjusted.") },
+        { "AutoContrast",         N_("Auto Contrast"),             "Boolean",                          xmpText, xmpInternal, N_("When true, \"Contrast\" is automatically adjusted.") },
+        { "AutoExposure",         N_("Auto Exposure"),             "Boolean",                          xmpText, xmpInternal, N_("When true, \"Exposure\" is automatically adjusted.") },
+        { "AutoShadows",          N_("Auto Shadows"),              "Boolean",                          xmpText, xmpInternal, N_("When true,\"Shadows\" is automatically adjusted.") },
+        { "BlueHue",              N_("Blue Hue"),                  "Integer",                          xmpText, xmpInternal, N_("\"Blue Hue\" setting. Range -100 to 100.") },
+        { "BlueSaturation",       N_("Blue Saturation"),           "Integer",                          xmpText, xmpInternal, N_("\"Blue Saturation\" setting. Range -100 to +100.") },
+        { "Brightness",           N_("Brightness"),                "Integer",                          xmpText, xmpInternal, N_("\"Brightness\" setting. Range 0 to +150.") },
+        { "CameraProfile",        N_("Camera Profile"),            "Text",                             xmpText, xmpInternal, N_("\"Camera Profile\" setting.") },
+        { "ChromaticAberrationB", N_("Chromatic Aberration Blue"), "Integer",                          xmpText, xmpInternal, N_("\"Chromatic Aberration, Fix Blue/Yellow Fringe\" setting. Range -100 to +100.") },
+        { "ChromaticAberrationR", N_("Chromatic Aberration Red"),  "Integer",                          xmpText, xmpInternal, N_("\"Chromatic Aberration, Fix Red/Cyan Fringe\" setting. Range -100 to +100.") },
+        { "ColorNoiseReduction",  N_("Color Noise Reduction"),     "Integer",                          xmpText, xmpInternal, N_("\"Color Noise Reduction\" setting. Range 0 to +100.") },
+        { "Contrast",             N_("Contrast"),                  "Integer",                          xmpText, xmpInternal, N_("\"Contrast\" setting. Range -50 to +100.") },
+        { "CropTop",              N_("Crop Top"),                  "Real",                             xmpText, xmpInternal, N_("When \"Has Crop\" is true, top of crop rectangle") },
+        { "CropLeft",             N_("Crop Left"),                 "Real",                             xmpText, xmpInternal, N_("When \"Has Crop\" is true, left of crop rectangle.") },
+        { "CropBottom",           N_("Crop Bottom"),               "Real",                             xmpText, xmpInternal, N_("When \"Has Crop\" is true, bottom of crop rectangle.") },
+        { "CropRight",            N_("Crop Right"),                "Real",                             xmpText, xmpInternal, N_("When \"Has Crop\" is true, right of crop rectangle.") },
+        { "CropAngle",            N_("Crop Angle"),                "Real",                             xmpText, xmpInternal, N_("When \"Has Crop\" is true, angle of crop rectangle.") },
+        { "CropWidth",            N_("Crop Width"),                "Real",                             xmpText, xmpInternal, N_("Width of resulting cropped image in CropUnits units.") },
+        { "CropHeight",           N_("Crop Height"),               "Real",                             xmpText, xmpInternal, N_("Height of resulting cropped image in CropUnits units.") },
+        { "CropUnits",            N_("Crop Units"),                "Integer",                          xmpText, xmpInternal, N_("Units for CropWidth and CropHeight. 0=pixels, 1=inches, 2=cm") },
+        { "Exposure",             N_("Exposure"),                  "Real",                             xmpText, xmpInternal, N_("\"Exposure\" setting. Range -4.0 to +4.0.") },
+        { "GreenHue",             N_("Green Hue"),                 "Integer",                          xmpText, xmpInternal, N_("\"Green Hue\" setting. Range -100 to +100.") },
+        { "GreenSaturation",      N_("Green Saturation"),          "Integer",                          xmpText, xmpInternal, N_("\"Green Saturation\" setting. Range -100 to +100.") },
+        { "HasCrop",              N_("Has Crop"),                  "Boolean",                          xmpText, xmpInternal, N_("When true, image has a cropping rectangle.") },
+        { "HasSettings",          N_("Has Settings"),              "Boolean",                          xmpText, xmpInternal, N_("When true, non-default camera raw settings.") },
+        { "LuminanceSmoothing",   N_("Luminance Smoothing"),       "Integer",                          xmpText, xmpInternal, N_("\"Luminance Smoothing\" setting. Range 0 to +100.") },
         { "RawFileName",          N_("Raw File Name"),             "Text",                             xmpText, xmpInternal, N_("File name of raw file (not a complete path).") },
-        { "RedHue",               N_("Red Hue"),                   "Integer",                          xmpText, xmpExternal, N_("\"Red Hue\" setting. Range -100 to +100.") },
-        { "RedSaturation",        N_("Red Saturation"),            "Integer",                          xmpText, xmpExternal, N_("\"Red Saturation\" setting. Range -100 to +100.") },
-        { "Saturation",           N_("Saturation"),                "Integer",                          xmpText, xmpExternal, N_("\"Saturation\" setting. Range -100 to +100.") },
-        { "Shadows",              N_("Shadows"),                   "Integer",                          xmpText, xmpExternal, N_("\"Shadows\" setting. Range 0 to +100.") },
-        { "ShadowTint",           N_("Shadow Tint"),               "Integer",                          xmpText, xmpExternal, N_("\"Shadow Tint\" setting. Range -100 to +100.") },
-        { "Sharpness",            N_("Sharpness"),                 "Integer",                          xmpText, xmpExternal, N_("\"Sharpness\" setting. Range 0 to +100.") },
-        { "Temperature",          N_("Temperature"),               "Integer",                          xmpText, xmpExternal, N_("\"Temperature\" setting. Range 2000 to 50000.") },
-        { "Tint",                 N_("Tint"),                      "Integer",                          xmpText, xmpExternal, N_("\"Tint\" setting. Range -150 to +150.") },
-        { "ToneCurve",            N_("Tone Curve"),                "Seq of points (Integer, Integer)", xmpText, xmpExternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+        { "RedHue",               N_("Red Hue"),                   "Integer",                          xmpText, xmpInternal, N_("\"Red Hue\" setting. Range -100 to +100.") },
+        { "RedSaturation",        N_("Red Saturation"),            "Integer",                          xmpText, xmpInternal, N_("\"Red Saturation\" setting. Range -100 to +100.") },
+        { "Saturation",           N_("Saturation"),                "Integer",                          xmpText, xmpInternal, N_("\"Saturation\" setting. Range -100 to +100.") },
+        { "Shadows",              N_("Shadows"),                   "Integer",                          xmpText, xmpInternal, N_("\"Shadows\" setting. Range 0 to +100.") },
+        { "ShadowTint",           N_("Shadow Tint"),               "Integer",                          xmpText, xmpInternal, N_("\"Shadow Tint\" setting. Range -100 to +100.") },
+        { "Sharpness",            N_("Sharpness"),                 "Integer",                          xmpText, xmpInternal, N_("\"Sharpness\" setting. Range 0 to +100.") },
+        { "Temperature",          N_("Temperature"),               "Integer",                          xmpText, xmpInternal, N_("\"Temperature\" setting. Range 2000 to 50000.") },
+        { "Tint",                 N_("Tint"),                      "Integer",                          xmpText, xmpInternal, N_("\"Tint\" setting. Range -150 to +150.") },
+        { "ToneCurve",            N_("Tone Curve"),                "Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
         { "ToneCurveName",        N_("Tone Curve Name"),           "Choice Text",                      xmpText, xmpInternal, N_("The name of the Tone Curve described by ToneCurve. One of: Linear, Medium Contrast, "
                                                                                                                                 "Strong Contrast, Custom or a user-defined preset name.") },
         { "Version",              N_("Version"),                   "Text",                             xmpText, xmpInternal, N_("Version of Camera Raw plugin.") },
-        { "VignetteAmount",       N_("Vignette Amount"),           "Integer",                          xmpText, xmpExternal, N_("\"Vignetting Amount\" setting. Range -100 to +100.") },
-        { "VignetteMidpoint",     N_("Vignette Midpoint"),         "Integer",                          xmpText, xmpExternal, N_("\"Vignetting Midpoint\" setting. Range 0 to +100.") },
-        { "WhiteBalance",         N_("White Balance"),             "Closed Choice Text",               xmpText, xmpExternal, N_("\"White Balance\" setting. One of: As Shot, Auto, Daylight, Cloudy, Shade, Tungsten, "
+        { "VignetteAmount",       N_("Vignette Amount"),           "Integer",                          xmpText, xmpInternal, N_("\"Vignetting Amount\" setting. Range -100 to +100.") },
+        { "VignetteMidpoint",     N_("Vignette Midpoint"),         "Integer",                          xmpText, xmpInternal, N_("\"Vignetting Midpoint\" setting. Range 0 to +100.") },
+        { "WhiteBalance",         N_("White Balance"),             "Closed Choice Text",               xmpText, xmpInternal, N_("\"White Balance\" setting. One of: As Shot, Auto, Daylight, Cloudy, Shade, Tungsten, "
                                                                                                                                 "Fluorescent, Flash, Custom") },
+		// The following properties are not in the XMP specification. They are found in sample files from Adobe applications and in exiftool.
+    { "AlreadyApplied",			  	N_("Already Applied"),			"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Converter",				  	N_("Converter"),				"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "MoireFilter",			  	N_("Moire Filter"),				"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Smoothness",    			  	N_("Smoothness"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "CameraProfileDigest",	  	N_("Camera Profile Digest"),	"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Clarity",                   	N_("Clarity"),					"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ConvertToGrayscale",        	N_("Convert To Grayscale"),		"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Defringe",                  	N_("Defringe"),					"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "FillLight",                 	N_("Fill Light"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HighlightRecovery",         	N_("Highlight Recovery"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentAqua",         	N_("Hue Adjustment Aqua"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentBlue",         	N_("Hue Adjustment Blue"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentGreen",        	N_("Hue Adjustment Green"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentMagenta",      	N_("Hue Adjustment Magenta"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentOrange",       	N_("Hue Adjustment Orange"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentPurple",       	N_("Hue Adjustment Purple"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentRed",          	N_("Hue Adjustment Red"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "HueAdjustmentYellow",       	N_("Hue Adjustment Yellow"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "IncrementalTemperature",    	N_("Incremental Temperature"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "IncrementalTint",           	N_("Incremental Tint"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentAqua",   	N_("Luminance Adjustment Aqua"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentBlue",   	N_("Luminance Adjustment Blue"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentGreen",  	N_("Luminance Adjustment Green"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentMagenta", N_("Luminance Adjustment Magenta"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentOrange", 	N_("Luminance Adjustment Orange"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentPurple", 	N_("Luminance Adjustment Purple"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentRed",    	N_("Luminance Adjustment Red"),		"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceAdjustmentYellow", 	N_("Luminance Adjustment Yellow"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricDarks",           	N_("Parametric Darks"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricHighlights",      	N_("Parametric Highlights"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricHighlightSplit",  	N_("Parametric Highlight Split"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricLights",          	N_("Parametric Lights"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricMidtoneSplit",    	N_("Parametric Midtone Split"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricShadows",         	N_("Parametric Shadows"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ParametricShadowSplit",     	N_("Parametric Shadow Split"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentAqua",  	N_("Saturation Adjustment Aqua"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentBlue",  	N_("Saturation Adjustment Blue"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentGreen", 	N_("Saturation Adjustment Green"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentMagenta", N_("Saturation Adjustment Magenta"),	"Integer",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentOrange", N_("Saturation Adjustment Orange"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentPurple", N_("Saturation Adjustment Purple"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentRed",    N_("Saturation Adjustment Red"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SaturationAdjustmentYellow", N_("Saturation Adjustment Yellow"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SharpenDetail",             	N_("Sharpen Detail"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SharpenEdgeMasking",        	N_("Sharpen Edge Masking"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SharpenRadius",             	N_("Sharpen Radius"),			"Real",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SplitToningBalance",        	N_("Split Toning Balance"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SplitToningHighlightHue",   	N_("Split Toning Highlight Hue"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SplitToningHighlightSaturation", N_("Split Toning Highlight Saturation"),	"Integer",		xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SplitToningShadowHue",      	N_("Split Toning Shadow Hue"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "SplitToningShadowSaturation", N_("Split Toning Shadow Saturation"),	"Integer",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Vibrance",                  	N_("Vibrance"),					"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerRed",              	N_("Gray Mixer Red"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerOrange",           	N_("Gray Mixer Orange"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerYellow",           	N_("Gray Mixer Yellow"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerGreen",            	N_("Gray Mixer Green"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerAqua",             	N_("Gray Mixer Aqua"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerBlue",             	N_("Gray Mixer Blue"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerPurple",           	N_("Gray Mixer Purple"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrayMixerMagenta",          	N_("Gray Mixer Magenta"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "RetouchInfo",               	N_("Retouch Info"),				"bag Text",						xmpBag,  xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "RedEyeInfo",                	N_("Red Eye Info"),				"bag Text",						xmpBag,  xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "CropUnit",            		N_("Crop Unit"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteAmount",    	N_("Post Crop Vignette Amount"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteMidpoint",  	N_("Post Crop Vignette Midpoint"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteFeather",   	N_("Post Crop Vignette Feather"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteRoundness", 	N_("Post Crop Vignette Roundness"),	"Integer",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteStyle",     	N_("Post Crop Vignette Style"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ProcessVersion",             N_("Process Version"),			"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileEnable",          N_("Lens Profile Enable"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileSetup",           N_("Lens Profile Setup"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileName",            N_("Lens Profile Name"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileFilename",        N_("Lens Profile Filename"),	"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileDigest",          N_("Lens Profile Digest"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileDistortionScale", N_("Lens Profile Distortion Scale"),	"Integer",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileChromaticAberrationScale", N_("Lens Profile Chromatic Aberration Scale"),	"Integer",	xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileVignettingScale", N_("Lens Profile Vignetting Scale"),	"Integer",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensManualDistortionAmount", N_("Lens Manual Distortion Amount"),	"Integer",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveVertical",        N_("Perspective Vertical"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveHorizontal",      N_("Perspective Horizontal"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveRotate",          N_("Perspective Rotate"),		"Real",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveScale",           N_("Perspective Scale"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "CropConstrainToWarp",        N_("Crop Constrain To Warp"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceNoiseReductionDetail",	N_("Luminance Noise Reduction Detail"),		"Integer",		xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LuminanceNoiseReductionContrast", N_("Luminance Noise Reduction Contrast"),	"Integer",		xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ColorNoiseReductionDetail",  N_("Color Noise Reduction Detail"),				"Integer",		xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrainAmount",                N_("Grain Amount"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrainSize",                  N_("Grain Size"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "GrainFrequency",             N_("GrainFrequency"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "AutoLateralCA",              N_("Auto Lateral CA"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Exposure2012",               N_("Exposure 2012"),			"Real",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Contrast2012",               N_("Contrast 2012"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Highlights2012",             N_("Highlights 2012"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Shadows2012",                N_("Shadows 2012"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Whites2012",                 N_("Whites 2012"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Blacks2012",                 N_("Blacks 2012"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "Clarity2012",                N_("Clarity 2012"),				"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PostCropVignetteHighlightContrast", N_("Post Crop Vignette Highlight Contrast"),	"Integer",	xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ToneCurveName2012",          N_("Tone Curve Name 2012"),		"Text",							xmpText, xmpInternal, N_("Values: Linear, Medium Contrast, Strong Contrast, Custom. Not in XMP Specification. Found in sample files.") },
+    { "ToneCurveRed",               N_("Tone Curve Red"),			"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurveGreen",             N_("Tone Curve Green"),			"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurveBlue",              N_("Tone Curve Blue"),			"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurvePV2012",            N_("Tone Curve PV 2012"),		"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurvePV2012Red",         N_("Tone Curve PV 2012 Red"),	"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurvePV2012Green",       N_("Tone Curve PV 2012 Green"),	"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "ToneCurvePV2012Blue",        N_("Tone Curve PV 2012 Blue"),	"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer) defining a \"Tone Curve\".") },
+    { "DefringePurpleAmount",       N_("Defringe Purple Amount"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefringePurpleHueLo",        N_("Defringe Purple Hue Lo"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefringePurpleHueHi",        N_("Defringe Purple Hue Hi"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefringeGreenAmount",        N_("Defringe Green Amount"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefringeGreenHueLo",         N_("Defringe Green Hue Lo"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefringeGreenHueHi",         N_("Defringe Green Hue Hi"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "AutoWhiteVersion",           N_("Defringe Green Hue Hi"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "ColorNoiseReductionSmoothness", N_("Color Noise Reduction Smoothness"),	"Integer",			xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveAspect",          N_("Perspective Aspect"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "PerspectiveUpright",         N_("Perspective Upright"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightVersion",             N_("Upright Version"),			"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightCenterMode",          N_("Upright Center Mode"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightCenterNormX",         N_("Upright Center Norm X"),	"Real",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightCenterNormY",         N_("Upright Center Norm Y"),	"Real",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightFocalMode",           N_("Upright Focal Mode"),		"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightFocalLength35mm",     N_("Upright Focal Length 35mm"),	"Real",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightPreview",             N_("Upright Preview"),			"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransformCount",      N_("Upright TransformCount"),	"Integer",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightDependentDigest",     N_("Upright DependentDigest"),	"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransform_0",         N_("Upright Transform_0"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransform_1",         N_("Upright Transform_1"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransform_2",         N_("Upright Transform_2"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransform_3",         N_("Upright Transform_3"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "UprightTransform_4",         N_("Upright Transform_4"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyExifMake", N_("Lens Profile Match Key Exif Make"),	"Text",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyExifModel", N_("Lens Profile Match Key Exif Model"),	"Text",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyCameraModelName", N_("Lens Profile Match Key Camera Model Name"),	"Text",	xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyLensInfo", N_("Lens Profile Match Key Lens Info"),	"Text",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyLensID",  N_("Lens Profile Match Key Lens ID"),		"Text",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyLensName", N_("Lens Profile Match Key Lens Name"),	"Text",				xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeyIsRaw",   N_("Lens Profile Match Key Is Raw"),		"Boolean",			xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "LensProfileMatchKeySensorFormatFactor", N_("Lens Profile Match Key Sensor Format Factor"),	"Real",	xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefaultAutoTone",            N_("Default Auto Tone"),		"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefaultAutoGray",            N_("DefaultAuto Gray"),			"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefaultsSpecificToSerial",   N_("Defaults Specific To Serial"),	"Boolean",					xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DefaultsSpecificToISO",      N_("Defaults Specific To ISO"),	"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "DNGIgnoreSidecars",          N_("DNG IgnoreSidecars"),		"Boolean",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "NegativeCachePath",          N_("Negative Cache Path"),		"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "NegativeCacheMaximumSize",   N_("Negative Cache Maximum Size"),	"Real",						xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "NegativeCacheLargePreviewSize", N_("Negative Cache Large Preview Size"),	"Integer",			xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "JPEGHandling",               N_("JPEG Handling"),			"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+    { "TIFFHandling",               N_("TIFF Handling"),			"Text",							xmpText, xmpInternal, N_("Not in XMP Specification. Found in sample files.") },
+	// Corrections root structure properties
+    { "CircularGradientBasedCorrections", 	N_("CircularGradientBasedCorrections"),	"CircularGradientBasedCorrections", xmpText, xmpInternal, N_("*Root structure* ") },
+    { "PaintBasedCorrections", 				N_("PaintBasedCorrections"), 			"PaintBasedCorrections", 			xmpText, xmpInternal, N_("*Root structure* ") },
+        { "CorrectionMasks", 				N_("CorrectionMasks"), 					"CorrectionMasks", 					xmpText, xmpInternal, N_("*sub Root structure* ") },
+		// Corrections child properties
+        { "What",              				N_("What"),                  			"Text",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "MaskValue",              		N_("Mask Value"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Radius",              			N_("Radius"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Flow",              				N_("Flow"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "CenterWeight",           		N_("Center Weight"),                  	"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Dabs",              				N_("Dabs"),                  			"Seq of points (Integer, Integer)", xmpText, xmpInternal, N_("Array of points (Integer, Integer).") },
+        { "ZeroX",              			N_("Zero X"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "ZeroY",              			N_("Zero Y"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "FullX",              			N_("Full X"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "FullY",              			N_("Full Y"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Top",              				N_("Top"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Left",              				N_("Left"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Bottom",              			N_("Bottom"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Right",              			N_("Right"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Angle",              			N_("Angle"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Midpoint",              			N_("Midpoint"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Roundness",              		N_("Roundness"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Feather",              			N_("Feather"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Flipped",              			N_("Flipped"),                  		"Boolean",                          xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Version",              			N_("Version"),                  		"Integer",                          xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "SizeX",              			N_("Size X"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "SizeY",              			N_("Size Y"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "X",              				N_("X"),                  				"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Y",              				N_("Y"),                  				"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Alpha",              			N_("Alpha"),                  			"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "CenterValue",              		N_("Center Value"),                  	"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "PerimeterValue",              	N_("Perimeter Value"),                  "Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+	// Retouch root structure properties
+	{ "RetouchAreas", 						N_("RetouchAreas"), 					"RetouchAreas", 					xmpText, xmpInternal, N_("*Root structure* ") },
+		// Retouch child properties
+        { "SpotType",              			N_("Spot Type"),                  		"Text",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "SourceState",              		N_("Source State"),                  	"Text",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Method",              			N_("Method"),                  			"Text",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "SourceX",              			N_("Source X"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "OffsetY",              			N_("Offset Y"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Opacity",              			N_("Opacity"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Feather",              			N_("Feather"),                  		"Real",                             xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
+        { "Seed",              				N_("Seed"),                  			"Integer",                          xmpText, xmpExternal, N_("Not in XMP Specification. Found in sample files.") },
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
@@ -542,7 +793,7 @@ namespace Exiv2 {
         { "Make",                      N_("Make"),                       "ProperName",                   xmpText, xmpInternal, N_("TIFF tag 271, 0x10F. Manufacturer of recording equipment.") },
         { "Model",                     N_("Model"),                      "ProperName",                   xmpText, xmpInternal, N_("TIFF tag 272, 0x110. Model name or number of equipment.") },
         { "Software",                  N_("Software"),                   "AgentName",                    xmpText, xmpInternal, N_("TIFF tag 305, 0x131. Software or firmware used to generate image. "
-                                                                                                                                  "Note: This property is stored in XMP as xmp:CreatorTool. ") },
+                                                                                                                                  "Note: This property is stored in XMP as xmp:CreatorTool.") },
         { "Artist",                    N_("Artist"),                     "ProperName",                   xmpText, xmpExternal, N_("TIFF tag 315, 0x13B. Camera owner, photographer or image creator. "
                                                                                                                                   "Note: This property is stored in XMP as the first item in the dc:creator array.") },
         { "Copyright",                 N_("Copyright"),                  "Lang Alt",                     langAlt, xmpExternal, N_("TIFF tag 33432, 0x8298. Copyright information. "
@@ -650,6 +901,37 @@ namespace Exiv2 {
         { "GPSProcessingMethod",      N_("GPS Processing Method"),               "Text",                         xmpText, xmpInternal, N_("GPS tag 27, 0x1B. A character string recording the name of the method used for location finding.") },
         { "GPSAreaInformation",       N_("GPS Area Information"),                "Text",                         xmpText, xmpInternal, N_("GPS tag 28, 0x1C. A character string recording the name of the GPS area.") },
         { "GPSDifferential",          N_("GPS Differential"),                    "Closed Choice of Integer",     xmpText, xmpInternal, N_("GPS tag 30, 0x1E. Indicates whether differential correction is applied to the GPS receiver.") },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
+    extern const XmpPropertyInfo xmpExifEXInfo[] = {
+        { "Gamma",                      N_("Gamma"),                    "Rational",                 xmpText, xmpInternal, N_("EXIF tag 42240, 0xA500. Indicates the value of coefficient gamma.") },
+        { "PhotographicSensitivity",    N_("Photographic Sensitivity"), "Integer",                  xmpText, xmpInternal, N_("EXIF tag 34855, 0x8827. Indicates the sensitivity of the camera or input device when the image was shot up to the value of 65535 with one of the following parameters that are defined in ISO 12232: standard output sensitivity (SOS), recommended exposure index (REI), or ISO speed.") },
+        { "SensitivityType",            N_("Sensitivity Type"),         "Closed Choice of Integer", xmpText, xmpInternal, N_("EXIF tag 34864, 0x8830. Indicates which one of the parameters of ISO12232 is used for PhotographicSensitivity:0 = Unknown "
+                                                                                                                             "1 = Standard output sensitivity (SOS) "
+                                                                                                                             "2 = Recommended exposure index (REI) "
+                                                                                                                             "3 = ISO speed "
+                                                                                                                             "4 = Standard output sensitivity (SOS) and recommended exposure index (REI) "
+                                                                                                                             "5 = Standard output sensitivity (SOS) and ISO speed "
+                                                                                                                             "6 = Recommended exposure index (REI) and ISO speed "
+                                                                                                                             "7 = Standard output sensitivity (SOS) and recommended exposure index (REI) and ISO speed") },
+        { "StandardOutput-Sensitivity", N_("Standard Output Sensitivity"),  "Integer",              xmpText, xmpInternal, N_("EXIF tag 34865, 0x8831. Indicates the standard output sensitivity value of a camera or input device defined in ISO 12232.") },
+        { "RecommendedExposureIndex",   N_("Recommended Exposure Index"),   "Integer",              xmpText, xmpInternal, N_("EXIF tag 34866, 0x8832. Indicates the recommended exposure index value of a camera or input device defined in ISO 12232.") },
+        { "ISOSpeed",                   N_("ISO Speed"),                    "Integer",              xmpText, xmpInternal, N_("EXIF tag 34867, 0x8833. Indicates the ISO speed value of a camera or input device defined in ISO 12232.") },
+        { "ISOSpeedLatitudeyyy",        N_("ISO Speed Latitude yyy"),       "Integer",              xmpText, xmpInternal, N_("EXIF tag 34868, 0x8834. Indicates the ISO speed latitude yyy value of a camera or input device defined in ISO 12232.") },
+        { "ISOSpeedLatitudezzz",        N_("ISO Speed Latitude zzz"),       "Integer",              xmpText, xmpInternal, N_("EXIF tag 34869, 0x8835. Indicates the ISO speed latitude zzz value of a camera or input device defined in ISO 12232.") },
+        { "CameraOwnerName",            N_("Camera Owner Name"),            "Proper-Name",          xmpText, xmpInternal, N_("EXIF tag 42032, 0xA430. This tag records the owner of a camera used in photography as an ASCII string.") },
+        { "BodySerialNumber",           N_("Body Serial Number"),           "Text",                 xmpText, xmpInternal, N_("EXIF tag 42033, 0xA431. The serial number of the camera or camera body used to take the photograph.") },
+        { "LensSpecification",          N_("Lens Specification"),           "Ordered array of Rational",    xmpText, xmpInternal, N_("EXIF tag 42034, 0xA432. notes minimum focal length, maximum focal length, minimum F number in the minimum focal length, and minimum F number in the maximum focal length, which are specification information for the lens that was used in photography.") },
+        { "LensMake",                   N_("Lens Make"),                    "Proper-Name",          xmpText, xmpInternal, N_("EXIF tag 42035, 0xA433. Records the lens manufacturer as an ASCII string.") },
+        { "LensModel",                  N_("Lens Model"),                   "Text",                 xmpText, xmpInternal, N_("EXIF tag 42036, 0xA434. Records the lens's model name and model number as an ASCII string.") },
+        { "LensSerialNumber",           N_("Lens Serial Number"),           "Text",                 xmpText, xmpInternal, N_("EXIF tag 42037, 0xA435. This tag records the serial number of the interchangeable lens that was used in photography as an ASCII string.") },
+
+        { "InteroperabilityIndex",    N_("Interoperability Index"),         "Closed Choice of Text",    xmpText, xmpInternal, N_("EXIF tag 1, 0x0001. Indicates the identification of the Interoperability rule.  "
+                                                                                                                                 "R98 = Indicates a file conforming to R98 file specification of Recommended Exif Interoperability Rules (Exif R 98) or to DCF basic file stipulated by Design Rule for Camera File System (DCF). "
+                                                                                                                                 "THM = Indicates a file conforming to DCF thumbnail file stipulated by Design rule for Camera File System. "
+                                                                                                                                 "R03 = Indicates a file conforming to DCF Option File stipulated by Design rule for Camera File System.") },
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
@@ -1037,7 +1319,7 @@ namespace Exiv2 {
         { "FirstPhotoDate",                 N_("First Photo Date"),                 "Date",                 xmpText, xmpExternal,   N_("Date and time for the first image created in the panorama.")   },
         { "LastPhotoDate",                  N_("Last Photo Date"),                  "Date",                 xmpText, xmpExternal,   N_("Date and time for the last image created in the panorama.")   },
         { "SourcePhotosCount",              N_("Source Photos Count"),              "Integer",              xmpText, xmpExternal,   N_("Number of source images used to create the panorama")   },
-        { "ExposureLockUsed",               N_("Exposure Lock Used"),               "Boolean",              xmpText, xmpExternal,   N_("When individual source photographs were captured, whether or not the camera's exposure setting was locked. ")   },
+        { "ExposureLockUsed",               N_("Exposure Lock Used"),               "Boolean",              xmpText, xmpExternal,   N_("When individual source photographs were captured, whether or not the camera's exposure setting was locked.")   },
         { "CroppedAreaImageWidthPixels",    N_("Cropped Area Image Width Pixels"),  "Integer",              xmpText, xmpExternal,   N_("Original width in pixels of the image (equal to the actual image's width for unedited images).")   },
         { "CroppedAreaImageHeightPixels",   N_("Cropped Area Image Height Pixels"), "Integer",              xmpText, xmpExternal,   N_("Original height in pixels of the image (equal to the actual image's height for unedited images).")   },
         { "FullPanoWidthPixels",            N_("Full Pano Width Pixels"),           "Integer",              xmpText, xmpExternal,   N_("Original full panorama width from which the image was cropped. Or, if only a partial panorama was captured, this specifies the width of what the full panorama would have been.")   },
@@ -1107,7 +1389,7 @@ namespace Exiv2 {
         { "CropTop",                N_("Pixel Crop Top"),                   "Integer",                  xmpText, xmpExternal, N_("Number of Pixels to be cropped from the top.")   },
         { "CurrentTime",            N_("Current Time"),                     "Integer",                  xmpText, xmpExternal, N_("The time value for current time position within the movie.") },
         { "DataPackets",            N_("Data Packets"),                     "Integer",                  xmpText, xmpExternal, N_("Specifies the number of Data Packet entries that exist within the Data Object.")   },
-        { "DateTimeOriginal",       N_("Date and Time Original"),           "Date",                     xmpText, xmpInternal, N_("Date and time when original video was generated, in ISO 8601 format. ") },
+        { "DateTimeOriginal",       N_("Date and Time Original"),           "Date",                     xmpText, xmpInternal, N_("Date and time when original video was generated, in ISO 8601 format.") },
         { "DateTimeDigitized",      N_("Date and Time Digitized"),          "Date",                     xmpText, xmpInternal, N_("Date and time when video was stored as digital data, can be the same "
                                                                                                                                  "as DateTimeOriginal if originally stored in digital form. Stored in ISO 8601 format.") },
         { "DateUTC",                N_("Date-Time Original"),               "Text",                     xmpText, xmpExternal, N_("Contains the production date")   },
@@ -1167,15 +1449,15 @@ namespace Exiv2 {
         { "GPSAltitude",            N_("GPS Altitude"),                     "Rational",                 xmpText, xmpInternal, N_("GPS tag 6, 0x06. Indicates altitude in meters.") },
         { "GPSAltitudeRef",         N_("GPS Altitude Reference"),           "Closed Choice of Integer", xmpText, xmpInternal, N_("GPS tag 5, 0x05. Indicates whether the altitude is above or below sea level.") },
         { "GPSCoordinates",         N_("GPS Coordinates"),                  "Text",                     xmpText, xmpExternal, N_("Information about the GPS Coordinates.")   },
-        { "GPSDateStamp",           N_("GPS Time Stamp"),                   "Date",                     xmpText, xmpInternal, N_("Date stamp of GPS data, ") },
+        { "GPSDateStamp",           N_("GPS Time Stamp"),                   "Date",                     xmpText, xmpInternal, N_("Date stamp of GPS data.") },
         { "GPSImgDirection",        N_("GPS Image Direction"),              "Rational",                 xmpText, xmpInternal, N_("Direction of image when captured, values range from 0 to 359.99.") },
         { "GPSImgDirectionRef",     N_("GPS Image Direction Reference"),    "Closed Choice of Text",    xmpText, xmpInternal, N_("Reference for image direction.") },
         { "GPSLatitude",            N_("GPS Latitude"),                     "GPSCoordinate",            xmpText, xmpInternal, N_("(North/South). Indicates latitude.") },
         { "GPSLongitude",           N_("GPS Longitude"),                    "GPSCoordinate",            xmpText, xmpInternal, N_("(East/West). Indicates longitude.") },
         { "GPSMapDatum",            N_("GPS Map Datum"),                    "Text",                     xmpText, xmpInternal, N_("Geodetic survey data.") },
         { "GPSSatellites",          N_("GPS Satellites"),                   "Text",                     xmpText, xmpInternal, N_("Satellite information, format is unspecified.") },
-        { "GPSTimeStamp",           N_("GPS Time Stamp"),                   "Date",                     xmpText, xmpInternal, N_("Time stamp of GPS data, ") },
-        { "GPSVersionID",           N_("GPS Version ID"),                   "Text",                     xmpText, xmpInternal, N_("A decimal encoding with period separators. ") },
+        { "GPSTimeStamp",           N_("GPS Time Stamp"),                   "Date",                     xmpText, xmpInternal, N_("Time stamp of GPS data.") },
+        { "GPSVersionID",           N_("GPS Version ID"),                   "Text",                     xmpText, xmpInternal, N_("A decimal encoding with period separators.") },
         { "GraphicsMode",           N_("Graphics Mode"),                    "Text",                     xmpText, xmpExternal, N_("A 16-bit integer that specifies the transfer mode. The transfer mode specifies which Boolean"
                                                                                                                                  "operation QuickDraw should perform when drawing or transferring an image from one location to another.")   },
         { "Grouping",               N_("Grouping"),                         "Text",                     xmpText, xmpExternal, N_("Information about the Grouping.")   },
@@ -1273,7 +1555,7 @@ namespace Exiv2 {
         { "PreviewDate",            N_("Preview Date"),                     "Integer",                  xmpText, xmpExternal, N_("The date of the movie preview in local time converted from UTC") },
         { "PreviewDuration",        N_("Preview Duration"),                 "Integer",                  xmpText, xmpExternal, N_("The duration of the movie preview in movie time scale units") },
         { "PreviewTime",            N_("Preview Time"),                     "Integer",                  xmpText, xmpExternal, N_("The time value in the movie at which the preview begins.") },
-        { "PreviewVersion",         N_("Preview Version"),                  "Integer",                  xmpText, xmpExternal, N_("The version of the movie preview ") },
+        { "PreviewVersion",         N_("Preview Version"),                  "Integer",                  xmpText, xmpExternal, N_("The version of the movie preview") },
         { "ProducedBy",             N_("Produced By"),                      "Text",                     xmpText, xmpExternal, N_("Produced By, i.e. name of person or organization.")   },
         { "Producer",               N_("Producer"),                         "Text",                     xmpText, xmpExternal, N_("Producer involved with the video.")   },
         { "ProducerKeywords",       N_("Producer Keywords"),                "Text",                     xmpText, xmpExternal, N_("Information about the Producer Keywords.")   },
@@ -1330,9 +1612,9 @@ namespace Exiv2 {
         { "SubTLang",               N_("Subtitles Language"),               "Text",                     xmpText, xmpExternal, N_("The Language in which the subtitles is recorded in.")   },
         { "SubTTrackForced",        N_("Subtitle Track Forced"),            "Text",                     xmpText, xmpExternal, N_("Subtitles Track Forced , i.e. Enabled/Disabled")   },
         { "SubTTrackLacing",        N_("Subtitle Track Lacing"),            "Text",                     xmpText, xmpExternal, N_("Subtitles Track Lacing , i.e. Enabled/Disabled")   },
-        { "Subject",                N_("Subject"),                          "Text",                     xmpText, xmpExternal, N_("Subject. ")   },
-        { "TapeName",               N_("Tape Name"),                        "Text",                     xmpText, xmpExternal, N_("TapeName.")   },
-        { "TagDefault",             N_("Tag Default Setting"),              "Text",                     xmpText, xmpExternal, N_("If Tag is Default enabled, this value is Yes, else No ")   },
+        { "Subject",                N_("Subject"),                          "Text",                     xmpText, xmpExternal, N_("Subject.")   },
+        { "TapeName",               N_("Tape Name"),                        "Text",                     xmpText, xmpExternal, N_("TapeName.")  },
+        { "TagDefault",             N_("Tag Default Setting"),              "Text",                     xmpText, xmpExternal, N_("If Tag is Default enabled, this value is Yes, else No")   },
         { "TagLanguage",            N_("Tag Language"),                     "Text",                     xmpText, xmpExternal, N_("Language that has been used to define tags")   },
         { "TagName",                N_("Tag Name"),                         "Text",                     xmpText, xmpExternal, N_("Tags could be used to define several titles for a segment.")   },
         { "TagString",              N_("Tag String"),                       "Text",                     xmpText, xmpExternal, N_("Information contained in a Tags")   },
@@ -1413,7 +1695,7 @@ namespace Exiv2 {
         { "HandlerClass",       N_("Handler Class"),                "Text",                  xmpText, xmpExternal, N_("A four-character code that identifies the type of the handler. Only two values are valid for this field: 'mhlr' for media handlers and 'dhlr' for data handlers.")   },
         { "HandlerDescription", N_("Handler Description"),          "Text",                  xmpText, xmpExternal, N_("A (counted) string that specifies the name of the component-that is, the media handler used when this media was created..")   },
         { "HandlerType",        N_("Handler Type"),                 "Text",                  xmpText, xmpExternal, N_("A four-character code that identifies the type of the media handler or data handler.")   },
-        { "HandlerVendorID",    N_("Handler Vendor ID"),            "Text",                  xmpText, xmpExternal, N_("Component manufacturer.")   },                                        
+        { "HandlerVendorID",    N_("Handler Vendor ID"),            "Text",                  xmpText, xmpExternal, N_("Component manufacturer.")   },
         { "MediaCreateDate",    N_("Media Track Create Date"),      "Integer",               xmpText, xmpExternal, N_("A 32-bit integer that indicates (in seconds since midnight, January 1, 1904) when the media header was created.")   },
         { "MediaDuration",      N_("Media Track Duration"),         "Integer",               xmpText, xmpExternal, N_("A time value that indicates the duration of this media (in the movie's time coordinate system).")   },
         { "MediaHeaderVersion", N_("Media Header Version"),         "Text",                  xmpText, xmpExternal, N_("A 1-byte specification of the version of this media header")   },
@@ -1455,7 +1737,7 @@ namespace Exiv2 {
             { "bibliographicCitation",  N_("Bibliographic Citation"),   "Text",            xmpText,      xmpExternal, N_("A bibliographic reference for the resource.")              },
             { "references",             N_("References"),               "bag Text",        xmpBag,       xmpExternal, N_("A related resource that is referenced, cited, or otherwise pointed to by the described resource.")      },
         // Location Level Class
-        { "Location",               N_("Location"),                 "Location",        xmpText,      xmpInternal, 
+        { "Location",               N_("Location"),                 "Location",        xmpText,      xmpInternal,
                                     N_("*Main structure* containing Darwin Core location based information."),
         },
         // End of list marker
@@ -1465,632 +1747,632 @@ namespace Exiv2 {
    extern const XmpPropertyInfo xmpDwCInfo[] = {
 
         // Record Level Class
-        { "Record",                         N_("Record"),                               "Record",    xmpText,   xmpInternal, 
+        { "Record",                         N_("Record"),                               "Record",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing record based information."),
         },
             // Record Level Terms
-            { "institutionID",                  N_("Institution ID"),                       "Text",      xmpText,   xmpExternal,      
+            { "institutionID",                  N_("Institution ID"),                       "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the institution having custody of the object(s) or information referred to in the record.")
             },
-            { "collectionID",                   N_("Collection ID"),                        "Text",     xmpText,    xmpExternal, 
+            { "collectionID",                   N_("Collection ID"),                        "Text",     xmpText,    xmpExternal,
                                                 N_("An identifier for the collection or dataset from which the record was derived. For physical specimens, the recommended best practice is to use the identifier in a collections registry such as the Biodiversity Collections Index (http://www.biodiversitycollectionsindex.org/).")
             },
-            { "institutionCode",                N_("Institution Code"),                     "Text",      xmpText,   xmpExternal,      
+            { "institutionCode",                N_("Institution Code"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("The name (or acronym) in use by the institution having custody of the object(s) or information referred to in the record.")
             },
-            { "datasetID",                      N_("Dataset ID"),                           "Text",     xmpText,    xmpExternal, 
+            { "datasetID",                      N_("Dataset ID"),                           "Text",     xmpText,    xmpExternal,
                                                 N_("An identifier for the set of data. May be a global unique identifier or an identifier specific to a collection or institution.")
             },
-            { "collectionCode",                 N_("Collection Code"),                      "Text",     xmpText,    xmpExternal, 
+            { "collectionCode",                 N_("Collection Code"),                      "Text",     xmpText,    xmpExternal,
                                                 N_("The name, acronym, coden, or initialism identifying the collection or data set from which the record was derived.")
             },
-            { "datasetName",                    N_("Dataset Name"),                         "Text",     xmpText,    xmpExternal, 
+            { "datasetName",                    N_("Dataset Name"),                         "Text",     xmpText,    xmpExternal,
                                                 N_("The name identifying the data set from which the record was derived.")
             },
-            { "ownerInstitutionCode",           N_("Owner Institution Code"),               "Text",      xmpText,   xmpExternal,      
+            { "ownerInstitutionCode",           N_("Owner Institution Code"),               "Text",      xmpText,   xmpExternal,
                                                 N_("The name (or acronym) in use by the institution having ownership of the object(s) or information referred to in the record.")
             },
-            { "basisOfRecord",                  N_("Basis Of Record"),                      "Text",     xmpText,    xmpExternal, 
+            { "basisOfRecord",                  N_("Basis Of Record"),                      "Text",     xmpText,    xmpExternal,
                                                 N_("The specific nature of the data record - a subtype of the type. Recommended best practice is to use a controlled vocabulary such as the Darwin Core Type Vocabulary (http://rs.tdwg.org/dwc/terms/type-vocabulary/index.htm).")
             },
-            { "informationWithheld",            N_("Information Withheld"),                 "Text",      xmpText,   xmpExternal,      
+            { "informationWithheld",            N_("Information Withheld"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("Additional information that exists, but that has not been shared in the given record.")
             },
-            { "dataGeneralizations",            N_("Data Generalizations"),                 "Text",     xmpText,    xmpExternal, 
+            { "dataGeneralizations",            N_("Data Generalizations"),                 "Text",     xmpText,    xmpExternal,
                                                 N_("Actions taken to make the shared data less specific or complete than in its original form. Suggests that alternative data of higher quality may be available on request.")
             },
-            { "dynamicProperties",              N_("Dynamic Properties"),                   "bag Text",     xmpBag,    xmpExternal, 
+            { "dynamicProperties",              N_("Dynamic Properties"),                   "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of additional measurements, facts, characteristics, or assertions about the record. Meant to provide a mechanism for structured content such as key-value pairs.")
             },
 
         // Occurrence Level Class
-        { "Occurrence",                     N_("Occurrence"),                         "Occurrence",    xmpText,   xmpInternal, 
+        { "Occurrence",                     N_("Occurrence"),                         "Occurrence",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing occurrence based information."),
         },
             // Occurrence Level Terms
-            { "occurrenceID",                   N_("Occurrence ID"),                        "Text",      xmpText,   xmpExternal,      
+            { "occurrenceID",                   N_("Occurrence ID"),                        "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the Occurrence (as opposed to a particular digital record of the occurrence). In the absence of a persistent global unique identifier, construct one from a combination of identifiers in the record that will most closely make the occurrenceID globally unique.")
             },
-            { "catalogNumber",                  N_("Catalog Number"),                       "Text",     xmpText,    xmpExternal, 
+            { "catalogNumber",                  N_("Catalog Number"),                       "Text",     xmpText,    xmpExternal,
                                                 N_("An identifier (preferably unique) for the record within the data set or collection.")
             },
-            { "occurrenceDetails",              N_("Occurrence Details"),                   "Text",      xmpText,   xmpExternal,      
-                                                N_("Depreciated. Details about the Occurrence.")
+            { "occurrenceDetails",              N_("Occurrence Details"),                   "Text",      xmpText,   xmpExternal,
+                                                N_("Deprecated. Details about the Occurrence.")
             },
-            { "occurrenceRemarks",              N_("Occurrence Remarks"),                   "Text",      xmpText,   xmpExternal,      
+            { "occurrenceRemarks",              N_("Occurrence Remarks"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("Comments or notes about the Occurrence.")
             },
-            { "recordNumber",                   N_("Record Number"),                        "Text",      xmpText,   xmpExternal,      
+            { "recordNumber",                   N_("Record Number"),                        "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier given to the Occurrence at the time it was recorded. Often serves as a link between field notes and an Occurrence record, such as a specimen collector's number.")
             },
-            { "recordedBy",                     N_("Recorded By"),                          "bag Text",     xmpBag,   xmpExternal,      
+            { "recordedBy",                     N_("Recorded By"),                          "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of names of people, groups, or organizations responsible for recording the original Occurrence. The primary collector or observer, especially one who applies a personal identifier (recordNumber), should be listed first.")
             },
-            { "individualID",                   N_("Individual ID"),                        "Text",      xmpText,   xmpExternal,      
-                                                N_("Depreciated. An identifier for an individual or named group of individual organisms represented in the Occurrence. Meant to accommodate resampling of the same individual or group for monitoring purposes. May be a global unique identifier or an identifier specific to a data set.")
+            { "individualID",                   N_("Individual ID"),                        "Text",      xmpText,   xmpExternal,
+                                                N_("Deprecated. An identifier for an individual or named group of individual organisms represented in the Occurrence. Meant to accommodate resampling of the same individual or group for monitoring purposes. May be a global unique identifier or an identifier specific to a data set.")
             },
-            { "individualCount",                N_("Individual Count"),                     "Integer",      xmpText,   xmpExternal,      
+            { "individualCount",                N_("Individual Count"),                     "Integer",      xmpText,   xmpExternal,
                                                 N_("The number of individuals represented present at the time of the Occurrence.")
             },
-            { "organismQuantity",               N_("Organism Quantity"),                    "Text",      xmpText,   xmpExternal,      
+            { "organismQuantity",               N_("Organism Quantity"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("A number or enumeration value for the quantity of organisms.")
             },
-            { "organismQuantityType",           N_("Organism Quantity Type"),               "Text",      xmpText,   xmpExternal,      
+            { "organismQuantityType",           N_("Organism Quantity Type"),               "Text",      xmpText,   xmpExternal,
                                                 N_("The type of quantification system used for the quantity of organisms.")
             },
-            { "sex",                            N_("Sex"),                                  "Text",      xmpText,   xmpExternal,      
+            { "sex",                            N_("Sex"),                                  "Text",      xmpText,   xmpExternal,
                                                 N_("The sex of the biological individual(s) represented in the Occurrence. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "lifeStage",                      N_("Life Stage"),                           "Text",      xmpText,   xmpExternal,      
+            { "lifeStage",                      N_("Life Stage"),                           "Text",      xmpText,   xmpExternal,
                                                 N_("The age class or life stage of the biological individual(s) at the time the Occurrence was recorded. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "reproductiveCondition",          N_("Reproductive Condition"),               "Text",      xmpText,   xmpExternal,      
+            { "reproductiveCondition",          N_("Reproductive Condition"),               "Text",      xmpText,   xmpExternal,
                                                 N_("The reproductive condition of the biological individual(s) represented in the Occurrence. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "behavior",                       N_("Behavior"),                             "Text",     xmpText,    xmpExternal, 
+            { "behavior",                       N_("Behavior"),                             "Text",     xmpText,    xmpExternal,
                                                 N_("A description of the behavior shown by the subject at the time the Occurrence was recorded. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "establishmentMeans",             N_("Establishment Means"),                  "Text",      xmpText,    xmpExternal,      
+            { "establishmentMeans",             N_("Establishment Means"),                  "Text",      xmpText,    xmpExternal,
                                                 N_("The process by which the biological individual(s) represented in the Occurrence became established at the location. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "occurrenceStatus",               N_("Occurrence Status"),                    "Text",      xmpText,   xmpExternal,     
+            { "occurrenceStatus",               N_("Occurrence Status"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("A statement about the presence or absence of a Taxon at a Location. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "preparations",                   N_("Preparations"),                         "bag Text",     xmpBag,   xmpExternal,      
+            { "preparations",                   N_("Preparations"),                         "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of preparations and preservation methods for a specimen.")
             },
-            { "disposition",                    N_("Disposition"),                          "Text",     xmpText,    xmpExternal, 
+            { "disposition",                    N_("Disposition"),                          "Text",     xmpText,    xmpExternal,
                                                 N_("The current state of a specimen with respect to the collection identified in collectionCode or collectionID. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "otherCatalogNumbers",            N_("Other Catalog Numbers"),                "bag Text",     xmpBag,   xmpExternal,      
+            { "otherCatalogNumbers",            N_("Other Catalog Numbers"),                "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of previous or alternate fully qualified catalog numbers or other human-used identifiers for the same Occurrence, whether in the current or any other data set or collection.")
             },
-            { "previousIdentifications",        N_("Previous Identifications"),             "bag Text",     xmpBag,   xmpExternal,      
-                                                N_("Depreciated. A list (concatenated and separated) of previous assignments of names to the Occurrence.")
+            { "previousIdentifications",        N_("Previous Identifications"),             "bag Text",     xmpBag,   xmpExternal,
+                                                N_("Deprecated. A list (concatenated and separated) of previous assignments of names to the Occurrence.")
             },
-            { "associatedMedia",                N_("Associated Media"),                     "bag Text",     xmpBag,    xmpExternal, 
+            { "associatedMedia",                N_("Associated Media"),                     "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of identifiers (publication, global unique identifier, URI) of media associated with the Occurrence.")
             },
-            { "associatedReferences",           N_("Associated References"),                "bag Text",     xmpBag,    xmpExternal, 
+            { "associatedReferences",           N_("Associated References"),                "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of identifiers (publication, bibliographic reference, global unique identifier, URI) of literature associated with the Occurrence.")
             },
-            { "associatedOccurrences",          N_("Associated Occurrences"),               "bag Text",     xmpBag,    xmpExternal, 
-                                                N_("Depreciated. A list (concatenated and separated) of identifiers of other Occurrence records and their associations to this Occurrence.")
+            { "associatedOccurrences",          N_("Associated Occurrences"),               "bag Text",     xmpBag,    xmpExternal,
+                                                N_("Deprecated. A list (concatenated and separated) of identifiers of other Occurrence records and their associations to this Occurrence.")
             },
-            { "associatedSequences",            N_("Associated Sequences"),                 "bag Text",     xmpBag,    xmpExternal, 
+            { "associatedSequences",            N_("Associated Sequences"),                 "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of identifiers (publication, global unique identifier, URI) of genetic sequence information associated with the Occurrence.")
             },
-            { "associatedTaxa",                 N_("Associated Taxa"),                      "bag Text",     xmpBag,    xmpExternal, 
+            { "associatedTaxa",                 N_("Associated Taxa"),                      "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of identifiers or names of taxa and their associations with the Occurrence.")
             },
 
         // Organism Level Class
-        { "Organism",                 N_("Organism"),                     "Organism",    xmpText,   xmpInternal, 
+        { "Organism",                 N_("Organism"),                     "Organism",    xmpText,   xmpInternal,
                                       N_("*Main structure* containing organism based information."),
         },
             // Organism Level Terms
-            { "organismID",               N_("Organism ID"),                    "Text",      xmpText,    xmpExternal,      
+            { "organismID",               N_("Organism ID"),                    "Text",      xmpText,    xmpExternal,
                                           N_("An identifier for the Organism instance (as opposed to a particular digital record of the Organism). May be a globally unique identifier or an identifier specific to the data set.")
             },
-            { "organismName",             N_("Organism Name"),                        "Text",      xmpText,   xmpExternal,      
+            { "organismName",             N_("Organism Name"),                        "Text",      xmpText,   xmpExternal,
                                           N_("A textual name or label assigned to an Organism instance.")
             },
-            { "organismScope",            N_("Organism Scope"),                      "Text",      xmpText,    xmpExternal, 
+            { "organismScope",            N_("Organism Scope"),                      "Text",      xmpText,    xmpExternal,
                                           N_("A description of the kind of Organism instance. Can be used to indicate whether the Organism instance represents a discrete organism or if it represents a particular type of aggregation. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "associatedOccurrences",    N_("Organism Associated Occurrences"),      "bag Text",     xmpBag,    xmpExternal,      
+            { "associatedOccurrences",    N_("Organism Associated Occurrences"),      "bag Text",     xmpBag,    xmpExternal,
                                           N_("A list (concatenated and separated with a vertical bar ' | ') of identifiers of other Occurrence records and their associations to this Occurrence.")
             },
-            { "associatedOrganisms",      N_("Associated Organisms"),   "bag Text",     xmpBag,   xmpExternal,      
+            { "associatedOrganisms",      N_("Associated Organisms"),   "bag Text",     xmpBag,   xmpExternal,
                                           N_("A list (concatenated and separated with a vertical bar ' | ' ) of identifiers of other Organisms and their associations to this Organism.")
             },
-            { "previousIdentifications",  N_("Previous Identifications"),         "bag Text",     xmpBag,    xmpExternal,      
+            { "previousIdentifications",  N_("Previous Identifications"),         "bag Text",     xmpBag,    xmpExternal,
                                           N_("A list (concatenated and separated with a vertical bar ' | ' ) of previous assignments of names to the Organism.")
             },
-            { "organismRemarks",          N_("Organism Remarks"),                   "Text",      xmpText,    xmpExternal,      
+            { "organismRemarks",          N_("Organism Remarks"),                   "Text",      xmpText,    xmpExternal,
                                           N_("Comments or notes about the Organism instance.")
             },
 
         // Material Sample Level Class
-        { "MaterialSample",                 N_("Material Sample"),                         "MaterialSample",    xmpText,   xmpInternal, 
+        { "MaterialSample",                 N_("Material Sample"),                         "MaterialSample",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing material sample based information."),
         },
-        { "LivingSpecimen",                 N_("Living Specimen"),                         "LivingSpecimen",    xmpText,   xmpInternal, 
+        { "LivingSpecimen",                 N_("Living Specimen"),                         "LivingSpecimen",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing living specimen based information. A specimen that is alive."),
         },
-        { "PreservedSpecimen",              N_("Preserved Specimen"),                      "PreservedSpecimen",    xmpText,   xmpInternal, 
+        { "PreservedSpecimen",              N_("Preserved Specimen"),                      "PreservedSpecimen",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing preserved specimen based information. A specimen that has been preserved."),
         },
-        { "FossilSpecimen",                 N_("Fossil Specimen"),                         "FossilSpecimen",    xmpText,   xmpInternal, 
+        { "FossilSpecimen",                 N_("Fossil Specimen"),                         "FossilSpecimen",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing fossil specimen based information. A preserved specimen that is a fossil."),
         },
             // Material Sample Level Terms
-            { "materialSampleID",               N_("Material Sample ID"),                    "Text",      xmpText,    xmpExternal,      
+            { "materialSampleID",               N_("Material Sample ID"),                    "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the MaterialSample (as opposed to a particular digital record of the material sample). In the absence of a persistent global unique identifier, construct one from a combination of identifiers in the record that will most closely make the materialSampleID globally unique.")
             },
 
         // Event Level Class
-        { "Event",                          N_("Event"),                            "Event",    xmpText,  xmpInternal, 
+        { "Event",                          N_("Event"),                            "Event",    xmpText,  xmpInternal,
                                             N_("*Main structure* containing event based information."),
         },
-        { "HumanObservation",               N_("Human Observation"),                "HumanObservation",    xmpText,  xmpInternal, 
+        { "HumanObservation",               N_("Human Observation"),                "HumanObservation",    xmpText,  xmpInternal,
                                             N_("*Main structure* containing human observation based information."),
         },
-        { "MachineObservation",             N_("Machine Observation"),              "MachineObservation",    xmpText,  xmpInternal, 
+        { "MachineObservation",             N_("Machine Observation"),              "MachineObservation",    xmpText,  xmpInternal,
                                             N_("*Main structure* containing machine observation based information."),
         },
             // Event Level Terms
-            { "eventID",                        N_("Event ID"),                             "Text",      xmpText,    xmpExternal,      
+            { "eventID",                        N_("Event ID"),                             "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the set of information associated with an Event (something that occurs at a place and time). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "parentEventID",                  N_("Parent Event ID"),                             "Text",      xmpText,    xmpExternal,      
+            { "parentEventID",                  N_("Parent Event ID"),                             "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the broader Event that groups this and potentially other Events.")
             },
-            { "eventDate",                      N_("Event Date"),                  "Date",      xmpText,    xmpExternal,      
+            { "eventDate",                      N_("Event Date"),                  "Date",      xmpText,    xmpExternal,
                                                 N_("The date-time or interval during which an Event occurred. For occurrences, this is the date-time when the event was recorded. Not suitable for a time in a geological context. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "earliestDate",                   N_("Event Earliest Date"),                  "Date",      xmpText,    xmpExternal,      
-                                                N_("Depreciated. (Child of Xmp.dwc.Event) The date-time or interval during which an Event started. For occurrences, this is the date-time when the event was recorded. Not suitable for a time in a geological context. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
+            { "earliestDate",                   N_("Event Earliest Date"),                  "Date",      xmpText,    xmpExternal,
+                                                N_("Deprecated. (Child of Xmp.dwc.Event) The date-time or interval during which an Event started. For occurrences, this is the date-time when the event was recorded. Not suitable for a time in a geological context. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "latestDate",                     N_("Event Latest Date"),                    "Date",      xmpText,    xmpExternal,      
-                                                N_("Depreciated. (Child of Xmp.dwc.Event) The date-time or interval during which an Event ended. For occurrences, this is the date-time when the event was recorded. Not suitable for a time in a geological context. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
+            { "latestDate",                     N_("Event Latest Date"),                    "Date",      xmpText,    xmpExternal,
+                                                N_("Deprecated. (Child of Xmp.dwc.Event) The date-time or interval during which an Event ended. For occurrences, this is the date-time when the event was recorded. Not suitable for a time in a geological context. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "eventTime",                      N_("Event Time"),                           "Date",      xmpText,    xmpExternal,      
+            { "eventTime",                      N_("Event Time"),                           "Date",      xmpText,    xmpExternal,
                                                 N_("The time or interval during which an Event occurred. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "startDayOfYear",                 N_("Start Day Of Year"),                    "Integer",      xmpText,    xmpExternal,      
+            { "startDayOfYear",                 N_("Start Day Of Year"),                    "Integer",      xmpText,    xmpExternal,
                                                 N_("The earliest ordinal day of the year on which the Event occurred (1 for January 1, 365 for December 31, except in a leap year, in which case it is 366).")
             },
-            { "endDayOfYear",                   N_("End Day Of Year"),                      "Integer",      xmpText,    xmpExternal,      
+            { "endDayOfYear",                   N_("End Day Of Year"),                      "Integer",      xmpText,    xmpExternal,
                                                 N_("The latest ordinal day of the year on which the Event occurred (1 for January 1, 365 for December 31, except in a leap year, in which case it is 366).")
             },
-            { "year",                           N_("Year"),                                 "Integer",      xmpText,    xmpExternal,      
+            { "year",                           N_("Year"),                                 "Integer",      xmpText,    xmpExternal,
                                                 N_("The four-digit year in which the Event occurred, according to the Common Era Calendar.")
             },
-            { "month",                          N_("Month"),                                "Integer",      xmpText,    xmpExternal,      
+            { "month",                          N_("Month"),                                "Integer",      xmpText,    xmpExternal,
                                                 N_("The ordinal month in which the Event occurred.")
             },
-            { "day",                            N_("Day"),                                  "Integer",      xmpText,    xmpExternal, 
+            { "day",                            N_("Day"),                                  "Integer",      xmpText,    xmpExternal,
                                                 N_("The integer day of the month on which the Event occurred.")
             },
-            { "verbatimEventDate",              N_("Verbatim Event Date"),                  "Text",      xmpText,   xmpExternal,      
+            { "verbatimEventDate",              N_("Verbatim Event Date"),                  "Text",      xmpText,   xmpExternal,
                                                 N_("The verbatim original representation of the date and time information for an Event.")
             },
-            { "habitat",                        N_("Habitat"),                              "Text",      xmpText,    xmpExternal,      
+            { "habitat",                        N_("Habitat"),                              "Text",      xmpText,    xmpExternal,
                                                 N_("A category or description of the habitat in which the Event occurred.")
             },
-            { "samplingProtocol",               N_("Sampling Protocol"),                    "Text",      xmpText,   xmpExternal,      
+            { "samplingProtocol",               N_("Sampling Protocol"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The name of, reference to, or description of the method or protocol used during an Event.")
             },
-            { "samplingEffort",                 N_("Sampling Effort"),                      "Text",      xmpText,   xmpExternal,      
+            { "samplingEffort",                 N_("Sampling Effort"),                      "Text",      xmpText,   xmpExternal,
                                                 N_("The amount of effort expended during an Event.")
-            },               
-            { "sampleSizeValue",                N_("Sampling Size Value"),                      "Text",      xmpText,   xmpExternal,      
+            },
+            { "sampleSizeValue",                N_("Sampling Size Value"),                      "Text",      xmpText,   xmpExternal,
                                                 N_("A numeric value for a measurement of the size (time duration, length, area, or volume) of a sample in a sampling event.")
             },
-            { "sampleSizeUnit",                 N_("Sampling Size Unit"),                      "Text",      xmpText,   xmpExternal,      
+            { "sampleSizeUnit",                 N_("Sampling Size Unit"),                      "Text",      xmpText,   xmpExternal,
                                                 N_("The unit of measurement of the size (time duration, length, area, or volume) of a sample in a sampling event.")
             },
-            { "fieldNumber",                    N_("Field Number"),                         "Text",      xmpText,    xmpExternal,      
+            { "fieldNumber",                    N_("Field Number"),                         "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier given to the event in the field. Often serves as a link between field notes and the Event.")
             },
-            { "fieldNotes",                     N_("Field Notes"),                          "Text",      xmpText,    xmpExternal,      
+            { "fieldNotes",                     N_("Field Notes"),                          "Text",      xmpText,    xmpExternal,
                                                 N_("One of (a) an indicator of the existence of, (b) a reference to (publication, URI), or (c) the text of notes taken in the field about the Event.")
             },
-            { "eventRemarks",                   N_("Event Remarks"),                        "Text",      xmpText,    xmpExternal,      
+            { "eventRemarks",                   N_("Event Remarks"),                        "Text",      xmpText,    xmpExternal,
                                                 N_("Comments or notes about the Event.")
             },
 
         //Location Level Class
-        { "dctermsLocation",                N_("Location Class"),                       "Location",    xmpText,   xmpInternal, 
-                                            N_("Depreciated. Use Xmp.dcterms.Location instead. *Main structure* containing location based information."),
+        { "dctermsLocation",                N_("Location Class"),                       "Location",    xmpText,   xmpInternal,
+                                            N_("Deprecated. Use Xmp.dcterms.Location instead. *Main structure* containing location based information."),
         },
             //Location Level Terms
-            { "locationID",                     N_("Location ID"),                          "Text",      xmpText,   xmpExternal,      
+            { "locationID",                     N_("Location ID"),                          "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the set of location information (data associated with Location). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "higherGeographyID",              N_("Higher Geography ID"),                   "Text",      xmpText,    xmpExternal,      
+            { "higherGeographyID",              N_("Higher Geography ID"),                   "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the geographic region within which the Location occurred. Recommended best practice is to use an persistent identifier from a controlled vocabulary such as the Getty Thesaurus of Geographic Names.")
             },
-            { "higherGeography",                N_("Higher Geography"),                     "bag Text",     xmpBag,    xmpExternal,      
+            { "higherGeography",                N_("Higher Geography"),                     "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of geographic names less specific than the information captured in the locality term.")
             },
-            { "continent",                      N_("Continent"),                            "Text",     xmpText,    xmpExternal, 
+            { "continent",                      N_("Continent"),                            "Text",     xmpText,    xmpExternal,
                                                 N_("The name of the continent in which the Location occurs. Recommended best practice is to use a controlled vocabulary such as the Getty Thesaurus of Geographic Names or the ISO 3166 Continent code.")
             },
-            { "waterBody",                      N_("Water Body"),                           "Text",      xmpText,   xmpExternal,      
+            { "waterBody",                      N_("Water Body"),                           "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the water body in which the Location occurs. Recommended best practice is to use a controlled vocabulary such as the Getty Thesaurus of Geographic Names.")
             },
-            { "islandGroup",                    N_("Island Group"),                         "Text",      xmpText,   xmpExternal,      
+            { "islandGroup",                    N_("Island Group"),                         "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the island group in which the Location occurs. Recommended best practice is to use a controlled vocabulary such as the Getty Thesaurus of Geographic Names.")
             },
-            { "island",                         N_("Island"),                               "Text",      xmpText,   xmpExternal,      
+            { "island",                         N_("Island"),                               "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the island on or near which the Location occurs. Recommended best practice is to use a controlled vocabulary such as the Getty Thesaurus of Geographic Names.")
             },
-            { "country",                        N_("Country"),                              "Text",     xmpText,    xmpExternal, 
+            { "country",                        N_("Country"),                              "Text",     xmpText,    xmpExternal,
                                                 N_("The name of the country or major administrative unit in which the Location occurs. Recommended best practice is to use a controlled vocabulary such as the Getty Thesaurus of Geographic Names.")
             },
-            { "countryCode",                    N_("Country Code"),                         "Text",     xmpText,    xmpExternal, 
+            { "countryCode",                    N_("Country Code"),                         "Text",     xmpText,    xmpExternal,
                                                 N_("The standard code for the country in which the Location occurs. Recommended best practice is to use ISO 3166-1-alpha-2 country codes.")
             },
-            { "stateProvince",                  N_("State Province"),                       "Text",      xmpText,   xmpExternal,      
+            { "stateProvince",                  N_("State Province"),                       "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the next smaller administrative region than country (state, province, canton, department, region, etc.) in which the Location occurs.")
             },
-            { "county",                         N_("County"),                               "Text",     xmpText,    xmpExternal, 
+            { "county",                         N_("County"),                               "Text",     xmpText,    xmpExternal,
                                                 N_("The full, unabbreviated name of the next smaller administrative region than stateProvince (county, shire, department, etc.) in which the Location occurs.")
             },
-            { "municipality",                   N_("Municipality"),                         "Text",      xmpText,   xmpExternal,      
+            { "municipality",                   N_("Municipality"),                         "Text",      xmpText,   xmpExternal,
                                                 N_("The full, unabbreviated name of the next smaller administrative region than county (city, municipality, etc.) in which the Location occurs. Do not use this term for a nearby named place that does not contain the actual location.")
             },
-            { "locality",                       N_("Locality"),                             "Text",      xmpText,   xmpExternal,      
+            { "locality",                       N_("Locality"),                             "Text",      xmpText,   xmpExternal,
                                                 N_("The specific description of the place. Less specific geographic information can be provided in other geographic terms (higherGeography, continent, country, stateProvince, county, municipality, waterBody, island, islandGroup). This term may contain information modified from the original to correct perceived errors or standardize the description.")
             },
-            { "verbatimLocality",               N_("Verbatim Locality"),                    "Text",      xmpText,   xmpExternal,      
+            { "verbatimLocality",               N_("Verbatim Locality"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The original textual description of the place.")
             },
-            { "verbatimElevation",              N_("Verbatim Elevation"),                   "Text",      xmpText,   xmpExternal,      
+            { "verbatimElevation",              N_("Verbatim Elevation"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("The original description of the elevation (altitude, usually above sea level) of the Location.")
             },
-            { "minimumElevationInMeters",       N_("Minimum Elevation In Meters"),          "Real",      xmpText,   xmpExternal,      
+            { "minimumElevationInMeters",       N_("Minimum Elevation In Meters"),          "Real",      xmpText,   xmpExternal,
                                                 N_("The lower limit of the range of elevation (altitude, usually above sea level), in meters.")
             },
-            { "maximumElevationInMeters",       N_("Maximum Elevation In Meters"),          "Real",      xmpText,   xmpExternal,      
+            { "maximumElevationInMeters",       N_("Maximum Elevation In Meters"),          "Real",      xmpText,   xmpExternal,
                                                 N_("The upper limit of the range of elevation (altitude, usually above sea level), in meters.")
             },
-            { "verbatimDepth",                  N_("Verbatim Depth"),                       "Text",      xmpText,   xmpExternal,      
+            { "verbatimDepth",                  N_("Verbatim Depth"),                       "Text",      xmpText,   xmpExternal,
                                                 N_("The original description of the depth below the local surface.")
             },
-            { "minimumDepthInMeters",           N_("Minimum Depth In Meters"),              "Real",      xmpText,   xmpExternal,      
+            { "minimumDepthInMeters",           N_("Minimum Depth In Meters"),              "Real",      xmpText,   xmpExternal,
                                                 N_("The lesser depth of a range of depth below the local surface, in meters.")
             },
-            { "maximumDepthInMeters",           N_("Maximum Depth In Meters"),              "Real",      xmpText,   xmpExternal,      
+            { "maximumDepthInMeters",           N_("Maximum Depth In Meters"),              "Real",      xmpText,   xmpExternal,
                                                 N_("The greater depth of a range of depth below the local surface, in meters.")
             },
-            { "minimumDistanceAboveSurfaceInMeters",      N_("Minimum Distance Above Surface In Meters"),   "Real", xmpText, xmpExternal,      
+            { "minimumDistanceAboveSurfaceInMeters",      N_("Minimum Distance Above Surface In Meters"),   "Real", xmpText, xmpExternal,
                                                 N_("The lesser distance in a range of distance from a reference surface in the vertical direction, in meters. Use positive values for locations above the surface, negative values for locations below. If depth measures are given, the reference surface is the location given by the depth, otherwise the reference surface is the location given by the elevation.")
             },
-            { "maximumDistanceAboveSurfaceInMeters",    N_("Maximum Distance Above Surface In Meters"), "Real", xmpText,    xmpExternal,      
+            { "maximumDistanceAboveSurfaceInMeters",    N_("Maximum Distance Above Surface In Meters"), "Real", xmpText,    xmpExternal,
                                                         N_("The greater distance in a range of distance from a reference surface in the vertical direction, in meters. Use positive values for locations above the surface, negative values for locations below. If depth measures are given, the reference surface is the location given by the depth, otherwise the reference surface is the location given by the elevation.")
             },
-            { "locationAccordingTo",            N_("Location According To"),                "Text",      xmpText,   xmpExternal,      
+            { "locationAccordingTo",            N_("Location According To"),                "Text",      xmpText,   xmpExternal,
                                                 N_("Information about the source of this Location information. Could be a publication (gazetteer), institution, or team of individuals.")
             },
-            { "locationRemarks",                N_("Location Remarks"),                     "Text",      xmpText,   xmpExternal,      
+            { "locationRemarks",                N_("Location Remarks"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("Comments or notes about the Location.")
             },
-            { "verbatimCoordinates",            N_("Verbatim Coordinates"),                 "Text",      xmpText,   xmpExternal,      
+            { "verbatimCoordinates",            N_("Verbatim Coordinates"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("The verbatim original spatial coordinates of the Location. The coordinate ellipsoid, geodeticDatum, or full Spatial Reference System (SRS) for these coordinates should be stored in verbatimSRS and the coordinate system should be stored in verbatimCoordinateSystem.")
             },
-            { "verbatimLatitude",               N_("Verbatim Latitude"),                    "Text",      xmpText,   xmpExternal,      
+            { "verbatimLatitude",               N_("Verbatim Latitude"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The verbatim original latitude of the Location. The coordinate ellipsoid, geodeticDatum, or full Spatial Reference System (SRS) for these coordinates should be stored in verbatimSRS and the coordinate system should be stored in verbatimCoordinateSystem.")
             },
-            { "verbatimLongitude",              N_("Verbatim Longitude"),                   "Text",      xmpText,   xmpExternal,      
+            { "verbatimLongitude",              N_("Verbatim Longitude"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("The verbatim original longitude of the Location. The coordinate ellipsoid, geodeticDatum, or full Spatial Reference System (SRS) for these coordinates should be stored in verbatimSRS and the coordinate system should be stored in verbatimCoordinateSystem.")
             },
-            { "verbatimCoordinateSystem",       N_("Verbatim Coordinate System"),           "Text",      xmpText,   xmpExternal,      
+            { "verbatimCoordinateSystem",       N_("Verbatim Coordinate System"),           "Text",      xmpText,   xmpExternal,
                                                 N_("The spatial coordinate system for the verbatimLatitude and verbatimLongitude or the verbatimCoordinates of the Location. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "verbatimSRS",                    N_("Verbatim SRS"),                         "Text",      xmpText,   xmpExternal,      
+            { "verbatimSRS",                    N_("Verbatim SRS"),                         "Text",      xmpText,   xmpExternal,
                                                 N_("The ellipsoid, geodetic datum, or spatial reference system (SRS) upon which coordinates given in verbatimLatitude and verbatimLongitude, or verbatimCoordinates are based. Recommended best practice is use the EPSG code as a controlled vocabulary to provide an SRS, if known. Otherwise use a controlled vocabulary for the name or code of the geodetic datum, if known. Otherwise use a controlled vocabulary for the name or code of the ellipsoid, if known. If none of these is known, use the value \"unknown\".")
             },
-            { "decimalLatitude",                N_("Decimal Latitude"),                     "Real",     xmpText,    xmpExternal, 
+            { "decimalLatitude",                N_("Decimal Latitude"),                     "Real",     xmpText,    xmpExternal,
                                                 N_("The geographic latitude (in decimal degrees, using the spatial reference system given in geodeticDatum) of the geographic center of a Location. Positive values are north of the Equator, negative values are south of it. Legal values lie between -90 and 90, inclusive.")
             },
-            { "decimalLongitude",               N_("Decimal Longitude"),                    "Real",     xmpText,    xmpExternal, 
+            { "decimalLongitude",               N_("Decimal Longitude"),                    "Real",     xmpText,    xmpExternal,
                                                 N_("The geographic longitude (in decimal degrees, using the spatial reference system given in geodeticDatum) of the geographic center of a Location. Positive values are east of the Greenwich Meridian, negative values are west of it. Legal values lie between -180 and 180, inclusive.")
             },
-            { "geodeticDatum",                  N_("Geodetic Datum"),                       "Text",      xmpText,    xmpExternal,      
+            { "geodeticDatum",                  N_("Geodetic Datum"),                       "Text",      xmpText,    xmpExternal,
                                                 N_("The ellipsoid, geodetic datum, or spatial reference system (SRS) upon which the geographic coordinates given in decimalLatitude and decimalLongitude as based. Recommended best practice is use the EPSG code as a controlled vocabulary to provide an SRS, if known. Otherwise use a controlled vocabulary for the name or code of the geodetic datum, if known. Otherwise use a controlled vocabulary for the name or code of the ellipsoid, if known. If none of these is known, use the value \"unknown\".")
             },
-            { "coordinateUncertaintyInMeters",  N_("Coordinate Uncertainty In Meters"),     "Real",     xmpText,    xmpExternal, 
+            { "coordinateUncertaintyInMeters",  N_("Coordinate Uncertainty In Meters"),     "Real",     xmpText,    xmpExternal,
                                                 N_("The horizontal distance (in meters) from the given decimalLatitude and decimalLongitude describing the smallest circle containing the whole of the Location. Leave the value empty if the uncertainty is unknown, cannot be estimated, or is not applicable (because there are no coordinates). Zero is not a valid value for this term.")
             },
-            { "coordinatePrecision",            N_("Coordinate Precision"),                 "Text",     xmpText,    xmpExternal, 
+            { "coordinatePrecision",            N_("Coordinate Precision"),                 "Text",     xmpText,    xmpExternal,
                                                 N_("A decimal representation of the precision of the coordinates given in the decimalLatitude and decimalLongitude.")
             },
-            { "pointRadiusSpatialFit",          N_("Point Radius Spatial Fit"),              "Real",      xmpText,   xmpExternal,      
+            { "pointRadiusSpatialFit",          N_("Point Radius Spatial Fit"),              "Real",      xmpText,   xmpExternal,
                                                 N_("The ratio of the area of the point-radius (decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters) to the area of the true (original, or most specific) spatial representation of the Location. Legal values are 0, greater than or equal to 1, or undefined. A value of 1 is an exact match or 100% overlap. A value of 0 should be used if the given point-radius does not completely contain the original representation. The pointRadiusSpatialFit is undefined (and should be left blank) if the original representation is a point without uncertainty and the given georeference is not that same point (without uncertainty). If both the original and the given georeference are the same point, the pointRadiusSpatialFit is 1.")
             },
-            { "footprintWKT",                   N_("Footprint WKT"),                         "Text",      xmpText,    xmpExternal,      
+            { "footprintWKT",                   N_("Footprint WKT"),                         "Text",      xmpText,    xmpExternal,
                                                 N_("A Well-Known Text (WKT) representation of the shape (footprint, geometry) that defines the Location. A Location may have both a point-radius representation (see decimalLatitude) and a footprint representation, and they may differ from each other.")
             },
-            { "footprintSRS",                   N_("Footprint SRS"),                        "Text",      xmpText,    xmpExternal,      
+            { "footprintSRS",                   N_("Footprint SRS"),                        "Text",      xmpText,    xmpExternal,
                                                 N_("A Well-Known Text (WKT) representation of the Spatial Reference System (SRS) for the footprintWKT of the Location. Do not use this term to describe the SRS of the decimalLatitude and decimalLongitude, even if it is the same as for the footprintWKT - use the geodeticDatum instead.")
             },
-            { "footprintSpatialFit",            N_("Footprint Spatial Fit"),                "Real",      xmpText,    xmpExternal,      
+            { "footprintSpatialFit",            N_("Footprint Spatial Fit"),                "Real",      xmpText,    xmpExternal,
                                                 N_("The ratio of the area of the footprint (footprintWKT) to the area of the true (original, or most specific) spatial representation of the Location. Legal values are 0, greater than or equal to 1, or undefined. A value of 1 is an exact match or 100% overlap. A value of 0 should be used if the given footprint does not completely contain the original representation. The footprintSpatialFit is undefined (and should be left blank) if the original representation is a point and the given georeference is not that same point. If both the original and the given georeference are the same point, the footprintSpatialFit is 1.")
             },
-            { "georeferencedBy",                N_("Georeferenced By"),                     "bag Text",     xmpBag,   xmpExternal,      
+            { "georeferencedBy",                N_("Georeferenced By"),                     "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of names of people, groups, or organizations who determined the georeference (spatial representation) for the Location.")
             },
-            { "georeferencedDate",              N_("Georeferenced Date"),                   "Date",      xmpText,    xmpExternal,      
+            { "georeferencedDate",              N_("Georeferenced Date"),                   "Date",      xmpText,    xmpExternal,
                                                 N_("The date on which the Location was georeferenced. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "georeferenceProtocol",           N_("Georeference Protocol"),                "Text",      xmpText,    xmpExternal,      
+            { "georeferenceProtocol",           N_("Georeference Protocol"),                "Text",      xmpText,    xmpExternal,
                                                 N_("A description or reference to the methods used to determine the spatial footprint, coordinates, and uncertainties.")
             },
-            { "georeferenceSources",            N_("Georeference Sources"),                 "bag Text",     xmpBag,    xmpExternal,      
+            { "georeferenceSources",            N_("Georeference Sources"),                 "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of maps, gazetteers, or other resources used to georeference the Location, described specifically enough to allow anyone in the future to use the same resources.")
             },
-            { "georeferenceVerificationStatus", N_("Georeference Verification Status"),     "Text",      xmpText,    xmpExternal,      
+            { "georeferenceVerificationStatus", N_("Georeference Verification Status"),     "Text",      xmpText,    xmpExternal,
                                                 N_("A categorical description of the extent to which the georeference has been verified to represent the best possible spatial description. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "georeferenceRemarks",            N_("Georeference Remarks"),                 "Text",      xmpText,    xmpExternal,      
+            { "georeferenceRemarks",            N_("Georeference Remarks"),                 "Text",      xmpText,    xmpExternal,
                                                 N_("Notes or comments about the spatial description determination, explaining assumptions made in addition or opposition to the those formalized in the method referred to in georeferenceProtocol.")
             },
 
         // Geological Context Level Class
-        { "GeologicalContext",              N_("Geological Context"),                     "GeologicalContext",    xmpText,   xmpInternal, 
+        { "GeologicalContext",              N_("Geological Context"),                     "GeologicalContext",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing geological context based information."),
         },
             // Geological Context Level Terms
-            { "geologicalContextID",            N_("Geological Context ID"),                "Text",      xmpText,    xmpExternal,      
+            { "geologicalContextID",            N_("Geological Context ID"),                "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the set of information associated with a GeologicalContext (the location within a geological context, such as stratigraphy). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "earliestEonOrLowestEonothem",    N_("Earliest Eon Or Lowest Eonothem"),      "Text",     xmpText,    xmpExternal, 
+            { "earliestEonOrLowestEonothem",    N_("Earliest Eon Or Lowest Eonothem"),      "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the earliest possible geochronologic eon or lowest chrono-stratigraphic eonothem or the informal name (\"Precambrian\") attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "latestEonOrHighestEonothem",     N_("Latest Eon Or Highest Eonothem"),       "Text",      xmpText,   xmpExternal,      
+            { "latestEonOrHighestEonothem",     N_("Latest Eon Or Highest Eonothem"),       "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the latest possible geochronologic eon or highest chrono-stratigraphic eonothem or the informal name (\"Precambrian\") attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "earliestEraOrLowestErathem",     N_("Earliest Era Or Lowest Erathem"),       "Text",     xmpText,    xmpExternal, 
+            { "earliestEraOrLowestErathem",     N_("Earliest Era Or Lowest Erathem"),       "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the earliest possible geochronologic era or lowest chronostratigraphic erathem attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "latestEraOrHighestErathem",      N_("Latest Era Or Highest Erathem"),        "Text",      xmpText,   xmpExternal,      
+            { "latestEraOrHighestErathem",      N_("Latest Era Or Highest Erathem"),        "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the latest possible geochronologic era or highest chronostratigraphic erathem attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "earliestPeriodOrLowestSystem",   N_("Earliest Period Or Lowest System"),     "Text",     xmpText,    xmpExternal, 
+            { "earliestPeriodOrLowestSystem",   N_("Earliest Period Or Lowest System"),     "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the earliest possible geochronologic period or lowest chronostratigraphic system attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "latestPeriodOrHighestSystem",    N_("Latest Period Or Highest System"),      "Text",      xmpText,   xmpExternal,      
+            { "latestPeriodOrHighestSystem",    N_("Latest Period Or Highest System"),      "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the latest possible geochronologic period or highest chronostratigraphic system attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "earliestEpochOrLowestSeries",    N_("Earliest Epoch Or Lowest Series"),      "Text",     xmpText,    xmpExternal, 
+            { "earliestEpochOrLowestSeries",    N_("Earliest Epoch Or Lowest Series"),      "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the earliest possible geochronologic epoch or lowest chronostratigraphic series attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "latestEpochOrHighestSeries",     N_("Latest Epoch Or Highest Series"),       "Text",      xmpText,   xmpExternal,      
+            { "latestEpochOrHighestSeries",     N_("Latest Epoch Or Highest Series"),       "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the latest possible geochronologic epoch or highest chronostratigraphic series attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "earliestAgeOrLowestStage",       N_("Earliest Age Or Lowest Stage"),         "Text",     xmpText,    xmpExternal, 
+            { "earliestAgeOrLowestStage",       N_("Earliest Age Or Lowest Stage"),         "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the earliest possible geochronologic age or lowest chronostratigraphic stage attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "latestAgeOrHighestStage",        N_("Latest Age Or Highest Stage"),          "Text",      xmpText,   xmpExternal,      
+            { "latestAgeOrHighestStage",        N_("Latest Age Or Highest Stage"),          "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the latest possible geochronologic age or highest chronostratigraphic stage attributable to the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "lowestBiostratigraphicZone",     N_("Lowest Biostratigraphic Zone"),         "Text",      xmpText,   xmpExternal,      
+            { "lowestBiostratigraphicZone",     N_("Lowest Biostratigraphic Zone"),         "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the lowest possible geological biostratigraphic zone of the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "highestBiostratigraphicZone",    N_("Highest Biostratigraphic Zone"),        "Text",      xmpText,    xmpExternal,      
+            { "highestBiostratigraphicZone",    N_("Highest Biostratigraphic Zone"),        "Text",      xmpText,    xmpExternal,
                                                 N_("The full name of the highest possible geological biostratigraphic zone of the stratigraphic horizon from which the cataloged item was collected.")
             },
-            { "lithostratigraphicTerms",        N_("Lithostratigraphic Terms"),             "Text",      xmpText,   xmpExternal,      
+            { "lithostratigraphicTerms",        N_("Lithostratigraphic Terms"),             "Text",      xmpText,   xmpExternal,
                                                 N_("The combination of all litho-stratigraphic names for the rock from which the cataloged item was collected.")
             },
-            { "group",                          N_("Group"),                                "Text",      xmpText,    xmpExternal,      
+            { "group",                          N_("Group"),                                "Text",      xmpText,    xmpExternal,
                                                 N_("The full name of the lithostratigraphic group from which the cataloged item was collected.")
             },
-            { "formation",                      N_("Formation"),                            "Text",      xmpText,    xmpExternal,      
+            { "formation",                      N_("Formation"),                            "Text",      xmpText,    xmpExternal,
                                                 N_("The full name of the lithostratigraphic formation from which the cataloged item was collected.")
             },
-            { "member",                         N_("Member"),                               "Text",      xmpText,   xmpExternal,      
+            { "member",                         N_("Member"),                               "Text",      xmpText,   xmpExternal,
                                                 N_("The full name of the lithostratigraphic member from which the cataloged item was collected.")
             },
-            { "bed",                            N_("Bed"),                                  "Text",     xmpText,    xmpExternal, 
+            { "bed",                            N_("Bed"),                                  "Text",     xmpText,    xmpExternal,
                                                 N_("The full name of the lithostratigraphic bed from which the cataloged item was collected.")
             },
 
         // Identification Level Class
-        { "Identification",                 N_("Identification"),                     "Identification",    xmpText,   xmpInternal, 
+        { "Identification",                 N_("Identification"),                     "Identification",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing identification based information."),
         },
             // Identification Level Terms
-            { "identificationID",               N_("Identification ID"),                    "Text",      xmpText,    xmpExternal,      
+            { "identificationID",               N_("Identification ID"),                    "Text",      xmpText,    xmpExternal,
                                                 N_("An identifier for the Identification (the body of information associated with the assignment of a scientific name). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "identifiedBy",                   N_("Identified By"),                        "bag Text",     xmpBag,   xmpExternal,      
+            { "identifiedBy",                   N_("Identified By"),                        "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of names of people, groups, or organizations who assigned the Taxon to the subject.")
             },
-            { "dateIdentified",                 N_("Date Identified"),                      "Date",      xmpText,    xmpExternal, 
+            { "dateIdentified",                 N_("Date Identified"),                      "Date",      xmpText,    xmpExternal,
                                                 N_("The date on which the subject was identified as representing the Taxon. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "identificationReferences",       N_("Identification References"),            "bag Text",     xmpBag,    xmpExternal,      
+            { "identificationReferences",       N_("Identification References"),            "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of references (publication, global unique identifier, URI) used in the Identification.")
             },
-            { "identificationVerificationStatus",   N_("Identification Verification Status"),   "Text",  xmpText,   xmpExternal,      
+            { "identificationVerificationStatus",   N_("Identification Verification Status"),   "Text",  xmpText,   xmpExternal,
                                                     N_("A categorical indicator of the extent to which the taxonomic identification has been verified to be correct. Recommended best practice is to use a controlled vocabulary such as that used in HISPID/ABCD.")
             },
-            { "identificationRemarks",          N_("Identification Remarks"),               "Text",      xmpText,    xmpExternal,      
+            { "identificationRemarks",          N_("Identification Remarks"),               "Text",      xmpText,    xmpExternal,
                                                 N_("Comments or notes about the Identification.")
             },
-            { "identificationQualifier",        N_("Identification Qualifier"),             "Text",      xmpText,    xmpExternal,      
+            { "identificationQualifier",        N_("Identification Qualifier"),             "Text",      xmpText,    xmpExternal,
                                                 N_("A brief phrase or a standard term (\"cf.\" \"aff.\") to express the determiner's doubts about the Identification.")
             },
-            { "typeStatus",                     N_("Type Status"),                          "bag Text",     xmpBag,   xmpExternal,      
+            { "typeStatus",                     N_("Type Status"),                          "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of nomenclatural types (type status, typified scientific name, publication) applied to the subject.")
             },
 
         // Taxon Level Class
-        { "Taxon",                          N_("Taxon"),                                "Taxon",    xmpBag,   xmpInternal, 
+        { "Taxon",                          N_("Taxon"),                                "Taxon",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing taxonomic based information."),
         },
             // Taxon Level Terms
-            { "taxonID",                        N_("Taxon ID"),                             "Text",      xmpText,   xmpExternal,      
+            { "taxonID",                        N_("Taxon ID"),                             "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the set of taxon information (data associated with the Taxon class). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "scientificNameID",               N_("Scientific Name ID"),                   "Text",      xmpText,   xmpExternal,      
+            { "scientificNameID",               N_("Scientific Name ID"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the nomenclatural (not taxonomic) details of a scientific name.")
             },
-            { "acceptedNameUsageID",            N_("Accepted Name Usage ID"),               "Text",     xmpText,    xmpExternal, 
+            { "acceptedNameUsageID",            N_("Accepted Name Usage ID"),               "Text",     xmpText,    xmpExternal,
                                                 N_("An identifier for the name usage (documented meaning of the name according to a source) of the currently valid (zoological) or accepted (botanical) taxon.")
             },
-            { "parentNameUsageID",              N_("Parent Name Usage ID"),                 "Text",      xmpText,   xmpExternal,      
+            { "parentNameUsageID",              N_("Parent Name Usage ID"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the name usage (documented meaning of the name according to a source) of the direct, most proximate higher-rank parent taxon (in a classification) of the most specific element of the scientificName.")
             },
-            { "originalNameUsageID",            N_("Original Name Usage ID"),               "Text",      xmpText,   xmpExternal,      
+            { "originalNameUsageID",            N_("Original Name Usage ID"),               "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the name usage (documented meaning of the name according to a source) in which the terminal element of the scientificName was originally established under the rules of the associated nomenclaturalCode.")
             },
-            { "nameAccordingToID",              N_("Name According To ID"),                 "Text",      xmpText,   xmpExternal,      
+            { "nameAccordingToID",              N_("Name According To ID"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the source in which the specific taxon concept circumscription is defined or implied. See nameAccordingTo.")
             },
-            { "namePublishedInID",              N_("Name Published In ID"),                 "Text",      xmpText,   xmpExternal,      
+            { "namePublishedInID",              N_("Name Published In ID"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the publication in which the scientificName was originally established under the rules of the associated nomenclaturalCode.")
             },
-            { "taxonConceptID",                 N_("Taxon Concept ID"),                     "Text",      xmpText,   xmpExternal,      
+            { "taxonConceptID",                 N_("Taxon Concept ID"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the taxonomic concept to which the record refers - not for the nomenclatural details of a taxon.")
             },
-            { "scientificName",                 N_("Scientific Name"),                      "Text",      xmpText,   xmpExternal,      
+            { "scientificName",                 N_("Scientific Name"),                      "Text",      xmpText,   xmpExternal,
                                                 N_("The full scientific name, with authorship and date information if known. When forming part of an Identification, this should be the name in lowest level taxonomic rank that can be determined. This term should not contain identification qualifications, which should instead be supplied in the IdentificationQualifier term.")
             },
             { "acceptedNameUsage",              N_("Accepted Name Usage"),                  "Text",     xmpText,    xmpExternal,
                                                 N_("The full name, with authorship and date information if known, of the currently valid (zoological) or accepted (botanical) taxon.")
             },
-            { "parentNameUsage",                N_("Parent Name Usage"),                    "Text",      xmpText,   xmpExternal,      
+            { "parentNameUsage",                N_("Parent Name Usage"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The full name, with authorship and date information if known, of the direct, most proximate higher-rank parent taxon (in a classification) of the most specific element of the scientificName.")
             },
-            { "originalNameUsage",              N_("Original Name Usage"),                  "Text",      xmpText,   xmpExternal,      
+            { "originalNameUsage",              N_("Original Name Usage"),                  "Text",      xmpText,   xmpExternal,
                                                 N_("The taxon name, with authorship and date information if known, as it originally appeared when first established under the rules of the associated nomenclaturalCode. The basionym (botany) or basonym (bacteriology) of the scientificName or the senior/earlier homonym for replaced names.")
             },
-            { "nameAccordingTo",                N_("Name According To"),                    "Text",      xmpText,   xmpExternal,      
+            { "nameAccordingTo",                N_("Name According To"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The reference to the source in which the specific taxon concept circumscription is defined or implied - traditionally signified by the Latin \"sensu\" or \"sec.\" (from secundum, meaning \"according to\"). For taxa that result from identifications, a reference to the keys, monographs, experts and other sources should be given.")
             },
-            { "namePublishedIn",                N_("Name Published In"),                    "Text",      xmpText,   xmpExternal,      
+            { "namePublishedIn",                N_("Name Published In"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("A reference for the publication in which the scientificName was originally established under the rules of the associated nomenclaturalCode.")
             },
-            { "namePublishedInYear",            N_("Name Published In Year"),               "Text",      xmpText,   xmpExternal,      
+            { "namePublishedInYear",            N_("Name Published In Year"),               "Text",      xmpText,   xmpExternal,
                                                 N_("The four-digit year in which the scientificName was published.")
             },
-            { "higherClassification",           N_("Higher Classification"),                "bag Text",     xmpBag,    xmpExternal,      
+            { "higherClassification",           N_("Higher Classification"),                "bag Text",     xmpBag,    xmpExternal,
                                                 N_("A list (concatenated and separated) of taxa names terminating at the rank immediately superior to the taxon referenced in the taxon record. Recommended best practice is to order the list starting with the highest rank and separating the names for each rank with a semi-colon ;")
             },
-            { "kingdom",                        N_("Kingdom"),                              "Text",      xmpText,   xmpExternal,      
+            { "kingdom",                        N_("Kingdom"),                              "Text",      xmpText,   xmpExternal,
                                                 N_("The full scientific name of the kingdom in which the taxon is classified.")
             },
-            { "phylum",                         N_("Phylum"),                               "Text",      xmpText,   xmpExternal,      
+            { "phylum",                         N_("Phylum"),                               "Text",      xmpText,   xmpExternal,
                                                 N_("The full scientific name of the phylum or division in which the taxon is classified.")
             },
-            { "class",                          N_("Class"),                                "Text",     xmpText,    xmpExternal, 
+            { "class",                          N_("Class"),                                "Text",     xmpText,    xmpExternal,
                                                 N_("The full scientific name of the class in which the taxon is classified.")
             },
-            { "order",                          N_("Order"),                                "Text",      xmpText,   xmpExternal,      
+            { "order",                          N_("Order"),                                "Text",      xmpText,   xmpExternal,
                                                 N_("The full scientific name of the order in which the taxon is classified.")
             },
-            { "family",                         N_("Family"),                               "Text",      xmpText,    xmpExternal,      
+            { "family",                         N_("Family"),                               "Text",      xmpText,    xmpExternal,
                                                 N_("The full scientific name of the family in which the taxon is classified.")
             },
-            { "genus",                          N_("Genus"),                                "Text",      xmpText,    xmpExternal,      
+            { "genus",                          N_("Genus"),                                "Text",      xmpText,    xmpExternal,
                                                 N_("The full scientific name of the genus in which the taxon is classified.")
             },
-            { "subgenus",                       N_("Subgenus"),                             "Text",      xmpText,   xmpExternal,      
+            { "subgenus",                       N_("Subgenus"),                             "Text",      xmpText,   xmpExternal,
                                                 N_("The full scientific name of the subgenus in which the taxon is classified. Values should include the genus to avoid homonym confusion.")
             },
-            { "specificEpithet",                N_("Specific Epithet"),                     "Text",      xmpText,   xmpExternal,      
+            { "specificEpithet",                N_("Specific Epithet"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the first or species epithet of the scientificName.")
             },
-            { "infraspecificEpithet",           N_("Infraspecific Epithet"),                "Text",      xmpText,   xmpExternal,      
+            { "infraspecificEpithet",           N_("Infraspecific Epithet"),                "Text",      xmpText,   xmpExternal,
                                                 N_("The name of the lowest or terminal infraspecific epithet of the scientificName, excluding any rank designation.")
             },
-            { "taxonRank",                      N_("Taxon Rank"),                           "Text",      xmpText,   xmpExternal,      
+            { "taxonRank",                      N_("Taxon Rank"),                           "Text",      xmpText,   xmpExternal,
                                                 N_("The taxonomic rank of the most specific name in the scientificName. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "verbatimTaxonRank",              N_("Verbatim Taxon Rank"),                  "Text",      xmpText,   xmpExternal,      
+            { "verbatimTaxonRank",              N_("Verbatim Taxon Rank"),                  "Text",      xmpText,   xmpExternal,
                                                 N_("The taxonomic rank of the most specific name in the scientificName as it appears in the original record.")
             },
-            { "scientificNameAuthorship",       N_("Scientific Name Authorship"),           "Text",      xmpText,   xmpExternal,      
+            { "scientificNameAuthorship",       N_("Scientific Name Authorship"),           "Text",      xmpText,   xmpExternal,
                                                 N_("The authorship information for the scientificName formatted according to the conventions of the applicable nomenclaturalCode.")
             },
-            { "vernacularName",                 N_("Vernacular Name"),                      "Lang Alt", langAlt,   xmpExternal,      
+            { "vernacularName",                 N_("Vernacular Name"),                      "Lang Alt", langAlt,   xmpExternal,
                                                 N_("A common or vernacular name.")
             },
-            { "nomenclaturalCode",              N_("Nomenclatural Code"),                   "Text",      xmpText,   xmpExternal,      
+            { "nomenclaturalCode",              N_("Nomenclatural Code"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("The nomenclatural code (or codes in the case of an ambiregnal name) under which the scientificName is constructed. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "taxonomicStatus",                N_("Taxonomic Status"),                     "Text",      xmpText,   xmpExternal,      
+            { "taxonomicStatus",                N_("Taxonomic Status"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("The status of the use of the scientificName as a label for a taxon. Requires taxonomic opinion to define the scope of a taxon. Rules of priority then are used to define the taxonomic status of the nomenclature contained in that scope, combined with the experts opinion. It must be linked to a specific taxonomic reference that defines the concept. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "nomenclaturalStatus",            N_("Nomenclatural Status"),                 "Text",      xmpText,   xmpExternal,      
+            { "nomenclaturalStatus",            N_("Nomenclatural Status"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("The status related to the original publication of the name and its conformance to the relevant rules of nomenclature. It is based essentially on an algorithm according to the business rules of the code. It requires no taxonomic opinion.")
             },
-            { "taxonRemarks",                   N_("Taxon Remarks"),                        "Text",      xmpText,   xmpExternal,      
+            { "taxonRemarks",                   N_("Taxon Remarks"),                        "Text",      xmpText,   xmpExternal,
                                                 N_("Comments or notes about the taxon or name.")
             },
 
         // Resource Relationship Level Class
-        { "ResourceRelationship",           N_("Resource Relationship"),                 "ResourceRelationship",    xmpText,   xmpInternal, 
+        { "ResourceRelationship",           N_("Resource Relationship"),                 "ResourceRelationship",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing relationships between resources based information."),
         },
             // Resource Relationship Level Terms
-            { "resourceRelationshipID",         N_("Resource Relationship ID"),             "Text",      xmpText,   xmpExternal,      
+            { "resourceRelationshipID",         N_("Resource Relationship ID"),             "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for an instance of relationship between one resource (the subject) and another (relatedResource, the object).")
             },
-            { "resourceID",                     N_("Resource ID"),                          "Text",      xmpText,   xmpExternal,      
+            { "resourceID",                     N_("Resource ID"),                          "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the resource that is the subject of the relationship.")
             },
-            { "relatedResourceID",              N_("Related Resource ID"),                  "Text",      xmpText,   xmpExternal,      
+            { "relatedResourceID",              N_("Related Resource ID"),                  "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for a related resource (the object, rather than the subject of the relationship).")
             },
-            { "relationshipOfResource",         N_("Relationship Of Resource"),             "Text",      xmpText,   xmpExternal,      
+            { "relationshipOfResource",         N_("Relationship Of Resource"),             "Text",      xmpText,   xmpExternal,
                                                 N_("The relationship of the resource identified by relatedResourceID to the subject (optionally identified by the resourceID). Recommended best practice is to use a controlled vocabulary.")
             },
-            { "relationshipAccordingTo",        N_("Relationship According To"),            "Text",      xmpText,   xmpExternal,      
+            { "relationshipAccordingTo",        N_("Relationship According To"),            "Text",      xmpText,   xmpExternal,
                                                 N_("The source (person, organization, publication, reference) establishing the relationship between the two resources.")
             },
-            { "relationshipEstablishedDate",    N_("Relationship Established Date"),        "Date",      xmpText,    xmpExternal,      
+            { "relationshipEstablishedDate",    N_("Relationship Established Date"),        "Date",      xmpText,    xmpExternal,
                                                 N_("The date-time on which the relationship between the two resources was established. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "relationshipRemarks",            N_("Relationship Remarks"),                 "Text",      xmpText,   xmpExternal,      
+            { "relationshipRemarks",            N_("Relationship Remarks"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("Comments or notes about the relationship between the two resources.")
             },
 
         // Measurement Or Fact Level Class
-        { "MeasurementOrFact",              N_("Measurement Or Fact"),                 "MeasurementOrFact",    xmpText,   xmpInternal, 
+        { "MeasurementOrFact",              N_("Measurement Or Fact"),                 "MeasurementOrFact",    xmpText,   xmpInternal,
                                             N_("*Main structure* containing measurement based information."),
         },
             // Measurement Or Fact Level Terms
-            { "measurementID",                  N_("Measurement ID"),                       "Text",      xmpText,   xmpExternal,      
+            { "measurementID",                  N_("Measurement ID"),                       "Text",      xmpText,   xmpExternal,
                                                 N_("An identifier for the MeasurementOrFact (information pertaining to measurements, facts, characteristics, or assertions). May be a global unique identifier or an identifier specific to the data set.")
             },
-            { "measurementType",                N_("Measurement Type"),                     "Text",      xmpText,   xmpExternal,      
+            { "measurementType",                N_("Measurement Type"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("The nature of the measurement, fact, characteristic, or assertion. Recommended best practice is to use a controlled vocabulary.")
             },
-            { "measurementValue",               N_("Measurement Value"),                    "Text",      xmpText,   xmpExternal,      
+            { "measurementValue",               N_("Measurement Value"),                    "Text",      xmpText,   xmpExternal,
                                                 N_("The value of the measurement, fact, characteristic, or assertion.")
             },
-            { "measurementAccuracy",            N_("Measurement Accuracy"),                 "Text",      xmpText,   xmpExternal,      
+            { "measurementAccuracy",            N_("Measurement Accuracy"),                 "Text",      xmpText,   xmpExternal,
                                                 N_("The description of the potential error associated with the measurementValue.")
             },
-            { "measurementUnit",                N_("Measurement Unit"),                     "Text",      xmpText,   xmpExternal,      
+            { "measurementUnit",                N_("Measurement Unit"),                     "Text",      xmpText,   xmpExternal,
                                                 N_("The units associated with the measurementValue. Recommended best practice is to use the International System of Units (SI).")
             },
-            { "measurementDeterminedDate",      N_("Measurement Determined Date"),          "Date",      xmpText,    xmpExternal,      
+            { "measurementDeterminedDate",      N_("Measurement Determined Date"),          "Date",      xmpText,    xmpExternal,
                                                 N_("The date on which the MeasurementOrFact was made. Recommended best practice is to use an encoding scheme, such as ISO 8601:2004(E).")
             },
-            { "measurementDeterminedBy",        N_("Measurement Determined By"),            "bag Text",     xmpBag,   xmpExternal,      
+            { "measurementDeterminedBy",        N_("Measurement Determined By"),            "bag Text",     xmpBag,   xmpExternal,
                                                 N_("A list (concatenated and separated) of names of people, groups, or organizations who determined the value of the MeasurementOrFact.")
             },
-            { "measurementMethod",              N_("Measurement Method"),                   "Text",      xmpText,   xmpExternal,      
+            { "measurementMethod",              N_("Measurement Method"),                   "Text",      xmpText,   xmpExternal,
                                                 N_("A description of or reference to (publication, URI) the method or protocol used to determine the measurement, fact, characteristic, or assertion.")
             },
-            { "measurementRemarks",             N_("Measurement Remarks"),                  "Text",      xmpText,   xmpExternal,      
+            { "measurementRemarks",             N_("Measurement Remarks"),                  "Text",      xmpText,   xmpExternal,
                                                 N_("Comments or notes accompanying the MeasurementOrFact.")
             },
         // End of list marker
@@ -2208,6 +2490,11 @@ namespace Exiv2 {
 
     const XmpNsInfo* XmpProperties::lookupNsRegistry(const XmpNsInfo::Prefix& prefix)
     {
+        return lookupNsRegistryUnsafe(prefix);
+    }
+
+    const XmpNsInfo* XmpProperties::lookupNsRegistryUnsafe(const XmpNsInfo::Prefix& prefix)
+    {
         for (NsRegistry::const_iterator i = nsRegistry_.begin();
              i != nsRegistry_.end(); ++i) {
             if (i->second == prefix) return &(i->second);
@@ -2222,7 +2509,7 @@ namespace Exiv2 {
         if (   ns2.substr(ns2.size() - 1, 1) != "/"
             && ns2.substr(ns2.size() - 1, 1) != "#") ns2 += "/";
         // Check if there is already a registered namespace with this prefix
-        const XmpNsInfo* xnp = lookupNsRegistry(XmpNsInfo::Prefix(prefix));
+        const XmpNsInfo* xnp = lookupNsRegistryUnsafe(XmpNsInfo::Prefix(prefix));
         if (xnp) {
 #ifndef SUPPRESS_WARNINGS
             if (strcmp(xnp->ns_, ns2.c_str()) != 0) {
@@ -2230,7 +2517,7 @@ namespace Exiv2 {
                             << xnp->ns_ << " to " << ns2 << "\n";
             }
 #endif
-            unregisterNs(xnp->ns_);
+            unregisterNsUnsafe(xnp->ns_);
         }
         // Allocated memory is freed when the namespace is unregistered.
         // Using malloc/free for better system compatibility in case
@@ -2249,6 +2536,11 @@ namespace Exiv2 {
 
     void XmpProperties::unregisterNs(const std::string& ns)
     {
+        unregisterNsUnsafe(ns);
+    }
+
+    void XmpProperties::unregisterNsUnsafe(const std::string& ns)
+    {
         NsRegistry::iterator i = nsRegistry_.find(ns);
         if (i != nsRegistry_.end()) {
             std::free(const_cast<char*>(i->second.prefix_));
@@ -2262,7 +2554,7 @@ namespace Exiv2 {
         NsRegistry::iterator i = nsRegistry_.begin();
         while (i != nsRegistry_.end()) {
             NsRegistry::iterator kill = i++;
-            unregisterNs(kill->first);
+            unregisterNsUnsafe(kill->first);
         }
     }
 
@@ -2285,9 +2577,9 @@ namespace Exiv2 {
 
     std::string XmpProperties::ns(const std::string& prefix)
     {
-        const XmpNsInfo* xn = lookupNsRegistry(XmpNsInfo::Prefix(prefix));
+        const XmpNsInfo* xn = lookupNsRegistryUnsafe(XmpNsInfo::Prefix(prefix));
         if (xn != 0) return xn->ns_;
-        return nsInfo(prefix)->ns_;
+        return nsInfoUnsafe(prefix)->ns_;
     }
 
     const char* XmpProperties::propertyTitle(const XmpKey& key)
@@ -2351,11 +2643,24 @@ namespace Exiv2 {
 
     const XmpNsInfo* XmpProperties::nsInfo(const std::string& prefix)
     {
+        return nsInfoUnsafe(prefix);
+    }
+
+    const XmpNsInfo* XmpProperties::nsInfoUnsafe(const std::string& prefix)
+    {
         const XmpNsInfo::Prefix pf(prefix);
-        const XmpNsInfo* xn = lookupNsRegistry(pf);
+        const XmpNsInfo* xn = lookupNsRegistryUnsafe(pf);
         if (!xn) xn = find(xmpNsInfo, pf);
         if (!xn) throw Error(35, prefix);
         return xn;
+    }
+
+    void XmpProperties::registeredNamespaces(Exiv2::Dictionary& nsDict)
+    {
+        for (unsigned int i = 0; i < EXV_COUNTOF(xmpNsInfo); ++i) {
+             Exiv2::XmpParser::registerNs(xmpNsInfo[i].ns_,xmpNsInfo[i].prefix_);
+        }
+        Exiv2::XmpParser::registeredNamespaces(nsDict);
     }
 
     void XmpProperties::printProperties(std::ostream& os, const std::string& prefix)
@@ -2381,9 +2686,7 @@ namespace Exiv2 {
         return fct(os, value, 0);
     }
 
-    //! @cond IGNORE
-
-    //! Internal Pimpl structure with private members and data of class XmpKey.
+    //! @brief Internal Pimpl structure with private members and data of class XmpKey.
     struct XmpKey::Impl {
         Impl() {}                       //!< Default constructor
         Impl(const std::string& prefix, const std::string& property); //!< Constructor
@@ -2395,7 +2698,7 @@ namespace Exiv2 {
 
           @throw Error if the key cannot be decomposed.
         */
-        void decomposeKey(const std::string& key);
+        void decomposeKey(const std::string& key); //!< Misterious magic
 
         // DATA
         static const char* familyName_; //!< "Xmp"
@@ -2403,8 +2706,8 @@ namespace Exiv2 {
         std::string prefix_;            //!< Prefix
         std::string property_;          //!< Property name
     };
-    //! @endcond
 
+    //! @brief Constructor for Internal Pimpl structure XmpKey::Impl::Impl
     XmpKey::Impl::Impl(const std::string& prefix, const std::string& property)
     {
         // Validate prefix
@@ -2492,6 +2795,7 @@ namespace Exiv2 {
         return XmpProperties::ns(p_->prefix_);
     }
 
+    //! @cond IGNORE
     void XmpKey::Impl::decomposeKey(const std::string& key)
     {
         // Get the family name, prefix and property name parts of the key

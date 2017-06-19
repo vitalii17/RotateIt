@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -35,13 +35,48 @@
 // *****************************************************************************
 // included header files
 // + standard includes
-#include <string>
 #include <vector>
-#if EXV_HAVE_REGEX
-#include <regex.h>
-typedef std::vector<regex_t> exv_grep_keys_t ;
+
+/*!
+ @brief CPLUSPLUS11 is the value of macro --cplusplus for C++11
+*/
+#define CPLUSPLUS11 201103L
+
+#if __cplusplus >= CPLUSPLUS11
+# include <regex>
+  /*!
+   @brief exv_grep_keys_t is a vector of keys to match to strings
+  */
+  typedef std::vector<std::regex> exv_grep_keys_t ;
 #else
-typedef std::vector<std::string> exv_grep_keys_t ;
+# if EXV_HAVE_REGEX
+#  include <regex.h>
+  /*!
+   @brief exv_grep_keys_t is a vector of keys to match to strings
+  */
+   typedef std::vector<regex_t> exv_grep_keys_t ;
+# else
+  /*!
+   @brief exv_grep_key_t is a simple string and the ignore flag
+  */
+   struct Exiv2_grep_key_t {
+    /*!
+    @brief Exiv2_grep_key_t constructor
+    */
+     Exiv2_grep_key_t(std::string pattern,bool bIgnoreCase)
+       :pattern_(pattern),bIgnoreCase_(bIgnoreCase) {}
+
+     //! simple string to match
+     std::string pattern_;
+
+     //! should we ignore cast in the match?
+     bool        bIgnoreCase_;
+   };
+  /*!
+   @brief exv_grep_keys_t is a vector of keys to match to strings
+  */
+   typedef std::vector<Exiv2_grep_key_t> exv_grep_keys_t ;
+# endif
 #endif
 
 /*!
@@ -51,7 +86,7 @@ typedef std::vector<std::string> exv_grep_keys_t ;
 /*!
   @brief %Exiv2 MINOR version number of the library used at compile-time.
  */
-#define EXIV2_MINOR_VERSION (25)
+#define EXIV2_MINOR_VERSION (26)
 /*!
   @brief %Exiv2 PATCH version number of the library used at compile-time.
  */

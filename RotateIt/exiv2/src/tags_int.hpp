@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    tags_int.hpp
   @brief   Internal Exif tag and type information
-  @version $Rev: 3777 $
+  @version $Rev$
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    15-Jan-04, ahu: created<BR>
@@ -62,6 +62,7 @@ namespace Exiv2 {
         exifId,
         gpsId,
         iopId,
+        mpfId,
         subImage1Id,
         subImage2Id,
         subImage3Id,
@@ -80,6 +81,7 @@ namespace Exiv2 {
         canonCfId,
         canonPiId,
         canonPaId,
+        canonTiId,
         canonFiId,
         canonPrId,
         casioId,
@@ -168,7 +170,7 @@ namespace Exiv2 {
     enum SectionId { sectionIdNotSet,
                      imgStruct, recOffset, imgCharacter, otherTags, exifFormat,
                      exifVersion, imgConfig, userInfo, relatedFile, dateTime,
-                     captureCond, gpsTags, iopTags, makerTags, dngTags, panaRaw,
+                     captureCond, gpsTags, iopTags, mpfTags, makerTags, dngTags, panaRaw,
                      tiffEp, tiffPm6, adobeOpi,
                      lastSectionId };
 
@@ -304,6 +306,8 @@ namespace Exiv2 {
     const TagInfo* gpsTagList();
     //! Return read-only list of built-in Exiv2 Makernote info tags
     const TagInfo* mnTagList();
+    //! Return read-only list of built-in mfp Tags http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/MPF.html
+    const TagInfo* mpfTagList();
 
     //! Return the group id for a group name
     IfdId groupId(const std::string& groupName);

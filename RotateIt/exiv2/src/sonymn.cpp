@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      sonymn.cpp
-  Version:   $Rev: 3777 $
+  Version:   $Rev$
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   18-Apr-05, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: sonymn.cpp 3777 2015-05-02 11:55:40Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // *****************************************************************************
 // included header files
@@ -104,7 +104,7 @@ namespace Exiv2 {
         { 298, "DSC-RX1"                },
         { 299, "NEX-VG900"              },
         { 300, "NEX-VG30E"              },
-        { 302, "ILCE-3000"              },
+        { 302, "ILCE-3000 / ILCE-3500"  },
         { 303, "SLT-A58"                },
         { 305, "NEX-3N"                 },
         { 306, "ILCE-7"                 },
@@ -119,7 +119,18 @@ namespace Exiv2 {
         { 318, "ILCE-7S"                },
         { 319, "ILCA-77M2"              },
         { 339, "ILCE-5100"              },
-        { 346, "ILCE-QX1"               }
+        { 340, "ILCE-7M2"               },
+        { 341, "DSC-RX100M4"            },
+        { 342, "DSC-RX10M2"             },
+        { 344, "DSC-RX1RM2"             },
+        { 346, "ILCE-QX1"               },
+        { 347, "ILCE-7RM2"              },
+        { 350, "ILCE-7SM2"              },
+        { 353, "ICLA-68"                },
+        { 354, "ILCA-99M2"              },
+        { 355, "DSC-RX10M3"             },
+        { 356, "DSC-RX100M5"            },
+        { 357, "ILCE-6300"              }
     };
 
     //! Lookup table to translate Sony dynamic range optimizer values to readable labels
@@ -211,11 +222,11 @@ namespace Exiv2 {
         { 4,  N_("Manual")                     },
         { 5,  N_("Daylight")                   },
         { 6,  N_("Cloudy")                     },
-        { 7,  N_("White Flourescent")          },
-        { 8,  N_("Cool White Flourescent")     },
-        { 9,  N_("Day White Flourescent")      },
+        { 7,  N_("White Fluorescent")          },
+        { 8,  N_("Cool White Fluorescent")     },
+        { 9,  N_("Day White Fluorescent")      },
         { 10, N_("Incandescent2")              },
-        { 11, N_("Warm White Fluorescent")     }, 
+        { 11, N_("Warm White Fluorescent")     },
         { 14, N_("Incandescent")               },
         { 15, N_("Flash")                      },
         { 17, N_("Underwater 1 (Blue Water)")  },
@@ -303,6 +314,9 @@ namespace Exiv2 {
             else if (val == "3000") os << "ARW 2.0";
             else if (val == "3100") os << "ARW 2.1";
             else if (val == "3200") os << "ARW 2.2";
+            else if (val == "3300") os << "ARW 2.3";
+            else if (val == "3310") os << "ARW 2.3.1";
+            else if (val == "3320") os << "ARW 2.3.2";
             else                    os << "(" << value << ")";
         }
         return os;
@@ -493,15 +507,20 @@ namespace Exiv2 {
 
     //! Lookup table to translate Sony camera settings drive mode values to readable labels
     extern const TagDetails sonyDriveModeStd[] = {
-        { 1,  N_("Single Frame")                     },
-        { 2,  N_("Continuous High")                  },
-        { 4,  N_("Self-timer 10 sec")                },
-        { 5,  N_("Self-timer 2 sec")                 },
-        { 7,  N_("Continuous Bracketing")            },
-        { 12, N_("Continuous Low")                   },
-        { 18, N_("White Balance Bracketing Low")     },
-        { 19, N_("D-Range Optimizer Bracketing Low") },
-        { 19, N_("D-Range Optimizer Bracketing Low") } // To silence compiler warning
+        { 0x01, N_("Single Frame")                      },
+        { 0x02, N_("Continuous High")                   },
+        { 0x04, N_("Self-timer 10 sec")                 },
+        { 0x05, N_("Self-timer 2 sec, Mirror Lock-up")  },
+        { 0x06, N_("Single-frame Bracketing")           },
+        { 0x07, N_("Continuous Bracketing")             },
+        { 0x0a, N_("Remote Commander")                  },
+        { 0x0b, N_("Mirror Lock-up")                    },
+        { 0x12, N_("Continuous Low")                    },
+        { 0x18, N_("White Balance Bracketing Low")      },
+        { 0x19, N_("D-Range Optimizer Bracketing Low")  },
+        { 0x28, N_("White Balance Bracketing High")     },
+        { 0x29, N_("D-Range Optimizer Bracketing High") },
+        { 0x29, N_("D-Range Optimizer Bracketing High") } // To silence compiler warning
     };
 
     //! Lookup table to translate Sony camera settings focus mode values to readable labels
@@ -551,13 +570,21 @@ namespace Exiv2 {
 
     //! Lookup table to translate Sony camera settings image style values to readable labels
     extern const TagDetails sonyImageStyle[] = {
-        { 1,    N_("Standard")      },
-        { 2,    N_("Vivid")         },
-        { 9,    N_("Adobe RGB")     },
-        { 11,   N_("Neutral")       },
-        { 129,  N_("StyleBox1")     },
-        { 130,  N_("StyleBox1")     },
-        { 131,  N_("StyleBox1")     }
+        { 1,    N_("Standard")            },
+        { 2,    N_("Vivid")               },
+        { 3,    N_("Portrait")            },
+        { 4,    N_("Landscape")           },
+        { 5,    N_("Sunset")              },
+        { 7,    N_("Night View/Portrait") },
+        { 8,    N_("B&W")                 },
+        { 9,    N_("Adobe RGB")           },
+        { 11,   N_("Neutral")             },
+        { 129,  N_("StyleBox1")           },
+        { 130,  N_("StyleBox2")           },
+        { 131,  N_("StyleBox3")           },
+        { 132,  N_("StyleBox4")           },
+        { 133,  N_("StyleBox5")           },
+        { 134,  N_("StyleBox6")           }
     };
 
     //! Lookup table to translate Sony camera settings exposure program values to readable labels

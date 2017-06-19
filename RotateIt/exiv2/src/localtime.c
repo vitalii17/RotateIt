@@ -1,11 +1,18 @@
 /*!
   @file    localtime.c
   @brief   This file is from the tz distribution at ftp://elsie.nci.nih.gov/pub/
-  @version $Rev: 3479 $
+  @version $Rev$
 */
 
 
 #include "config.h"
+
+#ifdef  _MSC_VER
+#if     _MSC_VER >= _MSC_VER_2015
+#define tzname _tzname
+#endif
+#endif
+
 #include "timegm.h"
 
 /*

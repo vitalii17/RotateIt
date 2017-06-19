@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,17 +20,11 @@
  */
 /*
   File:      image.cpp
-  Version:   $Rev: 3846 $
-  Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
-             Brad Schick (brad) <brad@robotbattle.com>
-  History:   26-Jan-04, ahu: created
-             11-Feb-04, ahu: isolated as a component
-             19-Jul-04, brad: revamped to be more flexible and support Iptc
-             15-Jan-05, brad: inside-out design changes
+  Version:   $Rev$
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: image.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
+EXIV2_RCSID("@(#) $Id$")
 
 // included header files
 #include "config.h"
@@ -50,12 +44,18 @@ EXIV2_RCSID("@(#) $Id: image.cpp 3846 2015-06-08 14:39:59Z ahuggel $")
 #endif // EXV_HAVE_LIBZ
 #include "rafimage.hpp"
 #include "tiffimage.hpp"
+#include "tiffimage_int.hpp"
+#include "tiffcomposite_int.hpp"
+#include "tiffvisitor_int.hpp"
+#include "webpimage.hpp"
 #include "orfimage.hpp"
 #include "gifimage.hpp"
 #include "psdimage.hpp"
 #include "tgaimage.hpp"
 #include "bmpimage.hpp"
 #include "jp2image.hpp"
+#include "nikonmn_int.hpp"
+
 #ifdef EXV_ENABLE_VIDEO
 #include "matroskavideo.hpp"
 #include "quicktimevideo.hpp"
@@ -112,6 +112,7 @@ namespace {
         { ImageType::crw,  newCrwInstance,  isCrwType,  amReadWrite, amNone,      amNone,      amReadWrite },
         { ImageType::mrw,  newMrwInstance,  isMrwType,  amRead,      amRead,      amRead,      amNone      },
         { ImageType::tiff, newTiffInstance, isTiffType, amReadWrite, amReadWrite, amReadWrite, amNone      },
+        { ImageType::webp, newWebPInstance, isWebPType, amReadWrite, amNone,      amReadWrite, amNone      },
         { ImageType::dng,  newTiffInstance, isTiffType, amReadWrite, amReadWrite, amReadWrite, amNone      },
         { ImageType::nef,  newTiffInstance, isTiffType, amReadWrite, amReadWrite, amReadWrite, amNone      },
         { ImageType::pef,  newTiffInstance, isTiffType, amReadWrite, amReadWrite, amReadWrite, amNone      },
@@ -169,9 +170,352 @@ namespace Exiv2 {
     {
     }
 
-    void Image::printStructure(std::ostream&, PrintStructureOption)
+    void Image::printStructure(std::ostream&, PrintStructureOption,int /*depth*/)
     {
         throw Error(13, io_->path());
+    }
+
+    bool Image::isStringType(uint16_t type)
+    {
+        return type == Exiv2::asciiString
+            || type == Exiv2::unsignedByte
+            || type == Exiv2::signedByte
+            || type == Exiv2::undefined
+            ;
+    }
+    bool Image::isShortType(uint16_t type) {
+         return type == Exiv2::unsignedShort
+             || type == Exiv2::signedShort
+             ;
+    }
+    bool Image::isLongType(uint16_t type) {
+         return type == Exiv2::unsignedLong
+             || type == Exiv2::signedLong
+             ;
+    }
+    bool Image::isRationalType(uint16_t type) {
+         return type == Exiv2::unsignedRational
+             || type == Exiv2::signedRational
+             ;
+    }
+    bool Image::is2ByteType(uint16_t type)
+    {
+        return isShortType(type);
+    }
+    bool Image::is4ByteType(uint16_t type)
+    {
+        return isLongType(type)
+            || type == Exiv2::tiffFloat
+            || type == Exiv2::tiffIfd
+            ;
+    }
+    bool Image::is8ByteType(uint16_t type)
+    {
+        return isRationalType(type)
+             || type == Exiv2::tiffDouble
+            ;
+    }
+    bool Image::isPrintXMP(uint16_t type, Exiv2::PrintStructureOption option)
+    {
+        return type == 700 && option == kpsXMP;
+    }
+    bool Image::isPrintICC(uint16_t type, Exiv2::PrintStructureOption option)
+    {
+        return type == 0x8773 && option == kpsIccProfile;
+    }
+
+    bool Image::isBigEndianPlatform()
+    {
+        union {
+            uint32_t i;
+            char c[4];
+        } e = { 0x01000000 };
+
+        return e.c[0]?true:false;
+    }
+    bool Image::isLittleEndianPlatform() { return !isBigEndianPlatform(); }
+
+    uint32_t Image::byteSwap(uint32_t value,bool bSwap)
+    {
+        uint32_t result = 0;
+        result |= (value & 0x000000FF) << 24;
+        result |= (value & 0x0000FF00) << 8;
+        result |= (value & 0x00FF0000) >> 8;
+        result |= (value & 0xFF000000) >> 24;
+        return bSwap ? result : value;
+    }
+
+    uint16_t Image::byteSwap(uint16_t value,bool bSwap)
+    {
+        uint16_t result = 0;
+        result |= (value & 0x00FF) << 8;
+        result |= (value & 0xFF00) >> 8;
+        return bSwap ? result : value;
+    }
+
+    uint16_t Image::byteSwap2(DataBuf& buf,size_t offset,bool bSwap)
+    {
+        uint16_t v;
+        char*    p = (char*) &v;
+        p[0] = buf.pData_[offset];
+        p[1] = buf.pData_[offset+1];
+        return Image::byteSwap(v,bSwap);
+    }
+
+    uint32_t Image::byteSwap4(DataBuf& buf,size_t offset,bool bSwap)
+    {
+        uint32_t v;
+        char*    p = (char*) &v;
+        p[0] = buf.pData_[offset];
+        p[1] = buf.pData_[offset+1];
+        p[2] = buf.pData_[offset+2];
+        p[3] = buf.pData_[offset+3];
+        return Image::byteSwap(v,bSwap);
+    }
+
+    static const char* tagName(uint16_t tag,size_t nMaxLength)
+    {
+        const char* result = NULL;
+
+        // build a static map of tags for fast search
+        static std::map<int,std::string> tags;
+        static bool init  = true;
+        static char buffer[80];
+
+        if ( init ) {
+            int idx;
+            const TagInfo* ti ;
+            for (ti = Internal::  mnTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal:: iopTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal:: gpsTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal:: ifdTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal::exifTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal:: mpfTagList(), idx = 0; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+            for (ti = Internal::Nikon1MakerNote::tagList(), idx = 0
+                                                      ; ti[idx].tag_ != 0xffff; ++idx) tags[ti[idx].tag_] = ti[idx].name_;
+        }
+        init = false;
+
+        try {
+            result = tags[tag].c_str();
+            if ( nMaxLength > sizeof(buffer) -2 )
+                 nMaxLength = sizeof(buffer) -2;
+            strncpy(buffer,result,nMaxLength);
+            result = buffer;
+        } catch ( ... ) {}
+
+        return result ;
+    }
+
+    static const char* typeName(uint16_t tag)
+    {
+        //! List of TIFF image tags
+        const char* result = NULL;
+        switch (tag ) {
+            case Exiv2::unsignedByte     : result = "BYTE"      ; break;
+            case Exiv2::asciiString      : result = "ASCII"     ; break;
+            case Exiv2::unsignedShort    : result = "SHORT"     ; break;
+            case Exiv2::unsignedLong     : result = "LONG"      ; break;
+            case Exiv2::unsignedRational : result = "RATIONAL"  ; break;
+            case Exiv2::signedByte       : result = "SBYTE"     ; break;
+            case Exiv2::undefined        : result = "UNDEFINED" ; break;
+            case Exiv2::signedShort      : result = "SSHORT"    ; break;
+            case Exiv2::signedLong       : result = "SLONG"     ; break;
+            case Exiv2::signedRational   : result = "SRATIONAL" ; break;
+            case Exiv2::tiffFloat        : result = "FLOAT"     ; break;
+            case Exiv2::tiffDouble       : result = "DOUBLE"    ; break;
+            case Exiv2::tiffIfd          : result = "IFD"       ; break;
+            default                      : result = "unknown"   ; break;
+        }
+        return result;
+    }
+
+    static bool typeValid(uint16_t type)
+    {
+    	return type >= 1 && type <= 13 ;
+    }
+
+    void Image::printIFDStructure(BasicIo& io, std::ostream& out, Exiv2::PrintStructureOption option,uint32_t start,bool bSwap,char c,int depth)
+    {
+        depth++;
+        bool bFirst  = true  ;
+
+        // buffer
+        const size_t dirSize = 32;
+        DataBuf  dir(dirSize);
+        bool bPrint = option == kpsBasic || option == kpsRecursive;
+
+        do {
+            // Read top of directory
+            io.seek(start,BasicIo::beg);
+            io.read(dir.pData_, 2);
+            uint16_t   dirLength = byteSwap2(dir,0,bSwap);
+
+            bool tooBig = dirLength > 500;
+
+            if ( bFirst && bPrint ) {
+                out << Internal::indent(depth) << Internal::stringFormat("STRUCTURE OF TIFF FILE (%c%c): ",c,c) << io.path() << std::endl;
+                if ( tooBig ) out << Internal::indent(depth) << "dirLength = " << dirLength << std::endl;
+            }
+            if  (tooBig) break;
+
+            // Read the dictionary
+            for ( int i = 0 ; i < dirLength ; i ++ ) {
+                if ( bFirst && bPrint ) {
+                    out << Internal::indent(depth)
+                        << " address |    tag                           |     "
+                        << " type |    count |    offset | value\n";
+                }
+                bFirst = false;
+
+                io.read(dir.pData_, 12);
+                uint16_t tag    = byteSwap2(dir,0,bSwap);
+                uint16_t type   = byteSwap2(dir,2,bSwap);
+                uint32_t count  = byteSwap4(dir,4,bSwap);
+                uint32_t offset = byteSwap4(dir,8,bSwap);
+
+                // Break for unknown tag types else we may get segfault.
+                if ( !typeValid(type) ) {
+                    std::cerr << "invalid type value detected in Image::printIFDStructure:  " << type << std::endl;
+                    start = 0; // break from do loop
+                    break; // break from for loop
+                }
+
+                std::string sp  = "" ; // output spacer
+
+                //prepare to print the value
+                uint32_t kount  = isPrintXMP(tag,option) ? count // haul in all the data
+                                : isPrintICC(tag,option) ? count // ditto
+                                : isStringType(type)     ? (count > 32 ? 32 : count) // restrict long arrays
+                                : count > 5              ? 5
+                                : count
+                                ;
+                uint32_t pad    = isStringType(type) ? 1 : 0;
+                uint32_t size   = isStringType(type) ? 1
+                                : is2ByteType(type)  ? 2
+                                : is4ByteType(type)  ? 4
+                                : is8ByteType(type)  ? 8
+                                : 1
+                                ;
+
+                // if ( offset > io.size() ) offset = 0; // Denial of service?
+                DataBuf  buf(size*count + pad+20);  // allocate a buffer
+                std::memcpy(buf.pData_,dir.pData_+8,4);  // copy dir[8:11] into buffer (short strings)
+                if ( count*size > 4 ) {            // read into buffer
+                    size_t   restore = io.tell();  // save
+                    io.seek(offset,BasicIo::beg);  // position
+                    io.read(buf.pData_,count*size);// read
+                    io.seek(restore,BasicIo::beg); // restore
+                }
+
+                if ( bPrint ) {
+                    uint32_t address = start + 2 + i*12 ;
+                    out << Internal::indent(depth)
+                            << Internal::stringFormat("%8u | %#06x %-25s |%10s |%9u |%10u | "
+                                ,address,tag,tagName(tag,25),typeName(type),count,offset);
+                    if ( isShortType(type) ){
+                        for ( size_t k = 0 ; k < kount ; k++ ) {
+                            out << sp << byteSwap2(buf,k*size,bSwap);
+                            sp = " ";
+                        }
+                    } else if ( isLongType(type) ){
+                        for ( size_t k = 0 ; k < kount ; k++ ) {
+                            out << sp << byteSwap4(buf,k*size,bSwap);
+                            sp = " ";
+                        }
+
+                    } else if ( isRationalType(type) ){
+                        for ( size_t k = 0 ; k < kount ; k++ ) {
+                            uint32_t a = byteSwap4(buf,k*size+0,bSwap);
+                            uint32_t b = byteSwap4(buf,k*size+4,bSwap);
+                            out << sp << a << "/" << b;
+                            sp = " ";
+                        }
+                    } else if ( isStringType(type) ) {
+                        out << sp << Internal::binaryToString(buf, kount);
+                    }
+
+                    sp = kount == count ? "" : " ...";
+                    out << sp << std::endl;
+
+                    if ( option == kpsRecursive && (tag == 0x8769 /* ExifTag */ || tag == 0x014a/*SubIFDs*/  || type == tiffIfd) ) {
+                        for ( size_t k = 0 ; k < count ; k++ ) {
+                            size_t   restore = io.tell();
+                            uint32_t offset = byteSwap4(buf,k*size,bSwap);
+                            printIFDStructure(io,out,option,offset,bSwap,c,depth);
+                            io.seek(restore,BasicIo::beg);
+                        }
+                    } else if ( option == kpsRecursive && tag == 0x83bb /* IPTCNAA */ ) {
+                        size_t   restore = io.tell();  // save
+                        io.seek(offset,BasicIo::beg);  // position
+                        byte* bytes=new byte[count] ;  // allocate memory
+                        io.read(bytes,count)        ;  // read
+                        io.seek(restore,BasicIo::beg); // restore
+                        IptcData::printStructure(out,bytes,count,depth);
+                        delete[] bytes;                // free
+                    }  else if ( option == kpsRecursive && tag == 0x927c /* MakerNote */ && count > 10) {
+                        size_t   restore = io.tell();  // save
+
+                        uint32_t jump= 10           ;
+                        byte     bytes[20]          ;
+                        const char* chars = (const char*) &bytes[0] ;
+                        io.seek(offset,BasicIo::beg);  // position
+                        io.read(bytes,jump    )     ;  // read
+                        bytes[jump]=0               ;
+                        if ( ::strcmp("Nikon",chars) == 0 ) {
+                            // tag is an embedded tiff
+                            byte* bytes=new byte[count-jump] ;  // allocate memory
+                            io.read(bytes,count-jump)        ;  // read
+                            MemIo memIo(bytes,count-jump)    ;  // create a file
+                            printTiffStructure(memIo,out,option,depth);
+                            delete[] bytes                   ;  // free
+                        } else {
+                            // tag is an IFD
+                            io.seek(0,BasicIo::beg);  // position
+                            printIFDStructure(io,out,option,offset,bSwap,c,depth);
+                        }
+
+                        io.seek(restore,BasicIo::beg); // restore
+                    }
+                }
+
+                if ( isPrintXMP(tag,option) ) {
+                    buf.pData_[count]=0;
+                    out << (char*) buf.pData_;
+                }
+                if ( isPrintICC(tag,option) ) {
+                    out.write((const char*)buf.pData_,count);
+                }
+            }
+            if ( start ) {
+                io.read(dir.pData_, 4);
+                start = tooBig ? 0 : byteSwap4(dir,0,bSwap);
+            }
+        } while (start) ;
+
+        if ( bPrint ) {
+            out << Internal::indent(depth) << "END " << io.path() << std::endl;
+        }
+        out.flush();
+        depth--;
+    }
+
+    void Image::printTiffStructure(BasicIo& io, std::ostream& out, Exiv2::PrintStructureOption option,int depth,size_t offset /*=0*/)
+    {
+        if ( option == kpsBasic || option == kpsXMP || option == kpsRecursive || option == kpsIccProfile ) {
+            // buffer
+            const size_t dirSize = 32;
+            DataBuf  dir(dirSize);
+
+            // read header (we already know for certain that we have a Tiff file)
+            io.read(dir.pData_,  8);
+            char c = (char) dir.pData_[0] ;
+            bool bSwap   = ( c == 'M' && isLittleEndianPlatform() )
+                        || ( c == 'I' && isBigEndianPlatform()    )
+                        ;
+            uint32_t start = byteSwap4(dir,4,bSwap);
+            printIFDStructure(io,out,option,start+(uint32_t)offset,bSwap,c,depth);
+        }
     }
 
     void Image::clearMetadata()
@@ -181,6 +525,7 @@ namespace Exiv2 {
         clearXmpPacket();
         clearXmpData();
         clearComment();
+        clearIccProfile();
     }
 
     ExifData& Image::exifData()
@@ -210,6 +555,9 @@ namespace Exiv2 {
         }
         if (checkMode(mdIptc) & amWrite) {
             setIptcData(image.iptcData());
+        }
+        if (checkMode(mdIccProfile) & amWrite && iccProfile()) {
+            setIccProfile(*iccProfile());
         }
         if (checkMode(mdXmp) & amWrite) {
             setXmpPacket(image.xmpPacket());
@@ -249,7 +597,10 @@ namespace Exiv2 {
     void Image::setXmpPacket(const std::string& xmpPacket)
     {
         xmpPacket_ = xmpPacket;
-        writeXmpFromPacket(true);
+        if ( XmpParser::decode(xmpData_, xmpPacket) ) {
+            throw Error(54);
+        }
+        xmpPacket_ = xmpPacket;
     }
 
     void Image::clearXmpData()
@@ -264,12 +615,14 @@ namespace Exiv2 {
         writeXmpFromPacket(false);
     }
 
+#ifdef EXV_HAVE_XMP_TOOLKIT
     void Image::writeXmpFromPacket(bool flag)
     {
-#ifdef EXV_HAVE_XMP_TOOLKIT
         writeXmpFromPacket_ = flag;
-#endif
     }
+#else
+    void Image::writeXmpFromPacket(bool) {}
+#endif
 
     void Image::clearComment()
     {
@@ -279,6 +632,21 @@ namespace Exiv2 {
     void Image::setComment(const std::string& comment)
     {
         comment_ = comment;
+    }
+
+    void Image::setIccProfile(Exiv2::DataBuf& iccProfile,bool bTestValid)
+    {
+        if ( bTestValid ) {
+            if ( iccProfile.pData_ && ( iccProfile.size_ < (long) sizeof(long)) ) throw Error(53);
+            long size = iccProfile.pData_ ? getULong(iccProfile.pData_, bigEndian): -1;
+            if ( size!= iccProfile.size_ ) throw Error(53);
+        }
+        iccProfile_ = iccProfile;
+    }
+
+    void Image::clearIccProfile()
+    {
+        iccProfile_.release();
     }
 
     void Image::setByteOrder(ByteOrder byteOrder)
@@ -378,6 +746,8 @@ namespace Exiv2 {
         case mdComment:
             am = r->commentSupport_;
             break;
+        case mdIccProfile: break;
+
         // no default: let the compiler complain
         }
         return am;
@@ -581,6 +951,11 @@ namespace Exiv2 {
 namespace Exiv2 {
     namespace Internal {
 
+#ifdef  MSDEV_2003
+#undef  vsnprintf
+#define vsnprintf _vsnprintf
+#endif
+
     std::string stringFormat(const char* format, ...)
     {
         std::string result;
@@ -607,21 +982,80 @@ namespace Exiv2 {
         return result;
     }
 
-    std::string binaryToString(DataBuf& buf, size_t size, size_t start /*=0*/)
+    std::string binaryToString(const byte* buff, size_t size, size_t start /*=0*/)
     {
         std::string result = "";
-        byte* buff = buf.pData_;
-
         size += start;
 
         while (start < size) {
             int   c             = (int) buff[start++] ;
             bool  bTrailingNull = c == 0 && start == size;
             if ( !bTrailingNull ) {
-                if (c < ' ' || c > 127) c = '.' ;
+                if (c < ' ' || c >= 127) c = '.' ;
                 result +=  (char) c ;
             }
         }
+        return result;
+    }
+
+    std::string binaryToString(DataBuf& buf, size_t size, size_t start /*=0*/)
+    {
+        if ( size > (size_t) buf.size_ ) size = (size_t) buf.size_;
+        return binaryToString(buf.pData_,size,start);
+    }
+
+    std::string binaryToHex(const byte *data, size_t size)
+    {
+        std::stringstream hexOutput;
+
+        unsigned long tl = (unsigned long)((size / 16) * 16);
+        unsigned long tl_offset = (unsigned long)(size - tl);
+
+        for (unsigned long loop = 0; loop < (unsigned long)size; loop++) {
+            if (data[loop] < 16) {
+                hexOutput << "0";
+            }
+            hexOutput << std::hex << (int)data[loop];
+            if ((loop % 8) == 7) {
+                hexOutput << "  ";
+            }
+            if ((loop % 16) == 15 || loop == (tl + tl_offset - 1)) {
+                int max = 15;
+                if (loop >= tl) {
+                    max = tl_offset - 1;
+                    for (int offset = 0; offset < (int)(16 - tl_offset); offset++) {
+                        if ((offset % 8) == 7) {
+                            hexOutput << "  ";
+                        }
+                        hexOutput << "   ";
+                    }
+                }
+                hexOutput << " ";
+                for (int  offset = max; offset >= 0; offset--) {
+                    if (offset == (max - 8)) {
+                        hexOutput << "  ";
+                    }
+                    byte c = '.';
+                    if (data[loop - offset] >= 0x20 && data[loop - offset] <= 0x7E) {
+                        c = data[loop - offset] ;
+                    }
+                    hexOutput << (char) c ;
+                }
+                hexOutput << std::endl;
+            }
+        }
+
+        hexOutput << std::endl << std::endl << std::endl;
+
+        return hexOutput.str();
+    }
+
+    std::string indent(int32_t d)
+    {
+        std::string result ;
+        if ( d > 0 )
+            while ( d--)
+                result += "  ";
         return result;
     }
 

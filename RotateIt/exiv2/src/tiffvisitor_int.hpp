@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2015 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2017 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -22,7 +22,7 @@
   @file    tiffvisitor_int.hpp
   @brief   Internal operations on a TIFF composite tree, implemented as visitor
            classes.
-  @version $Rev: 3777 $
+  @version $Rev$
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    11-Apr-06, ahu: created
@@ -59,7 +59,7 @@ namespace Exiv2 {
 
     /*!
       @brief Abstract base class defining the interface for TIFF composite
-             vistors (Visitor pattern)
+             visitors (Visitor pattern)
 
       A concrete visitor class is used as shown in the example below. Accept()
       will invoke the member function corresponding to the concrete type of each
