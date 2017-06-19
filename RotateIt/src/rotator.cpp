@@ -226,7 +226,15 @@ void Rotator::process()
         {   
             if(m_exifEnabled)
             {
-                ExifTools::copyExif(m_inputImagePath, m_outputImagePath);
+                try
+                {
+                    ExifTools::copyExif(m_inputImagePath, m_outputImagePath);
+                }
+                catch(Exiv2::Error &error)
+                {
+                    qDebug() << "Error! Exception in Exiv2: code" << error.code();
+                    qDebug() << "Error! Exception in Exiv2: what" << error.what();
+                }
             }
         }
         else{}
