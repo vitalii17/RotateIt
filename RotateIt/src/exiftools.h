@@ -11,9 +11,7 @@ class ExifTools
 public:
     ExifTools();
 
-    static void copyExif(const QString &sourceStr,
-                         const QString &destStr,
-                         const QString &descriptionStr);
+    static void copyExif(const QString &sourceStr, const QString &destStr);
 };
 
 #endif // EXIFTOOLS_H

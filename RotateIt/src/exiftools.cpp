@@ -5,9 +5,7 @@ ExifTools::ExifTools()
 {
 }
 
-void ExifTools::copyExif(const QString &sourceStr,
-                         const QString &destStr,
-                         const QString &descriptionStr)
+void ExifTools::copyExif(const QString &sourceStr, const QString &destStr)
 {
         Exiv2::Image::AutoPtr sourceImageData =
                 Exiv2::ImageFactory::open(QFile::encodeName(sourceStr).data());
@@ -18,8 +16,6 @@ void ExifTools::copyExif(const QString &sourceStr,
 
         Exiv2::ExifThumb exifThumb(exifData);
         exifThumb.erase();
-
-        exifData["Exif.Photo.UserComment"] = descriptionStr.toStdString();
 
         Exiv2::Image::AutoPtr destImageData =
                 Exiv2::ImageFactory::open(QFile::encodeName(destStr).data());
