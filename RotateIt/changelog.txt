@@ -3,4 +3,5 @@
 
 0.2.0 
     - Added EXIF support;
-    - Some UI fixes.
+    - Updated UI;
+    - Improved performance.
