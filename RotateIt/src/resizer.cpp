@@ -21,50 +21,20 @@ int Resizer::height() const
 
 void Resizer::process()
 {
+    // Image scales to a square with the side equal max value of width/height
+
     QImageReader imageReader(m_path);
-
     QSize originalSize(imageReader.size());
-    QSize scaledSize = originalSize;
 
-    if((originalSize.width() || originalSize.height()) == 0)
+    if((originalSize.width() == 0) || (originalSize.height() == 0))
     {
         return;
     }
 
-//    qDebug() << "!!!!!!!!!" << originalSize.width() / width() <<
-//                originalSize.height() / height();
+    int squareSide = (width() > height()) ? width() : height();
 
-    // Source form coefficient
-    double kfs = static_cast<double>(originalSize.width()) /
-                 static_cast<double>(originalSize.height());
-
-    // Destination form coefficient
-    double kfd = static_cast<double>(width()) /
-                 static_cast<double>(height());
-
-    double scaleFactor = 1.0;
-
-    if(kfs > kfd)
-    {
-        scaleFactor = static_cast<double>(width()) /
-                static_cast<double>(originalSize.width());
-        scaledSize.setWidth(width());
-        scaledSize.setHeight(originalSize.height() * scaleFactor);
-        //qDebug() << "kfs > kfd";
-    }
-    else
-    {
-        scaleFactor = static_cast<double>(height()) /
-                static_cast<double>(originalSize.height());
-        scaledSize.setWidth(originalSize.width() * scaleFactor);
-        scaledSize.setHeight(height());
-        //qDebug() << "kfs < kfd";
-    }
-
-//    qDebug() << "Original size: " << originalSize;
-//    qDebug() << "Scaled size: " << scaledSize;
-//    qDebug() << "kfs =" << kfs;
-//    qDebug() << "kfd =" << kfd;
+    QSize scaledSize(originalSize);
+    scaledSize.scale(squareSide, squareSide, Qt::KeepAspectRatio);
 
     imageReader.setScaledSize(scaledSize);
     imageReader.read(&m_outputImage);
