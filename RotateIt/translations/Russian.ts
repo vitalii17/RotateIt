@@ -126,119 +126,119 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="148"/>
+        <location filename="../qml/main.qml" line="161"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="161"/>
-        <location filename="../qml/main.qml" line="311"/>
+        <location filename="../qml/main.qml" line="174"/>
+        <location filename="../qml/main.qml" line="322"/>
         <source>Open</source>
         <translation>Открыть</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="175"/>
+        <location filename="../qml/main.qml" line="188"/>
         <source>Tools</source>
         <translation>Инструменты</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="196"/>
-        <location filename="../qml/main.qml" line="323"/>
+        <location filename="../qml/main.qml" line="207"/>
+        <location filename="../qml/main.qml" line="334"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="206"/>
+        <location filename="../qml/main.qml" line="217"/>
         <source>Menu</source>
         <translation>Меню</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="228"/>
+        <location filename="../qml/main.qml" line="239"/>
         <source>Processing</source>
         <translation>Обработка</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="252"/>
+        <location filename="../qml/main.qml" line="263"/>
         <source>Rotate -90</source>
         <translation>Поворот -90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="257"/>
+        <location filename="../qml/main.qml" line="268"/>
         <source>Refresh</source>
         <translation>Сброс</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="262"/>
+        <location filename="../qml/main.qml" line="273"/>
         <source>Rotate 90</source>
         <translation>Поворот 90</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="267"/>
+        <location filename="../qml/main.qml" line="278"/>
         <source>Line</source>
         <translation>Горизонт</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="272"/>
+        <location filename="../qml/main.qml" line="283"/>
         <source>View gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="282"/>
+        <location filename="../qml/main.qml" line="293"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="287"/>
+        <location filename="../qml/main.qml" line="298"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="296"/>
+        <location filename="../qml/main.qml" line="307"/>
         <source>About</source>
         <translation>О Программе</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="335"/>
+        <location filename="../qml/main.qml" line="346"/>
         <source>Image does not saved</source>
         <translation>Изображение не сохранено</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="336"/>
+        <location filename="../qml/main.qml" line="347"/>
         <source>Do you want to save the modified image?</source>
-        <translation>Желаете соххранить изображение?</translation>
+        <translation>Желаете сохранить изображение?</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="337"/>
+        <location filename="../qml/main.qml" line="348"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="338"/>
+        <location filename="../qml/main.qml" line="349"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="419"/>
+        <location filename="../qml/main.qml" line="430"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="428"/>
+        <location filename="../qml/main.qml" line="439"/>
         <source>From Gallery</source>
         <translation>Из Галереи</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="437"/>
+        <location filename="../qml/main.qml" line="448"/>
         <source>Not available</source>
         <translation>Не доступно</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="438"/>
+        <location filename="../qml/main.qml" line="449"/>
         <source>Available only in extended version!</source>
         <translation>Доступно только в расширенной версии!</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="444"/>
+        <location filename="../qml/main.qml" line="455"/>
         <source>File Manager</source>
         <translation>Файловый Менеджер</translation>
     </message>
