@@ -6,7 +6,7 @@ The Qt-based Symbian application for rotation photo to any angle. Useful for cor
 * Open images from file manager or gallery(in Extended version). 
 * Multi-threading processing. You may edit next photo while saving previous.
 * Settings for JPEG compression from 0% to 100%.
-* Saving EXIF metadata. Uses Exiv2 library: https://github.com/Exiv2/.
+* Saves EXIF metadata. Uses Exiv2 library: https://github.com/Exiv2/.
 * Supports Symbian Anna/Belle. Can be builded for lower Symbian version up to 9.4 with some limitations.
 
 ## Tools to build
