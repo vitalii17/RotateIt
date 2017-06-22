@@ -218,27 +218,27 @@
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="430"/>
+        <location filename="../qml/main.qml" line="429"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="439"/>
+        <location filename="../qml/main.qml" line="438"/>
         <source>From Gallery</source>
         <translation>Из Галереи</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="448"/>
+        <location filename="../qml/main.qml" line="447"/>
         <source>Not available</source>
         <translation>Не доступно</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="449"/>
+        <location filename="../qml/main.qml" line="448"/>
         <source>Available only in extended version!</source>
         <translation>Доступно только в расширенной версии!</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="455"/>
+        <location filename="../qml/main.qml" line="454"/>
         <source>File Manager</source>
         <translation>Файловый Менеджер</translation>
     </message>
