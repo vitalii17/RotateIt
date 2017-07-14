@@ -445,7 +445,11 @@ PageStackWindow {
                     else
                     {
                         queryDialog.titleText = qsTr("Not available")
-                        queryDialog.message = qsTr("Available only in extended version!")
+                        queryDialog.message = qsTr("Available only in extended (unsigned) version! \
+                            You can download extended version on AppList or on GitHub(see 'About' for \
+                            more details). Note that your Symbian phone needs to be hacked and an \
+                            InstallServer patch applied to ROMPatcher. Most Custom Firmwares (CFW) \
+                            already have a modified InstallServer to allow installing unsigned apps.")
                         queryDialog.open()
                     }
                 }

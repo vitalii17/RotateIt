@@ -40,6 +40,12 @@ never been so easy! \
 <a href=\"http://forum.dailymobile.net\">\"dailymobile.net\"</a> \
 <p>Source code available on \
 <a href=\"https://github.com/Vitalii17/RotateIt\">\"GitHub.com\"</a> \
+<h3><p align = \"center\">About extended(unsigned) version</h3> \
+<p>Opening images from Gallery available only in unsigned version. You can download \
+extended version on AppList or on <a href=\"https://github.com/Vitalii17/RotateIt/\
+releases\">\"GitHub\"</a>. Note that your Symbian phone needs to be hacked and an \
+InstallServer patch applied to ROMPatcher. Most Custom Firmwares (CFW) already have a \
+modified InstallServer to allow installing unsigned apps. \
 <h3><p align = \"center\">License</h3> \
 <h4><p align = \"center\">The MIT License (MIT)</h4> \
 <p alifn = \"center\">Copyright (c) 2017 Vitalii Shunkov \
