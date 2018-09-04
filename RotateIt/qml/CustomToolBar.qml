@@ -146,7 +146,7 @@ Item {
         id: background
         anchors.fill: parent
         color: "grey"
-        opacity: 0.4
+        opacity: 0.55
         visible: true
     }
 

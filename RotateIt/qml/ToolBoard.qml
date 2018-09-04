@@ -4,7 +4,7 @@ import "ToolBoard.js" as Js
 Item {
     id: root
 
-    property string backgroundColor: "black"
+    property string backgroundColor: "grey"
     property int offsetY: 0
 
     property int  topPadding: 25
@@ -14,10 +14,15 @@ Item {
     property int  spacing: 35
     property bool shown: (state === "shown") ? true : false
 
+    property Item toolTip
+
     anchors.left: parent.left
     anchors.right: parent.right
 
     state: "hidden"
+
+    signal showToolTip(string text)
+    signal hideToolTip
 
     function open() {
         state = "shown"
@@ -31,6 +36,8 @@ Item {
         for(var i = 0; i < root.children.length; i++) {
             if(root.children[i] !== backgroundrect) {
                 Js.items.push(root.children[i])
+                root.children[i].pressedAndHold.connect(showToolTip)
+                root.children[i].released.connect(hideToolTip)
             }
         }
         Js.layout()
@@ -42,7 +49,7 @@ Item {
         id: backgroundrect
         anchors.fill: parent
         color: root.backgroundColor
-        opacity: 0.6
+        opacity: 0.55
         MouseArea {
             id: mouseArea
             anchors.fill: parent

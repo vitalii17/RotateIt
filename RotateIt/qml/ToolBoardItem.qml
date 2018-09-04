@@ -11,6 +11,8 @@ Item {
 
     signal clicked
     signal pressed
+//    signal pressedAndHold(string text, int x, int y)
+    signal pressedAndHold(string text)
     signal released
 
     onPressed: internal.animatePress()
@@ -20,10 +22,11 @@ Item {
         id: iconItem
         anchors.horizontalCenter: root.horizontalCenter
         width: height
-        height: root.height - text.height
+//        height: root.height - text.height
+        height: root.height
         Rectangle {
             anchors.fill: parent
-            radius: 8
+            radius: UiConstants.rectRadiusSmall
             opacity: 0.55
             color: "black"
             smooth: root.pressed ? true : false
@@ -39,16 +42,16 @@ Item {
         }
     }
 
-    Text {
-        id: text
-        text: root.text
-        anchors.horizontalCenter: iconItem.horizontalCenter
-        anchors.top: iconItem.bottom
-        anchors.topMargin: 5
-        color: "white"
-        smooth: root.pressed ? true : false
-        font.pointSize: UiConstants.toolBoardFontPixelSize
-    }
+//    Text {
+//        id: text
+//        text: root.text
+//        anchors.horizontalCenter: iconItem.horizontalCenter
+//        anchors.top: iconItem.bottom
+//        anchors.topMargin: 5
+//        color: "white"
+//        smooth: root.pressed ? true : false
+//        font.pointSize: UiConstants.toolBoardFontPixelSize
+//    }
 
     MouseArea {
         anchors.fill: parent
@@ -56,8 +59,13 @@ Item {
             root.clicked()
             internal.animateClick()
         }
-        onPressed: root.pressed()
+        onPressAndHold: {
+//            var mappedCoordinates = root.mapToItem(root.parent, 0, 0)
+//            root.pressedAndHold(root.text, mappedCoordinates.x, mappedCoordinates.y)
+            root.pressedAndHold(root.text)
+        }
         onReleased: root.released()
+        onPressed: root.pressed()
         onExited: root.released()
     }
 

@@ -18,6 +18,7 @@
         <file>qml/CustomToolButton.qml</file>
         <file>qml/CustomMenuItem.qml</file>
         <file>qml/UiConstants.js</file>
+        <file>qml/CustomToolTip.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>translations/Russian.qm</file>
