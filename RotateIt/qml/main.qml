@@ -4,6 +4,7 @@ import imagefetcher 1.0
 import imageview 1.0
 import engine 1.0
 import "DynamicObject.js" as DynamicObject
+import "UiConstants.js" as UiConstants
 
 PageStackWindow {
     id: window
@@ -64,15 +65,15 @@ PageStackWindow {
             id: imageView
             anchors.fill: parent
             // !! Memory leak !!
-//            sourceImage: engine.previewImage
+            //            sourceImage: engine.previewImage
             Connections {
                 target: engine
                 onPreviewImageChanged: {
-//                                        var startTime = new Date().getTime()
+                    //                                        var startTime = new Date().getTime()
                     imageView.sourceImage = engine.previewImage
                     gc()
-//                                        var stopTime = new Date().getTime()
-//                                        console.log(stopTime - startTime)
+                    //                                        var stopTime = new Date().getTime()
+                    //                                        console.log(stopTime - startTime)
                 }
             }
         }
@@ -226,6 +227,10 @@ PageStackWindow {
             visible: false
         }
 
+        CustomToolTip {
+            id: customToolTip
+        }
+
         TopBar {
             id: mainTopBar
             anchors.left: parent.left
@@ -251,6 +256,12 @@ PageStackWindow {
             offsetY: mainToolBarLayout.height
             anchors.bottom: parent.bottom
             z: 1
+            onShowToolTip: {
+                customToolTip.show(text, mainToolBoard)
+            }
+            onHideToolTip: {
+                customToolTip.hide()
+            }
             Connections {
                 target: mainToolBar
                 onShownChanged: {
@@ -358,13 +369,13 @@ PageStackWindow {
                 engine.smoothPixmapTransformHint = true
                 engine.save(settings.quality)
                 mainPage.imageModified = false
-                    if(_cause === "quit") {
-                        engine.savingFinished.connect(Qt.quit)
-                    }
-                    else if(_cause === "open") {
-                        engine.smoothPixmapTransformHint = true
-                        openMenu.open()
-                    }
+                if(_cause === "quit") {
+                    engine.savingFinished.connect(Qt.quit)
+                }
+                else if(_cause === "open") {
+                    engine.smoothPixmapTransformHint = true
+                    openMenu.open()
+                }
             }
             onRejected: {
                 if(_cause === "quit") {
@@ -389,22 +400,21 @@ PageStackWindow {
         }
     }
 
-    CustomToolBar {
-        id: mainToolBar
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        z: 1
-        tools: pageStack.currentPage.tools
-        //background: "qrc:/images/images/toolbar-background.svg"
-    }
-
     MouseArea {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: mainToolBar.height
         onPressed: mainToolBar.shown = true
+    }
+
+    CustomToolBar {
+        id: mainToolBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        tools: pageStack.currentPage.tools
+        //background: "qrc:/images/images/toolbar-background.svg"
     }
 
     ImageFetcher {
@@ -440,16 +450,17 @@ PageStackWindow {
 
                 onClicked: {
                     if(!disabled) {
-                     currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
+                        currentImagePath = imageFetcher.fetchImage(ImageFetcher.Gallery)
                     }
                     else
                     {
                         queryDialog.titleText = qsTr("Not available")
                         queryDialog.message = qsTr("Available only in extended (unsigned) version! \
-                            You can download extended version on AppList or on GitHub(see 'About' for \
-                            more details). Note that your Symbian phone needs to be hacked and an \
-                            InstallServer patch applied to ROMPatcher. Most Custom Firmwares (CFW) \
-                            already have a modified InstallServer to allow installing unsigned apps.")
+You can download extended version on AppList, GitHub(see 'About' for \
+more details) or on Symbian Zone community(vk.com/symbian_zone).  \
+Note that your Symbian phone needs to be hacked and an \
+InstallServer patch applied to ROMPatcher. Most Custom Firmwares (CFW) \
+already have a modified InstallServer to allow installing unsigned apps.")
                         queryDialog.open()
                     }
                 }
