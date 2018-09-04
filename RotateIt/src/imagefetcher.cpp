@@ -57,7 +57,7 @@ QString ImageFetcher::fetchImage(FetchMethod method)
 
     case FileManager:
     {
-        strRes = QFileDialog::getOpenFileName(0, tr("Select File"), "", "Images (*.png *.jpg");
+        strRes = QFileDialog::getOpenFileName(0, tr("Select File"), "", tr("Images (*.png *.jpg)"));
         if(!strRes.isEmpty())
         {
             setFetched(true);
