@@ -19,6 +19,4 @@ lrelease.bat
 translate.bat
 translation_helper.txt
 *-build-*/
-_clean.bat
-_clean-all.bat
 TODO.txt
