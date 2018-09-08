@@ -19,7 +19,7 @@ QML_IMPORT_PATH =
 # 0x2002CCCF value if protected UID is given to the application
 #symbian:DEPLOYMENT.installer_header = 0x2002CCCF
 
-VERSION = 0.2.0
+VERSION = 0.2.1
 DEFINES += "APP_VERSION=\"\\\"$$VERSION\\\"\""
 
 symbian {
@@ -34,11 +34,13 @@ symbian {
         # Use for LMGFetch (fetch files from gallery)
         LIBS += -lmgfetch -lbafl
         DEFINES += MG_FETCH_ENABLED
+        DEPLOYMENT.display_name += Rotate It! Ext
     }
     else {
         TARGET = Rotate_It
         TARGET.UID3 = 0xE39F1FBE
         DEFINES += MG_FETCH_DISABLED
+        DEPLOYMENT.display_name += Rotate It!
     }
 
     TARGET.CAPABILITY += NetworkServices # Links in QML
@@ -50,7 +52,6 @@ symbian {
 
     my_deployment.pkg_prerules = vendorinfo
     DEPLOYMENT += my_deployment
-    DEPLOYMENT.display_name += Rotate It!
 
     SOURCES += src/Symbian/xqvibra_p.cpp \
         src/Symbian/xqvibra.cpp \
@@ -109,4 +110,4 @@ HEADERS += src/vibra.h \
 RESOURCES += \
     resources.qrc
 
-OTHER_FILES +=
+OTHER_FILES += 
