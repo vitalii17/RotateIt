@@ -1,7 +1,12 @@
-0.1.0 September 22, 2016:
-    -First release.
+0.2.1 September 08, 2018:
+    - Updated UI for better look;
+    - Fixed bug when menu overlaps by toolbar on Symbian Anna devices;
+    - Fixed bug when png images in file manager was not visible;
 
-0.2.0 
+0.2.0 Jun 22, 2017:
     - Added EXIF support;
     - Updated UI;
     - Improved performance.
+
+0.1.0 October 01, 2016:
+    -First release.
